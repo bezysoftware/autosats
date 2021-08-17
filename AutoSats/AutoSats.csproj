@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+    <PackageReference Include="Delegate.SassBuilder" Version="1.4.0" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.3.3" />
+    <PackageReference Include="Quartz.Serialization.Json" Version="3.3.3" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.114.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
+    <PackageReference Include="DigitalRuby.ExchangeSharp" Version="0.8.1" />
+    <PackageReference Include="NBitcoin" Version="6.0.8" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Include="wwwroot\**" />
+  </ItemGroup>
+
+</Project>

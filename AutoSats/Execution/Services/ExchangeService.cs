@@ -1,0 +1,117 @@
+﻿using AutoSats.Exceptions;
+using AutoSats.Models;
+using ExchangeSharp;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace AutoSats.Execution.Services
+{
+    public class ExchangeService : IExchangeService, IDisposable
+    {
+        private ExchangeAPI api;
+
+        private ExchangeAPI Api => this.api ?? throw new InvalidOperationException("ExchangeService has not been initialized");
+
+        public void Initialize(string keysFileName, string exchangeName)
+        {
+            if (this.api != null)
+            {
+                // already initialized
+                return;
+            }
+
+            // todo: fixed in new version
+            var api = (ExchangeAPI)ExchangeAPI.GetExchangeAPI(exchangeName);
+
+            api.LoadAPIKeys(keysFileName);
+
+            this.api = api;
+        }
+
+        public async Task<BuyResult> BuyAsync(string pair, decimal amount)
+        {
+            var result = await this.api.PlaceOrderAsync(new ExchangeOrderRequest
+            {
+                Amount = amount,
+                IsBuy = true,
+                MarketSymbol = pair,
+                OrderType = OrderType.Market
+            });
+
+            // query order details until it is fully filled
+            while (result.Result == ExchangeAPIOrderResult.FilledPartially || result.Result == ExchangeAPIOrderResult.Pending)
+            {
+                result = await this.api.GetOrderDetailsAsync(result.OrderId);
+            }
+
+            if (result.Result != ExchangeAPIOrderResult.Filled)
+            {
+                throw new Exception($"{result.ResultCode}: {result.Message}");
+            }
+
+            return new BuyResult(result.OrderId, result.AmountFilled, result.AveragePrice);
+        }
+
+        public async Task<Dictionary<string, decimal>> GetBalancesAsync()
+        {
+            return await Api.GetAmountsAvailableToTradeAsync();
+        }
+
+        public async Task<decimal> GetPriceAsync(string pair)
+        {
+            var result = await Api.GetTickerAsync(pair);
+
+            return result.Last;
+        }
+
+        public async Task<IEnumerable<string>> GetFiatCurrenciesAsync()
+        {
+            var symbols = await Api.GetMarketSymbolsAsync();
+
+            var exchangeCurrencies = symbols
+                .Select(x => x.ToUpper())
+                .Where(x => x.Contains("BTC"))
+                .Distinct()
+                .Select(x => x.Replace("BTC", ""))
+                .ToArray();
+
+            var fiatCurrencies = CultureInfo
+                .GetCultures(CultureTypes.AllCultures)
+                .Where(c => !c.IsNeutralCulture)
+                .Select(culture => new RegionInfo(culture.LCID))
+                .Select(ri => ri.ISOCurrencySymbol)
+                .Concat(ExecutionConsts.StableCoins)
+                .Distinct()
+                .Select(x => x.ToUpper())
+                .ToArray();
+
+            return fiatCurrencies.Intersect(exchangeCurrencies).ToArray();
+        }
+
+        public async Task<string> WithdrawAsync(string cryptoCurrency, string address, decimal amount)
+        {
+            var result = await this.api.WithdrawAsync(new ExchangeWithdrawalRequest
+            {
+                Address = address,
+                Amount = amount,
+                Currency = cryptoCurrency
+            });
+
+            if (!result.Success)
+            {
+                throw new ScheduleRunFailedException(result.Message);
+            }
+
+            return result.Id;
+        }
+
+        public void Dispose()
+        {
+            this.api?.Dispose();
+            this.api = null;
+        }
+    }
+}
