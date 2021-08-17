@@ -16,8 +16,9 @@ FROM build AS publish
 RUN dotnet publish "AutoSats.csproj" -c Release -o /app/publish
 
 FROM base AS final
-ENV ConnectionStrings:AutoSatsDatabase="Data Source=/app_data/AutoSats.db"
+ENV ConnectionStrings__AutoSatsDatabase="Data Source=/app_data/AutoSats.db"
 RUN mkdir /app_data
+VOLUME /app_data
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "AutoSats.dll"]
