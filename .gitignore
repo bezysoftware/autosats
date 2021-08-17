@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 /data
+AutoSats.db
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
