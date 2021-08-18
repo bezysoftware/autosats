@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoSats.Data.Migrations
 {
     [DbContext(typeof(SatsContext))]
-    [Migration("20210814185515_Initial")]
+    [Migration("20210818190040_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,6 +47,7 @@ namespace AutoSats.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Cron")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CurrencyPair")

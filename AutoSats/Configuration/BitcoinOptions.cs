@@ -2,8 +2,15 @@
 {
     public class BitcoinOptions
     {
-        public string Url { get; set; }
+        public const string DefaultUrl = "http://localhost:8332";
 
-        public string Auth { get; set; }
+        public BitcoinOptions()
+        {
+            Url = DefaultUrl;
+        }
+
+        public string Url { get; init; }
+
+        public string? Auth { get; init; }
     }
 }

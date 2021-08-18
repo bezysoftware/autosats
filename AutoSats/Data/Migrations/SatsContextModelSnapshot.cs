@@ -45,6 +45,7 @@ namespace AutoSats.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Cron")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CurrencyPair")

@@ -9,9 +9,10 @@ namespace AutoSats.Data
         public int Id { get; set; }
 
         [Required]
-        public string Exchange { get; set; }
+        public string Exchange { get; set; } = null!;
 
-        public string Cron { get; set; }
+        [Required]
+        public string Cron { get; set; } = null!;
 
         [Required]
         public bool IsPaused { get; set; }
@@ -20,15 +21,15 @@ namespace AutoSats.Data
         public decimal Spend { get; set; }
 
         [Required]
-        public string CurrencyPair { get; set; }
+        public string CurrencyPair { get; set; } = null!;
 
         [Required]
         public ExchangeWithdrawalType WithdrawalType { get; set; }
 
-        public string WithdrawalAddress { get; set; }
+        public string? WithdrawalAddress { get; set; }
 
         public decimal WithdrawalAmount { get; set; }
 
-        public virtual ICollection<ExchangeEvent> Events { get; set; }
+        public virtual ICollection<ExchangeEvent> Events { get; set; } = null!;
     }
 }

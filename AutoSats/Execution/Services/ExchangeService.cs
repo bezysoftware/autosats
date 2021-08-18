@@ -11,29 +11,26 @@ namespace AutoSats.Execution.Services
 {
     public class ExchangeService : IExchangeService, IDisposable
     {
-        private ExchangeAPI api;
+        private ExchangeAPI? api;
 
         private ExchangeAPI Api => this.api ?? throw new InvalidOperationException("ExchangeService has not been initialized");
 
-        public void Initialize(string keysFileName, string exchangeName)
+        public void Initialize(string exchangeName, string? keysFileName)
         {
-            if (this.api != null)
-            {
-                // already initialized
-                return;
-            }
-
-            // todo: fixed in new version
+            // todo: no need to cast in new version https://github.com/jjxtra/ExchangeSharp/issues/621
             var api = (ExchangeAPI)ExchangeAPI.GetExchangeAPI(exchangeName);
 
-            api.LoadAPIKeys(keysFileName);
+            if (keysFileName != null)
+            {
+                api.LoadAPIKeys(keysFileName);
+            }
 
             this.api = api;
         }
 
         public async Task<BuyResult> BuyAsync(string pair, decimal amount)
         {
-            var result = await this.api.PlaceOrderAsync(new ExchangeOrderRequest
+            var result = await Api.PlaceOrderAsync(new ExchangeOrderRequest
             {
                 Amount = amount,
                 IsBuy = true,
@@ -44,7 +41,7 @@ namespace AutoSats.Execution.Services
             // query order details until it is fully filled
             while (result.Result == ExchangeAPIOrderResult.FilledPartially || result.Result == ExchangeAPIOrderResult.Pending)
             {
-                result = await this.api.GetOrderDetailsAsync(result.OrderId);
+                result = await Api.GetOrderDetailsAsync(result.OrderId);
             }
 
             if (result.Result != ExchangeAPIOrderResult.Filled)
@@ -79,7 +76,7 @@ namespace AutoSats.Execution.Services
                 .ToArray();
 
             var fiatCurrencies = CultureInfo
-                .GetCultures(CultureTypes.AllCultures)
+                .GetCultures(CultureTypes.SpecificCultures)
                 .Where(c => !c.IsNeutralCulture)
                 .Select(culture => new RegionInfo(culture.LCID))
                 .Select(ri => ri.ISOCurrencySymbol)
@@ -93,7 +90,7 @@ namespace AutoSats.Execution.Services
 
         public async Task<string> WithdrawAsync(string cryptoCurrency, string address, decimal amount)
         {
-            var result = await this.api.WithdrawAsync(new ExchangeWithdrawalRequest
+            var result = await Api.WithdrawAsync(new ExchangeWithdrawalRequest
             {
                 Address = address,
                 Amount = amount,

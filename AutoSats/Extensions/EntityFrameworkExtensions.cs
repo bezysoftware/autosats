@@ -12,7 +12,7 @@ namespace AutoSats.Extensions
             {
                 foreach (var property in entityType.GetProperties())
                 {
-                    if (property.ClrType.BaseType.IsEnum)
+                    if (property?.ClrType?.BaseType?.IsEnum ?? false)
                     {
                         var type = typeof(EnumToStringConverter<>).MakeGenericType(property.ClrType);
                         var converter = Activator.CreateInstance(type, new ConverterMappingHints()) as ValueConverter;

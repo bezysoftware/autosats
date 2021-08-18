@@ -14,7 +14,7 @@ namespace AutoSats.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Exchange = table.Column<string>(type: "TEXT", nullable: false),
-                    Cron = table.Column<string>(type: "TEXT", nullable: true),
+                    Cron = table.Column<string>(type: "TEXT", nullable: false),
                     IsPaused = table.Column<bool>(type: "INTEGER", nullable: false),
                     Spend = table.Column<decimal>(type: "TEXT", nullable: false),
                     CurrencyPair = table.Column<string>(type: "TEXT", nullable: false),

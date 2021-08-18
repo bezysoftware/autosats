@@ -4,12 +4,12 @@ namespace AutoSats.Data
 {
     public class ExchangeEventWithdrawal : ExchangeEvent
     {
-        public string WithdrawalId { get; set; }
+        public string? WithdrawalId { get; set; }
 
         [Required]
         public decimal Amount { get; set; }
 
         [Required]
-        public string Address { get; set; }
+        public string Address { get; set; } = null!;
     }
 }

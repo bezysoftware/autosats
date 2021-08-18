@@ -9,7 +9,7 @@ namespace AutoSats.Execution.Services
         /// <summary>
         /// Needs to be called first to initialize the service with keys.
         /// </summary>
-        void Initialize(string keysFileName, string exchangeName);
+        void Initialize(string exchangeName, string? keysFileName);
 
         /// <summary>
         /// Gets balances for all your currencies.

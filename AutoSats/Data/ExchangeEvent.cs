@@ -12,8 +12,8 @@ namespace AutoSats.Data
         public DateTime Timestamp { get; set; }
 
         [Required]
-        public ExchangeSchedule Schedule { get; set; }
+        public ExchangeSchedule Schedule { get; set; } = null!;
 
-        public string Error { get; set; }
+        public string? Error { get; set; }
     }
 }
