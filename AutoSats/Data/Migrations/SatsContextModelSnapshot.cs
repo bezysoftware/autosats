@@ -62,6 +62,10 @@ namespace AutoSats.Data.Migrations
                     b.Property<decimal>("Spend")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("WithdrawalAddress")
                         .HasColumnType("TEXT");
 

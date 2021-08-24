@@ -1,0 +1,78 @@
+﻿@using AutoSats.Data
+@inject IExchangeScheduler scheduler
+@inject IExchangeService exchange
+@inject NavigationManager navigationManager
+
+<div>
+    <Title Level="3">Your active schedules</Title>
+
+    <Card>
+        <AntList DataSource="@ExchangeSchedules" ItemLayout="@ListItemLayout.Vertical" TItem="ExchangeScheduleSummary" OnItemClick="ScheduleClick">
+            <ChildContent Context="item">
+                <ListItem Class="schedule-container">
+                    <ListItemMeta Avatar="@($"/img/{item.Exchange}.png")">
+                        <TitleTemplate>
+                            <div class="schedule-title-container">
+                                <span>
+                                    @{ var (fiat, crypto) = Extensions.Currency.Parse(item.CurrencyPair); }
+                                    Buy <strong>@(item.Spend.ToString("N2")) @fiat</strong> worth of <strong>@crypto</strong> on <strong>@item.Exchange</strong> and @GetWithdrawalDescription(item.WithdrawalType).
+                                </span>
+
+                                <Tooltip Class="@GetScheduleIconClass(@item.IsPaused)"
+                                         Title="@($"This schedule is {(item.IsPaused ? "paused" : "active")}")">
+                                    <Icon Type="@(item.IsPaused ? "pause" : "check")" Theme="outline" />
+                                </Tooltip>
+                            </div>
+                        </TitleTemplate>
+                        
+                        <DescriptionTemplate>
+                            <div class="schedule-description-list test">
+                                <div class="schedule-description-container">
+                                    <span>Repeats</span>
+                                    <span>@item.CronDescription</span>
+                                </div>
+                                <div class="schedule-description-container">
+                                    <span>Next on</span>
+                                    <span>@item.NextOccurence</span>
+                                </div>
+                                <div class="schedule-description-container">
+                                    <span>Balance left</span>
+                                    <span>$100</span>
+                                </div>
+                            </div>
+                        </DescriptionTemplate>
+                    </ListItemMeta>
+                </ListItem>
+            </ChildContent>
+        </AntList>
+
+        <a href="/schedule/new" class="new-schedule-link">
+            <AntDesign.Button>Create New Schedule</AntDesign.Button>
+        </a>
+    </Card>
+</div>
+
+@code
+{
+    [Parameter] public ExchangeScheduleSummary[] ExchangeSchedules { get; set; } = Array.Empty<ExchangeScheduleSummary>();
+
+    private string GetScheduleIconClass(bool isPaused) 
+    {
+        return $"schedule-title-icon {(isPaused ? "paused" : "active")}";
+    }
+
+    private void ScheduleClick(ExchangeScheduleSummary schedule)
+    {
+        navigationManager.NavigateTo($"/schedules/{schedule.Id}");
+    }
+
+    private string GetWithdrawalDescription(ExchangeWithdrawalType withdrawalType)
+    {
+        return withdrawalType switch
+        {
+            ExchangeWithdrawalType.Fixed => "withdraw to a fixed address",
+            ExchangeWithdrawalType.Dynamic => "withdraw to a new address each time",
+            _ => "do not withdraw"
+        };
+    }
+}

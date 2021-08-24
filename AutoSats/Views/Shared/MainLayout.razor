@@ -1,13 +1,21 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="main">
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+<Layout Class="site-layout">
+    <Header>header</Header>
+    <Layout>
+        <div class="site-layout-content">@Body</div>
+    </Layout>
+    <Footer Style="text-align: center;">footer</Footer>
+</Layout>
 
-        <div class="content px-4">
-            @Body
-        </div>
-    </div>
-</div>
+<style>
+    .site-layout {
+        height: 100vh;
+        display: flex;
+    }
+
+    .site-layout-content {
+        width: 800px;
+        align-self: center;
+    }
+</style>

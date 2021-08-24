@@ -1,5 +1,26 @@
 ﻿@page "/"
+@inject IExchangeScheduler scheduler
 
-<h1>Hello, world!</h1>
+@if (!exchangeSchedules.Any())
+{
+    <NoSchedules />
+}
+else if (exchangeSchedules.Length > 1)
+{
+    <MultipleSchedules ExchangeSchedules="exchangeSchedules" />
+}
+else
+{
+    <SingleSchedule />
+}
 
-Welcome to your new app.
+@code
+{
+    private ExchangeScheduleSummary[] exchangeSchedules { get; set; } = Array.Empty<ExchangeScheduleSummary>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var schedules = await scheduler.ListSchedulesAsync();
+        exchangeSchedules = schedules.ToArray();
+    }
+}

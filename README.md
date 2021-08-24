@@ -1,2 +1,6 @@
-# auto-sats
-Automatically accumulate bitcoin &amp; withdraw it from exchanges to your wallet.
+# AutoSats
+Periodically buy Bitcoin. Withdraw it to your wallet. Automatically on your own node.
+
+## What is DCA?
+
+## How does AutoSats help with that?

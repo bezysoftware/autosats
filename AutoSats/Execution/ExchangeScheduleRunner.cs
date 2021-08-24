@@ -119,7 +119,7 @@ namespace AutoSats.Execution
 
             var address = schedule.WithdrawalType switch
             {
-                ExchangeWithdrawalType.Fixed => schedule.WithdrawalAddress,
+                ExchangeWithdrawalType.Fixed => schedule.WithdrawalAddress ?? throw new InvalidOperationException("WithdrawalType is Fixed, but address is null"),
                 ExchangeWithdrawalType.Dynamic => await this.walletService.GenerateDepositAddressAsync(),
                 _ => throw new InvalidOperationException($"Unknown withdrawal type '{schedule.WithdrawalType}'")
             };

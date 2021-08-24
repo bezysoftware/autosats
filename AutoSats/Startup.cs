@@ -51,6 +51,9 @@ namespace AutoSats
 
             services.AddBitcoinRPC();
             services.AddAutoMapper(typeof(Startup));
+            services.AddAntDesign();
+            services.AddHttpClient();
+
             services.AddScoped<IExchangeService, ExchangeService>();
             services.AddScoped<IExchangeScheduler, ExchangeScheduler>();
             services.AddScoped<IExchangeScheduleRunner, ExchangeScheduleRunner>();

@@ -8,6 +8,7 @@ namespace AutoSats.Models
         public MappingProfile()
         {
             CreateMap<NewExchangeSchedule, ExchangeSchedule>();
+            CreateMap<ExchangeSchedule, ExchangeScheduleSummary>();
         }        
     }
 }

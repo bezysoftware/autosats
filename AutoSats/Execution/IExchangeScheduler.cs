@@ -36,7 +36,7 @@ namespace AutoSats.Execution
         /// <summary>
         /// Get an overview of all exchange schedules.
         /// </summary>
-        Task<IEnumerable<ExchangeSchedule>> ListSchedulesAsync();
+        Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync();
 
         /// <summary>
         /// Get schedule details including past events.

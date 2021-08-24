@@ -45,12 +45,14 @@ namespace AutoSats.Execution
             return this.walletService.GenerateDepositAddressAsync();
         }
 
-        public async Task<IEnumerable<ExchangeSchedule>> ListSchedulesAsync()
+        public async Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync()
         {
-            return await this.db.ExchangeSchedules
+            var schedules = await this.db.ExchangeSchedules
                 .AsNoTracking()
                 .OrderByDescending(x => x.IsPaused)
                 .ToArrayAsync();
+
+            return this.mapper.Map<IEnumerable<ExchangeScheduleSummary>>(schedules);
         }
 
         public async Task<ExchangeSchedule> GetScheduleDetailAsync(int id)

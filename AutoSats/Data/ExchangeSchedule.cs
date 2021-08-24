@@ -9,6 +9,9 @@ namespace AutoSats.Data
         public int Id { get; set; }
 
         [Required]
+        public string Title { get; set; } = null!;
+
+        [Required]
         public string Exchange { get; set; } = null!;
 
         [Required]

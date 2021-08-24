@@ -13,6 +13,7 @@ namespace AutoSats.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
                     Exchange = table.Column<string>(type: "TEXT", nullable: false),
                     Cron = table.Column<string>(type: "TEXT", nullable: false),
                     IsPaused = table.Column<bool>(type: "INTEGER", nullable: false),

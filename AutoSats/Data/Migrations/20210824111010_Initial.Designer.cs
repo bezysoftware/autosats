@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoSats.Data.Migrations
 {
     [DbContext(typeof(SatsContext))]
-    [Migration("20210818190040_Initial")]
+    [Migration("20210824111010_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,6 +62,10 @@ namespace AutoSats.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Spend")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("WithdrawalAddress")
