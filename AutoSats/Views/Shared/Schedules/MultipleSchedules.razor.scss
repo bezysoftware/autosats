@@ -5,7 +5,7 @@
 ::deep .schedule-container {
     padding: 16px;
     display: block;
-    
+
     &:hover {
         cursor: pointer;
         background: rgba(60, 90, 100, 0.04);
@@ -16,9 +16,10 @@
     }
 
     .schedule-description-list {
-        display: flex;
+        display: grid;
         justify-content: space-between;
-
+        grid-template-columns: 1fr 170px 100px;
+        
         .schedule-description-container {
             display: flex;
             flex-flow: column;

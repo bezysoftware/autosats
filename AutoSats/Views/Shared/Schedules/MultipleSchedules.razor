@@ -10,7 +10,10 @@
         <AntList DataSource="@ExchangeSchedules" ItemLayout="@ListItemLayout.Vertical" TItem="ExchangeScheduleSummary" OnItemClick="ScheduleClick">
             <ChildContent Context="item">
                 <ListItem Class="schedule-container">
-                    <ListItemMeta Avatar="@($"/img/{item.Exchange}.png")">
+                    <ListItemMeta>
+                        <AvatarTemplate>
+                            <Avatar Src="@($"/img/{item.Exchange}.png")" Size="large" />
+                        </AvatarTemplate>
                         <TitleTemplate>
                             <div class="schedule-title-container">
                                 <span>
@@ -26,14 +29,14 @@
                         </TitleTemplate>
                         
                         <DescriptionTemplate>
-                            <div class="schedule-description-list test">
+                            <div class="schedule-description-list">
                                 <div class="schedule-description-container">
                                     <span>Repeats</span>
                                     <span>@item.CronDescription</span>
                                 </div>
                                 <div class="schedule-description-container">
                                     <span>Next on</span>
-                                    <span>@item.NextOccurence</span>
+                                    <span>@GetNextOccurrence(item)</span>
                                 </div>
                                 <div class="schedule-description-container">
                                     <span>Balance left</span>
@@ -56,14 +59,19 @@
 {
     [Parameter] public ExchangeScheduleSummary[] ExchangeSchedules { get; set; } = Array.Empty<ExchangeScheduleSummary>();
 
-    private string GetScheduleIconClass(bool isPaused) 
+    private string GetScheduleIconClass(bool isPaused)
     {
         return $"schedule-title-icon {(isPaused ? "paused" : "active")}";
     }
 
+    private string GetNextOccurrence(ExchangeScheduleSummary schedule)
+    {
+        return schedule.IsPaused ? "<Paused>" : schedule.NextOccurence.ToString();
+    }
+
     private void ScheduleClick(ExchangeScheduleSummary schedule)
     {
-        navigationManager.NavigateTo($"/schedules/{schedule.Id}");
+        navigationManager.NavigateTo($"/schedule/{schedule.Id}");
     }
 
     private string GetWithdrawalDescription(ExchangeWithdrawalType withdrawalType)
