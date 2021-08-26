@@ -1,6 +1,7 @@
 ﻿using AutoSats.Exceptions;
 using AutoSats.Models;
 using ExchangeSharp;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,8 +13,14 @@ namespace AutoSats.Execution.Services
     public class ExchangeService : IExchangeService, IDisposable
     {
         private ExchangeAPI? api;
+        private readonly ILogger<ExchangeService> logger;
 
         private ExchangeAPI Api => this.api ?? throw new InvalidOperationException("ExchangeService has not been initialized");
+
+        public ExchangeService(ILogger<ExchangeService> logger)
+        {
+            this.logger = logger;
+        }
 
         public void Initialize(string exchangeName, string? keysFileName)
         {
@@ -26,6 +33,24 @@ namespace AutoSats.Execution.Services
             }
 
             this.api = api;
+        }
+
+        public async Task<CheckConnectionResult> CheckConnectionAsync(string exchangeName, string key1, string key2, string? key3)
+        {
+            var api = (ExchangeAPI)ExchangeAPI.GetExchangeAPI(exchangeName);
+
+            api.LoadAPIKeysUnsecure(key1, key2, key3);
+
+            try
+            {
+                await api.GetAmountsAvailableToTradeAsync();
+                return new CheckConnectionResult(true);
+            }
+            catch(Exception ex)
+            {
+                this.logger.LogError($"Check connection failed with supplied keys for exchange {exchangeName}", ex);
+                return new CheckConnectionResult(false, ex.Message);
+            }
         }
 
         public async Task<BuyResult> BuyAsync(string pair, decimal amount)

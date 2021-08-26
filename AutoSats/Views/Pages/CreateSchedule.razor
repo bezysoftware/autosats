@@ -1,3 +1,38 @@
 ﻿@page "/schedule/new"
+@inject IExchangeScheduler scheduler
 
-Create schedule
+<div>
+    <PageHeader Title="Create new schedule" BackIcon="true" Ghost="true" />
+
+    <Card>
+        <div class="steps-container">
+            <Steps Current="@currentStep">
+                <Step Title="Select an exchange" />
+                <Step Title="Define schedule" />
+                <Step Title="Set withdrawal strategy" />
+            </Steps>
+        </div>
+
+        @switch (currentStep)
+        {
+            case 0:
+                <ExchangeKeys KeysChanged="SetKeys" />
+                break;
+            case 1:
+                <span>Step 2</span>
+                break;
+        }
+
+    </Card>
+</div>
+
+@code {
+    private int currentStep = 0;
+    private NewSchedule model = new NewSchedule();
+
+    private void SetKeys(ViewModels.ExchangeKeys keys)
+    {
+        model.ExchangeKeys = keys;
+        currentStep = 1;
+    }
+}

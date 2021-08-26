@@ -2,7 +2,7 @@
 
 namespace AutoSats.Models
 {
-    public record ExchangeDetails(IEnumerable<string> fiatCurrencies)
+    public record ExchangeDetails(string Name, IEnumerable<string> fiatCurrencies)
     {        
     }
 }

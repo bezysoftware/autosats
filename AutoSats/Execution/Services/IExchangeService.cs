@@ -10,6 +10,11 @@ namespace AutoSats.Execution.Services
         /// Needs to be called first to initialize the service with keys.
         /// </summary>
         void Initialize(string exchangeName, string? keysFileName);
+        
+        /// <summary>
+        /// Check if given keys can access the exchange API.
+        /// </summary>
+        Task<CheckConnectionResult> CheckConnectionAsync(string exchangeName, string key1, string key2, string? key3);
 
         /// <summary>
         /// Gets balances for all your currencies.

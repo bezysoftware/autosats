@@ -12,7 +12,7 @@ namespace AutoSats.Models
         bool IsPaused,
         decimal Spend,
         string CurrencyPair,
-        ExchangeWithdrawalType WithdrawalType)
+        ExchangeWithdrawalType WithdrawalType) : IExchange
     {
         private DateTime? nextOccurrence;
         private string? cronDescription;
@@ -21,6 +21,7 @@ namespace AutoSats.Models
 
         public string CronDescription => this.cronDescription ??= GetCronDescription();
 
+        string IExchange.Name => Exchange;
 
         private string GetCronDescription()
         {

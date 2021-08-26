@@ -1,3 +1,4 @@
+using AutoSats.Configuration;
 using AutoSats.Data;
 using AutoSats.Execution;
 using AutoSats.Execution.Services;
@@ -54,7 +55,9 @@ namespace AutoSats
             services.AddAntDesign();
             services.AddHttpClient();
 
-            services.AddScoped<IExchangeService, ExchangeService>();
+            var exchanges = Configuration.GetSection("Exchanges").Get<ExchangeOptions[]>();
+
+            services.AddSingleton(exchanges); services.AddScoped<IExchangeService, ExchangeService>();
             services.AddScoped<IExchangeScheduler, ExchangeScheduler>();
             services.AddScoped<IExchangeScheduleRunner, ExchangeScheduleRunner>();
             services.AddScoped<IWalletService, WalletService>();

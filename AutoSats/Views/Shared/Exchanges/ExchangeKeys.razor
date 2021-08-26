@@ -1,0 +1,126 @@
+﻿@inject ExchangeOptions[] exchanges
+@inject IExchangeService service
+@inject MessageService message
+
+<div>
+    <Form Model="Keys" LabelColSpan="6" OnFinish="CheckBalanceAsync">
+        <Row>
+            <GridCol Span="12" Offset="6">
+                <FormItem>
+                    <Select DataSource="@exchanges"
+                            @bind-Value="@context.Exchange"
+                            TItem="ExchangeOptions"
+                            TItemValue="ExchangeOptions"
+                            Placeholder="Select an exchange"
+                            Size="large"
+                            OnSelectedItemChanged="@(_ => Keys.Clear())">
+
+                        <ItemTemplate Context="item">
+                            <Avatar Src="@item.GetImgLogoPath()"
+                                    Size="large" />
+                            <span>@item.Name</span>
+                        </ItemTemplate>
+
+                        <LabelTemplate Context="item">
+                            <div class="exchange-select-label">
+                                <Avatar Src="@item.GetImgLogoPath()" />
+                                <span>@item.Name</span>
+                            </div>
+                        </LabelTemplate>
+                    </Select>
+                </FormItem>
+            </GridCol>
+        </Row>
+        @if (@context.Exchange != null)
+        {
+            <Row>
+                <Text Class="exchange-description">
+                    @context.Exchange.Name requires a combination of
+                    @if (@context.Exchange.Key3Name != null)
+                    {
+                        <span><strong>@context.Exchange.Key1Name</strong>, <strong>@context.Exchange.Key2Name</strong> & <strong>@context.Exchange.Key3Name</strong>.</span>
+                    }
+                    else
+                    {
+                        <span><strong>@context.Exchange.Key1Name</strong> & <strong>@context.Exchange.Key2Name</strong>.</span>
+                    }
+
+                    Those values can be generated in <a href="@context.Exchange.ApiUrl" target="_blank">@context.Exchange.Name @context.Exchange.ApiName</a>. @context.Exchange.Hint
+
+                    @if (@context.Exchange.Permissions != null && @context.Exchange.Permissions.Any())
+                    {
+                        <span>
+                            Make sure you allow following permissions:
+                            <strong>@context.Exchange.Permissions[0]</strong>
+                            @foreach (var permission in context.Exchange.Permissions.Skip(1))
+                            {
+                                <span>, </span><strong>@permission</strong>
+                            }
+
+                            and also enable <strong>BTC withdrawal</strong> if you want to be able to automatically withdraw to your wallet (you can configure this in the next step).
+                        </span>
+                    }
+                </Text>
+            </Row>
+            <Row>
+                <GridCol Span="12">
+                    <FormItem Label="@context.Exchange.Key1Name">
+                        <Input @bind-Value="Keys.Key1"
+                               TValue="string" />
+                    </FormItem>
+
+                    <FormItem Label="@context.Exchange.Key2Name">
+                        <Input @bind-Value="Keys.Key2"
+                               TValue="string" />
+                    </FormItem>
+
+                    @if (@context.Exchange.Key3Name != null)
+                    {
+                        <FormItem Label="@context.Exchange.Key3Name">
+                            <Input @bind-Value="Keys.Key3"
+                                   TValue="string" />
+
+                        </FormItem>
+                    }
+                </GridCol>
+                <GridCol Offset="1" Span="11">
+                    <Image Src="@context.Exchange.GetImgConfigPath()" />
+                </GridCol>
+            </Row>
+
+            <FormItem WrapperColOffset="9" WrapperColSpan="6">
+                <Button Loading="@IsLoadingBalance" Block HtmlType="submit">
+                    @(IsLoadingBalance ? "Checking connection" : "Check connection")
+                </Button>
+            </FormItem>
+
+            <AntDesign.Text Type="secondary" Class="check-balance-description">
+                This will attempt to retrieve your current balance, no order will be placed.
+            </AntDesign.Text>
+
+        }
+    </Form>
+</div>
+
+@code {
+    [Parameter] public EventCallback<ViewModels.ExchangeKeys> KeysChanged { get; set; }
+
+    private ViewModels.ExchangeKeys Keys { get; set; } = new ViewModels.ExchangeKeys();
+    private bool IsLoadingBalance { get; set; }
+
+    private async Task CheckBalanceAsync()
+    {
+        IsLoadingBalance = true;
+        var result = await service.CheckConnectionAsync(Keys.Exchange!.Name!, Keys.Key1!, Keys.Key2!, Keys.Key3);
+        IsLoadingBalance = false;
+        
+        if (!result.Success)
+        {
+            await message.Error($"Couldn't verify supplied credentials: {result.Message}");
+        }
+        else
+        {
+            await KeysChanged.InvokeAsync(Keys);
+        }
+    }
+}

@@ -4,7 +4,7 @@
 @inject NavigationManager navigationManager
 
 <div>
-    <Title Level="3">Your active schedules</Title>
+    <PageHeader Title="Your active schedules" Ghost="true" />
 
     <Card>
         <AntList DataSource="@ExchangeSchedules" ItemLayout="@ListItemLayout.Vertical" TItem="ExchangeScheduleSummary" OnItemClick="ScheduleClick">
@@ -12,7 +12,7 @@
                 <ListItem Class="schedule-container">
                     <ListItemMeta>
                         <AvatarTemplate>
-                            <Avatar Src="@($"/img/{item.Exchange}.png")" Size="large" />
+                            <Avatar Src="@item.GetImgLogoPath()" Size="large" />
                         </AvatarTemplate>
                         <TitleTemplate>
                             <div class="schedule-title-container">
@@ -27,7 +27,7 @@
                                 </Tooltip>
                             </div>
                         </TitleTemplate>
-                        
+
                         <DescriptionTemplate>
                             <div class="schedule-description-list">
                                 <div class="schedule-description-container">
