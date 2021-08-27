@@ -14,7 +14,6 @@ namespace AutoSats.Views.ViewModels
         [Required]
         public string? Key2 { get; set; }
 
-        [Required]
         public string? Key3 { get; set; }
 
         public void Clear()

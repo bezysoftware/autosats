@@ -3,7 +3,7 @@
 @inject MessageService message
 
 <div>
-    <Form Model="Keys" LabelColSpan="6" OnFinish="CheckBalanceAsync">
+    <Form Model="Keys" LabelColSpan="6" ValidateMode="FormValidateMode.Complex" OnFinish="CheckBalanceAsync">
         <Row>
             <GridCol Span="12" Offset="6">
                 <FormItem>
@@ -76,7 +76,7 @@
 
                     @if (@context.Exchange.Key3Name != null)
                     {
-                        <FormItem Label="@context.Exchange.Key3Name">
+                        <FormItem Label="@context.Exchange.Key3Name" Required="true" Rules="Key3ValidationRules">
                             <Input @bind-Value="Keys.Key3"
                                    TValue="string" />
 
@@ -107,13 +107,14 @@
 
     private ViewModels.ExchangeKeys Keys { get; set; } = new ViewModels.ExchangeKeys();
     private bool IsLoadingBalance { get; set; }
+    private FormValidationRule[]? Key3ValidationRules { get; } = new[] { new FormValidationRule { Required = true } };
 
     private async Task CheckBalanceAsync()
     {
         IsLoadingBalance = true;
         var result = await service.CheckConnectionAsync(Keys.Exchange!.Name!, Keys.Key1!, Keys.Key2!, Keys.Key3);
         IsLoadingBalance = false;
-        
+
         if (!result.Success)
         {
             await message.Error($"Couldn't verify supplied credentials: {result.Message}");
