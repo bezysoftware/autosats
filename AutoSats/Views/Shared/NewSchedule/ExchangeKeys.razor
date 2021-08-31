@@ -3,7 +3,7 @@
 @inject MessageService message
 
 <div>
-    <Form Model="Keys" LabelColSpan="6" ValidateMode="FormValidateMode.Complex" OnFinish="CheckBalanceAsync">
+    <Form Model="keys" LabelColSpan="6" OnFinish="CheckBalanceAsync">
         <Row>
             <GridCol Span="12" Offset="6">
                 <FormItem>
@@ -13,7 +13,7 @@
                             TItemValue="ExchangeOptions"
                             Placeholder="Select an exchange"
                             Size="large"
-                            OnSelectedItemChanged="@(_ => Keys.Clear())">
+                            OnSelectedItemChanged="@(_ => keys.Clear())">
 
                         <ItemTemplate Context="item">
                             <Avatar Src="@item.GetImgLogoPath()"
@@ -57,7 +57,7 @@
                                 <span>, </span><strong>@permission</strong>
                             }
 
-                            and also enable <strong>BTC withdrawal</strong> if you want to be able to automatically withdraw to your wallet (you can configure this in the next step).
+                            and also enable <strong>BTC withdrawal</strong> if you want to be able to automatically withdraw to your wallet (you can configure this in the last step).
                         </span>
                     }
                 </Text>
@@ -65,21 +65,20 @@
             <Row>
                 <GridCol Span="12">
                     <FormItem Label="@context.Exchange.Key1Name">
-                        <Input @bind-Value="Keys.Key1"
+                        <Input @bind-Value="keys.Key1"
                                TValue="string" />
                     </FormItem>
 
                     <FormItem Label="@context.Exchange.Key2Name">
-                        <Input @bind-Value="Keys.Key2"
+                        <Input @bind-Value="keys.Key2"
                                TValue="string" />
                     </FormItem>
 
                     @if (@context.Exchange.Key3Name != null)
                     {
-                        <FormItem Label="@context.Exchange.Key3Name" Required="true" Rules="Key3ValidationRules">
-                            <Input @bind-Value="Keys.Key3"
+                        <FormItem Label="@context.Exchange.Key3Name">
+                            <Input @bind-Value="keys.Key3"
                                    TValue="string" />
-
                         </FormItem>
                     }
                 </GridCol>
@@ -89,8 +88,8 @@
             </Row>
 
             <FormItem WrapperColOffset="9" WrapperColSpan="6">
-                <Button Loading="@IsLoadingBalance" Block HtmlType="submit">
-                    @(IsLoadingBalance ? "Checking connection" : "Check connection")
+                <Button Loading="@isLoadingBalance" Block HtmlType="submit">
+                    @(isLoadingBalance ? "Checking connection" : "Check connection")
                 </Button>
             </FormItem>
 
@@ -105,15 +104,14 @@
 @code {
     [Parameter] public EventCallback<ViewModels.ExchangeKeys> KeysChanged { get; set; }
 
-    private ViewModels.ExchangeKeys Keys { get; set; } = new ViewModels.ExchangeKeys();
-    private bool IsLoadingBalance { get; set; }
-    private FormValidationRule[]? Key3ValidationRules { get; } = new[] { new FormValidationRule { Required = true } };
+    private ViewModels.ExchangeKeys keys = new ViewModels.ExchangeKeys();
+    private bool isLoadingBalance;
 
     private async Task CheckBalanceAsync()
     {
-        IsLoadingBalance = true;
-        var result = await service.CheckConnectionAsync(Keys.Exchange!.Name!, Keys.Key1!, Keys.Key2!, Keys.Key3);
-        IsLoadingBalance = false;
+        this.isLoadingBalance = true;
+        var result = await service.CheckConnectionAndInitializeAsync(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3);
+        this.isLoadingBalance = false;
 
         if (!result.Success)
         {
@@ -121,7 +119,7 @@
         }
         else
         {
-            await KeysChanged.InvokeAsync(Keys);
+            await KeysChanged.InvokeAsync(keys);
         }
     }
 }

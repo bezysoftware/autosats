@@ -1,5 +1,6 @@
 ﻿@page "/schedule/new"
 @inject IExchangeScheduler scheduler
+@inject NavigationManager navigation
 
 <div>
     <PageHeader Title="Create new schedule" BackIcon="true" Ghost="true" />
@@ -7,9 +8,8 @@
     <Card>
         <div class="steps-container">
             <Steps Current="@currentStep">
-                <Step Title="Select an exchange" />
-                <Step Title="Define schedule" />
-                <Step Title="Set withdrawal strategy" />
+                <Step Title="Connect to an exchange" />
+                <Step Title="Define schedule & withdrawal" />
             </Steps>
         </div>
 
@@ -19,7 +19,7 @@
                 <ExchangeKeys KeysChanged="SetKeys" />
                 break;
             case 1:
-                <span>Step 2</span>
+                <ScheduleDetails ExchangeKeys="exchangeKeys" DetailsChanged="SetDetails" />
                 break;
         }
 
@@ -28,11 +28,16 @@
 
 @code {
     private int currentStep = 0;
-    private NewSchedule model = new NewSchedule();
+    private ViewModels.ExchangeKeys? exchangeKeys;
 
     private void SetKeys(ViewModels.ExchangeKeys keys)
     {
-        model.ExchangeKeys = keys;
-        currentStep = 1;
+        this.exchangeKeys = keys;
+        this.currentStep = 1;
+    }
+
+    private void SetDetails(ViewModels.ScheduleDetails details)
+    {
+        navigation.NavigateTo("/");
     }
 }

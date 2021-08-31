@@ -35,15 +35,15 @@ namespace AutoSats.Execution.Services
             this.api = api;
         }
 
-        public async Task<CheckConnectionResult> CheckConnectionAsync(string exchangeName, string key1, string key2, string? key3)
+        public async Task<CheckConnectionResult> CheckConnectionAndInitializeAsync(string exchangeName, string key1, string key2, string? key3)
         {
             var api = (ExchangeAPI)ExchangeAPI.GetExchangeAPI(exchangeName);
 
-            api.LoadAPIKeysUnsecure(key1, key2, key3);
-
             try
             {
+                api.LoadAPIKeysUnsecure(key1, key2, key3);
                 await api.GetAmountsAvailableToTradeAsync();
+                this.api = api;
                 return new CheckConnectionResult(true);
             }
             catch(Exception ex)

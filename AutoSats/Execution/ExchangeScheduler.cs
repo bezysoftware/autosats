@@ -40,11 +40,6 @@ namespace AutoSats.Execution
             this.mapper = mapper;
         }
 
-        public Task<string> GenerateNewAddressAsync()
-        {
-            return this.walletService.GenerateDepositAddressAsync();
-        }
-
         public async Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync()
         {
             var schedules = await this.db.ExchangeSchedules
@@ -128,6 +123,7 @@ namespace AutoSats.Execution
                     .WithIdentity(key)
                     .ForJob(ExecutionConsts.ExchangeJobKey)
                     .WithCronSchedule(newSchedule.Cron)
+                    .StartAt(newSchedule.Start)
                     .Build();
 
                 var scheduler = await this.schedulerFactory.GetScheduler();

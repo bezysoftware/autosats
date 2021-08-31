@@ -1,4 +1,5 @@
 ﻿using AutoSats.Data;
+using System;
 
 namespace AutoSats.Models
 {
@@ -7,6 +8,7 @@ namespace AutoSats.Models
         string Exchange,
         string[] Keys,
         string Cron,
+        DateTime Start,
         decimal Spend,
         ExchangeWithdrawalType WithdrawalType)
     { 

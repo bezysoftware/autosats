@@ -1,14 +1,16 @@
-﻿namespace AutoSats.Data
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AutoSats.Data
 {
     public enum ExchangeWithdrawalType
     {
-        // No withdrawal
+        [Display(Name = "No withdrawal")]
         None,
 
-        // To a fixed address
+        [Display(Name = "Fixed address")]
         Fixed,
 
-        // To a generated address
+        [Display(Name = "New address each time")]
         Dynamic
     }
 }

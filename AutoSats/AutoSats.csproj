@@ -28,7 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Watch Include="wwwroot\**;**\*.scss" />
+    <Watch Include="wwwroot/**;**/*.scss" />
+    <None Update="**/*.css" Watch="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,7 +14,7 @@ namespace AutoSats.Execution.Services
         /// <summary>
         /// Check if given keys can access the exchange API.
         /// </summary>
-        Task<CheckConnectionResult> CheckConnectionAsync(string exchangeName, string key1, string key2, string? key3);
+        Task<CheckConnectionResult> CheckConnectionAndInitializeAsync(string exchangeName, string key1, string key2, string? key3);
 
         /// <summary>
         /// Gets balances for all your currencies.

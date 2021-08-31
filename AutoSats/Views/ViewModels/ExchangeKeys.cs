@@ -1,4 +1,5 @@
 ﻿using AutoSats.Configuration;
+using AutoSats.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Views.ViewModels
@@ -14,7 +15,10 @@ namespace AutoSats.Views.ViewModels
         [Required]
         public string? Key2 { get; set; }
 
+        [RequiredIfNot(nameof(Key3Name), null)]
         public string? Key3 { get; set; }
+
+        private string? Key3Name => Exchange?.Key3Name;
 
         public void Clear()
         {

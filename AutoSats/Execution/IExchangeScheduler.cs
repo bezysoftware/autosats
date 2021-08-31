@@ -29,11 +29,6 @@ namespace AutoSats.Execution
         Task ResumeScheduleAsync(int id);
 
         /// <summary>
-        /// Generate new withdrawal address.
-        /// </summary>
-        Task<string> GenerateNewAddressAsync();
-
-        /// <summary>
         /// Get an overview of all exchange schedules.
         /// </summary>
         Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync();
