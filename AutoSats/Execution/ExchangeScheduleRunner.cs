@@ -111,9 +111,9 @@ namespace AutoSats.Execution
 
             var (cryptoCurrency, _) = Currency.Parse(schedule.CurrencyPair);
             var balance = await GetCurrencyBalance(cryptoCurrency);
-            if (balance < schedule.WithdrawalAmount)
+            if (balance < schedule.WithdrawalLimit)
             {
-                this.logger.LogInformation($"{cryptoCurrency} balance {balance} is less than withdrawal amount {schedule.WithdrawalAmount}");
+                this.logger.LogInformation($"{cryptoCurrency} balance {balance} is less than withdrawal limit {schedule.WithdrawalLimit}");
                 return;
             }
 
@@ -124,17 +124,17 @@ namespace AutoSats.Execution
                 _ => throw new InvalidOperationException($"Unknown withdrawal type '{schedule.WithdrawalType}'")
             };
 
-            this.logger.LogInformation($"Going to withdraw '{schedule.WithdrawalAmount}' of '{cryptoCurrency}' to address '{address}'");
+            this.logger.LogInformation($"Going to withdraw '{balance}' of '{cryptoCurrency}' to address '{address}'");
 
             try
             {
-                var id = await this.exchangeService.WithdrawAsync(cryptoCurrency, address, schedule.WithdrawalAmount);
+                var id = await this.exchangeService.WithdrawAsync(cryptoCurrency, address, balance);
 
                 this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
                 {
                     Schedule = schedule,
                     Address = address,
-                    Amount = schedule.WithdrawalAmount,
+                    Amount = schedule.WithdrawalLimit,
                     Timestamp = DateTime.UtcNow,
                     WithdrawalId = id
                 });

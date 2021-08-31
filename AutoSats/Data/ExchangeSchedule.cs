@@ -31,7 +31,7 @@ namespace AutoSats.Data
 
         public string? WithdrawalAddress { get; set; }
 
-        public decimal WithdrawalAmount { get; set; }
+        public decimal WithdrawalLimit { get; set; }
 
         public virtual ICollection<ExchangeEvent> Events { get; set; } = null!;
     }

@@ -21,7 +21,7 @@ namespace AutoSats.Data.Migrations
                     CurrencyPair = table.Column<string>(type: "TEXT", nullable: false),
                     WithdrawalType = table.Column<int>(type: "INTEGER", nullable: false),
                     WithdrawalAddress = table.Column<string>(type: "TEXT", nullable: true),
-                    WithdrawalAmount = table.Column<decimal>(type: "TEXT", nullable: false)
+                    WithdrawalLimit = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

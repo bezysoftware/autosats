@@ -14,6 +14,6 @@ namespace AutoSats.Models
     { 
         public string? WithdrawalAddress { get; set; }
 
-        public decimal WithdrawalAmount { get; set; }
+        public decimal WithdrawalLimit { get; set; }
     }
 }

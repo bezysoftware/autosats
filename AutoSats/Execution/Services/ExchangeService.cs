@@ -12,10 +12,10 @@ namespace AutoSats.Execution.Services
 {
     public class ExchangeService : IExchangeService, IDisposable
     {
-        private ExchangeAPI? api;
+        private IExchangeAPI? api;
         private readonly ILogger<ExchangeService> logger;
 
-        private ExchangeAPI Api => this.api ?? throw new InvalidOperationException("ExchangeService has not been initialized");
+        private IExchangeAPI Api => this.api ?? throw new InvalidOperationException("ExchangeService has not been initialized");
 
         public ExchangeService(ILogger<ExchangeService> logger)
         {
@@ -24,8 +24,7 @@ namespace AutoSats.Execution.Services
 
         public void Initialize(string exchangeName, string? keysFileName)
         {
-            // todo: no need to cast in new version https://github.com/jjxtra/ExchangeSharp/issues/621
-            var api = (ExchangeAPI)ExchangeAPI.GetExchangeAPI(exchangeName);
+            var api = ExchangeAPI.GetExchangeAPI(exchangeName);
 
             if (keysFileName != null)
             {
@@ -74,7 +73,7 @@ namespace AutoSats.Execution.Services
                 throw new Exception($"{result.ResultCode}: {result.Message}");
             }
 
-            return new BuyResult(result.OrderId, result.AmountFilled, result.AveragePrice);
+            return new BuyResult(result.OrderId, result.AmountFilled, result.AveragePrice ?? result.Price ?? 0);
         }
 
         public async Task<Dictionary<string, decimal>> GetBalancesAsync()
@@ -119,7 +118,8 @@ namespace AutoSats.Execution.Services
             {
                 Address = address,
                 Amount = amount,
-                Currency = cryptoCurrency
+                Currency = cryptoCurrency,
+                TakeFeeFromAmount = true
             });
 
             if (!result.Success)

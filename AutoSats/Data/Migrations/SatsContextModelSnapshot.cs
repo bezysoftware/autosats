@@ -69,7 +69,7 @@ namespace AutoSats.Data.Migrations
                     b.Property<string>("WithdrawalAddress")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("WithdrawalAmount")
+                    b.Property<decimal>("WithdrawalLimit")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("WithdrawalType")

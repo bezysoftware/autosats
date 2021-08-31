@@ -26,7 +26,7 @@ namespace AutoSats.Views.ViewModels
 
         [Range(0.0000001, double.MaxValue, ErrorMessage = "Value must be greater than zero.")]
         [RequiredIfNot(nameof(WithdrawalType), ExchangeWithdrawalType.None, ErrorMessage = "Amount is required.")]
-        public decimal? WithdrawalAmount { get; set; }
+        public decimal? WithdrawalLimit { get; set; }
 
         [Required]
         public bool RunToVerify { get; set; } = true;
