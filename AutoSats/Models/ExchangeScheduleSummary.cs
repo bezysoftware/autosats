@@ -12,10 +12,15 @@ namespace AutoSats.Models
         bool IsPaused,
         decimal Spend,
         string CurrencyPair,
+        DateTime Start,
         ExchangeWithdrawalType WithdrawalType) : IExchange
     {
         private DateTime? nextOccurrence;
         private string? cronDescription;
+
+        public decimal TotalSpent { get; set; }
+
+        public decimal TotalAccumulated { get; set; }
 
         public DateTime NextOccurence => this.nextOccurrence ??= GetNextOccurence();
 
@@ -25,12 +30,12 @@ namespace AutoSats.Models
 
         private string GetCronDescription()
         {
-            return ExpressionDescriptor.GetDescription(Cron, new Options { Locale = "en" });
+            return ExpressionDescriptor.GetDescription(Cron, new Options { Locale = "en", Use24HourTimeFormat = true });
         }
 
         private DateTime GetNextOccurence()
         {
-            return new CronExpression(Cron).GetNextValidTimeAfter(DateTimeOffset.UtcNow).GetValueOrDefault(DateTimeOffset.MinValue).UtcDateTime.ToLocalTime();
+            return new CronExpression(Cron).GetNextValidTimeAfter(Start).GetValueOrDefault(DateTimeOffset.MinValue).UtcDateTime.ToLocalTime();
         }
     }
 }

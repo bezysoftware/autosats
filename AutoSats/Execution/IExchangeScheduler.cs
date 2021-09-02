@@ -10,8 +10,7 @@ namespace AutoSats.Execution
         /// <summary>
         /// Add new schedule.
         /// </summary>
-        /// <returns></returns>
-        Task AddScheduleAsync(NewExchangeSchedule schedule);
+        Task AddScheduleAsync(NewExchangeSchedule schedule, bool runToVerify);
 
         /// <summary>
         /// Mark schedule as deleted.
@@ -36,6 +35,6 @@ namespace AutoSats.Execution
         /// <summary>
         /// Get schedule details including past events.
         /// </summary>
-        Task<ExchangeSchedule> GetScheduleDetailAsync(int id);
+        Task<ExchangeScheduleDetails> GetScheduleDetailsAsync(int id);
     }
 }

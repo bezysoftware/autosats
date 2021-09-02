@@ -7,15 +7,15 @@ namespace AutoSats.Execution.Services
     public interface IExchangeService
     {
         /// <summary>
-        /// Needs to be called first to initialize the service with keys.
+        /// Initialize the service with keys coming from a file.
         /// </summary>
         void Initialize(string exchangeName, string? keysFileName);
-        
-        /// <summary>
-        /// Check if given keys can access the exchange API.
-        /// </summary>
-        Task<CheckConnectionResult> CheckConnectionAndInitializeAsync(string exchangeName, string key1, string key2, string? key3);
 
+        /// <summary>
+        /// Initialize the service with supplied keys.
+        /// </summary>
+        void Initialize(string exchangeName, string key1, string key2, string? key3);
+        
         /// <summary>
         /// Gets balances for all your currencies.
         /// </summary>

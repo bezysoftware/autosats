@@ -1,1 +1,51 @@
-﻿Single 
+﻿@inject NavigationManager navigation
+@inject IExchangeScheduler scheduler
+
+<div>
+    @if (ShowBackIcon)
+    {
+        <PageHeader Title="Schedule details" Ghost="true" BackIcon="true" />
+    }
+    else
+    {
+        <PageHeader Title="Schedule details" Ghost="true">
+            <PageHeaderExtra>
+                <Button OnClick="@(_ => navigation.NavigateTo("/schedule/new"))">Create Another</Button>
+            </PageHeaderExtra>
+        </PageHeader>
+    }
+    <Card>
+        @if (details != null)
+        {
+        <ScheduleSummary Summary="details.Summary" />
+        <Divider />
+        <Button>Click me</Button>
+        }
+    </Card>
+
+    <PageHeader Title="Timeline" Ghost="true" />
+    <Card>
+        <Timeline Mode="alternate">
+            <TimelineItem>Create a services site 2015-09-01</TimelineItem>
+            <TimelineItem Color="blue">Create a services site 2015-09-01</TimelineItem>
+            <TimelineItem Color="red">Create a services site 2015-09-01</TimelineItem>
+            <TimelineItem Color="green">Create a services site 2015-09-01</TimelineItem>
+            @*@foreach (var e in details?.Events ?? Array.Empty<ExchangeEvent>())
+                {
+                    <TimelineItem>Create a services site 2015-09-01</TimelineItem>
+                }*@
+        </Timeline>
+    </Card>
+</div>
+
+@code {
+    [Parameter] public int ScheduleId { get; set; }
+    [Parameter] public bool ShowBackIcon { get; set; }
+
+    private ExchangeScheduleDetails? details;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        this.details = await scheduler.GetScheduleDetailsAsync(ScheduleId);
+    }
+} 

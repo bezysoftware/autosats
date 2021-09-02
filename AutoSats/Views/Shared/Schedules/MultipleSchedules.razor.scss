@@ -1,54 +1,9 @@
-﻿::deep .schedule-container {
-    padding: 16px;
-    display: block;
+﻿.schedule-summary {
+    border-bottom: 1px solid #f0f0f0;
 
     &:hover {
         cursor: pointer;
         background: rgba(60, 90, 100, 0.04);
-    }
-
-    strong {
-        font-weight: 600;
-    }
-
-    .schedule-description-list {
-        display: grid;
-        justify-content: space-between;
-        grid-template-columns: 1fr 170px 100px;
-        
-        .schedule-description-container {
-            display: flex;
-            flex-flow: column;
-            margin-bottom: 18px;
-
-            &:last-child {
-                text-align: right;
-            }
-
-            span:first-child {
-            }
-
-            span:last-child {
-                color: black;
-                font-size: 16px;
-            }
-        }
-    }
-
-    .schedule-title-container {
-        display: flex;
-
-        .schedule-title-icon {
-            margin-left: auto;
-
-            &.active {
-                color: green;
-            }
-
-            &.paused {
-                color: orange;
-            }
-        }
     }
 }
 
@@ -56,5 +11,4 @@
     display: flex;
     justify-content: center;
     padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
 }

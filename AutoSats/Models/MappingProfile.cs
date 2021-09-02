@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoSats.Data;
+using System.Collections.Generic;
 
 namespace AutoSats.Models
 {

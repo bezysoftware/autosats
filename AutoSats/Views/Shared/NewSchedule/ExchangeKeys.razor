@@ -1,5 +1,5 @@
 ﻿@inject ExchangeOptions[] exchanges
-@inject IExchangeService service
+@inject IExchangeServiceFactory factory
 @inject MessageService message
 
 <div>
@@ -36,7 +36,7 @@
             <Row>
                 <Text Class="exchange-description">
                     @context.Exchange.Name requires a combination of
-                    @if (@context.Exchange.Key3Name != null)
+                    @if (@context.Exchange.Key3Name != string.Empty)
                     {
                         <span><strong>@context.Exchange.Key1Name</strong>, <strong>@context.Exchange.Key2Name</strong> & <strong>@context.Exchange.Key3Name</strong>.</span>
                     }
@@ -47,7 +47,7 @@
 
                     Those values can be generated in <a href="@context.Exchange.ApiUrl" target="_blank">@context.Exchange.Name @context.Exchange.ApiName</a>. @context.Exchange.Hint
 
-                    @if (@context.Exchange.Permissions != null && @context.Exchange.Permissions.Any())
+                    @if (@context.Exchange.Permissions.Any())
                     {
                         <span>
                             Make sure you allow following permissions:
@@ -74,7 +74,7 @@
                                TValue="string" />
                     </FormItem>
 
-                    @if (@context.Exchange.Key3Name != null)
+                    @if (@context.Exchange.Key3Name != string.Empty)
                     {
                         <FormItem Label="@context.Exchange.Key3Name">
                             <Input @bind-Value="keys.Key3"
@@ -110,16 +110,17 @@
     private async Task CheckBalanceAsync()
     {
         this.isLoadingBalance = true;
-        var result = await service.CheckConnectionAndInitializeAsync(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3);
-        this.isLoadingBalance = false;
 
-        if (!result.Success)
+        try
         {
-            await message.Error($"Couldn't verify supplied credentials: {result.Message}");
-        }
-        else
-        {
+            await factory.GetService(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3).GetBalancesAsync();
             await KeysChanged.InvokeAsync(keys);
         }
+        catch(Exception ex)
+        {
+            await message.Error($"Couldn't verify supplied credentials: {ex.Message}");
+        }
+
+        this.isLoadingBalance = false;
     }
 }

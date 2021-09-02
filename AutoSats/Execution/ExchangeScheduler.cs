@@ -43,14 +43,22 @@ namespace AutoSats.Execution
         public async Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync()
         {
             var schedules = await this.db.ExchangeSchedules
+                .Include(x => x.Events.Where(e => e is ExchangeEventBuy))
                 .AsNoTracking()
                 .OrderByDescending(x => x.IsPaused)
                 .ToArrayAsync();
 
-            return this.mapper.Map<IEnumerable<ExchangeScheduleSummary>>(schedules);
+            return schedules
+                .Select(x => this.mapper.Map<ExchangeScheduleSummary>(x) with 
+                { 
+                    TotalAccumulated = x.Events.Cast<ExchangeEventBuy>().Sum(e => e.Received),
+                    TotalSpent = x.Events.Count * x.Spend
+                })
+                .OrderBy(x => x.NextOccurence)
+                .ToArray();
         }
 
-        public async Task<ExchangeSchedule> GetScheduleDetailAsync(int id)
+        public async Task<ExchangeScheduleDetails> GetScheduleDetailsAsync(int id)
         {
             var schedule = await this.db.ExchangeSchedules
                 .Include(x => x.Events)
@@ -63,7 +71,9 @@ namespace AutoSats.Execution
                 throw new ScheduleNotFoundException(id);
             }
 
-            return schedule;
+            var summary = this.mapper.Map<ExchangeScheduleSummary>(schedule);
+
+            return new ExchangeScheduleDetails(summary, schedule.Events);
         }
 
         public async Task DeleteScheduleAsync(int id)
@@ -98,7 +108,7 @@ namespace AutoSats.Execution
             this.db.SaveChanges();
         }
 
-        public async Task AddScheduleAsync(NewExchangeSchedule newSchedule)
+        public async Task AddScheduleAsync(NewExchangeSchedule newSchedule, bool runToVerify)
         {
             using var tx = this.db.Database.BeginTransaction();
 
@@ -114,7 +124,10 @@ namespace AutoSats.Execution
             try
             {
                 // attempt to run the schedule
-                await this.runner.RunScheduleAsync(schedule.Id);
+                if (runToVerify)
+                {
+                    await this.runner.RunScheduleAsync(schedule.Id);
+                }
 
                 // save quartz schedule
                 var key = GetTriggerKey(schedule.Id);
@@ -127,9 +140,11 @@ namespace AutoSats.Execution
                     .Build();
 
                 var scheduler = await this.schedulerFactory.GetScheduler();
-                await scheduler.ScheduleJob(trigger);
 
+                // todo: scheduler should use our own transaction
                 tx.Commit();
+
+                await scheduler.ScheduleJob(trigger);
             }
             catch(Exception ex)
             {

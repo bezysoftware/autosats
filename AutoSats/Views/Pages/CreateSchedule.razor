@@ -7,7 +7,7 @@
 
     <Card>
         <div class="steps-container">
-            <Steps Current="@currentStep">
+            <Steps Current="@currentStep" OnChange="OnStepChange">
                 <Step Title="Connect to an exchange" />
                 <Step Title="Define schedule & withdrawal" />
             </Steps>
@@ -29,6 +29,14 @@
 @code {
     private int currentStep = 0;
     private ViewModels.ExchangeKeys? exchangeKeys;
+
+    private void OnStepChange(int current)
+    {
+        if (current < this.currentStep)
+        {
+            this.currentStep = current;
+        }
+    }
 
     private void SetKeys(ViewModels.ExchangeKeys keys)
     {

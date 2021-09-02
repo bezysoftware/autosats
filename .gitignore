@@ -11,6 +11,7 @@
 *.sln.docstates
 /data
 AutoSats.db
+*.keys
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

@@ -57,7 +57,9 @@ namespace AutoSats
 
             var exchanges = Configuration.GetSection("Exchanges").Get<ExchangeOptions[]>();
 
-            services.AddSingleton(exchanges); services.AddScoped<IExchangeService, ExchangeService>();
+            services.AddSingleton(exchanges); 
+            services.AddTransient<IExchangeService, ExchangeService>();
+            services.AddScoped<IExchangeServiceFactory, ExchangeServiceFactory>();
             services.AddScoped<IExchangeScheduler, ExchangeScheduler>();
             services.AddScoped<IExchangeScheduleRunner, ExchangeScheduleRunner>();
             services.AddScoped<IWalletService, WalletService>();

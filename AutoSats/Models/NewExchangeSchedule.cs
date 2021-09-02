@@ -10,10 +10,8 @@ namespace AutoSats.Models
         string Cron,
         DateTime Start,
         decimal Spend,
-        ExchangeWithdrawalType WithdrawalType)
-    { 
-        public string? WithdrawalAddress { get; set; }
-
-        public decimal WithdrawalLimit { get; set; }
-    }
+        ExchangeWithdrawalType WithdrawalType,
+        string? WithdrawalAddress,
+        decimal? WithdrawalLimit)
+    { }
 }

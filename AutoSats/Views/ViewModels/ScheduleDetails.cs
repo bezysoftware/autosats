@@ -1,5 +1,6 @@
 ﻿using AutoSats.Data;
 using AutoSats.Validation;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Views.ViewModels
@@ -8,14 +9,17 @@ namespace AutoSats.Views.ViewModels
     {
         [Required]
         [Cron]
-        public string? Cron { get; set; }
+        public string Cron { get; set; } = string.Empty;
 
         [Required]
-        public string? Currency { get; set; }
+        public string Currency { get; set; } = string.Empty;
 
         [Required]
         [Range(1, double.MaxValue, ErrorMessage = "Value must be greater than zero.")]
         public decimal Spend { get; set; }
+
+        [Required]
+        public DateTime Start { get; set; } = DateTime.Now;
 
         [Required]
         public ExchangeWithdrawalType WithdrawalType { get; set; }

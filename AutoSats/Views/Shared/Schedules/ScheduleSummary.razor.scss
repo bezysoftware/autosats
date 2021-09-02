@@ -1,0 +1,31 @@
+﻿::deep .schedule-container {
+    padding: 8px;
+    display: block;
+
+    strong {
+        font-weight: 600;
+    }
+
+    .schedule-description-list {
+        display: grid;
+        justify-content: space-between;
+        grid-template-columns: 1fr auto auto auto;
+    }
+
+    .schedule-title-container {
+        display: flex;
+        font-size: 16px;
+
+        .schedule-title-icon {
+            margin-left: auto;
+
+            &.active {
+                color: green;
+            }
+
+            &.paused {
+                color: orange;
+            }
+        }
+    }
+}

@@ -1,0 +1,70 @@
+﻿@if (Summary != null)
+{
+    var (crypto, fiat) = Extensions.Currency.Parse(Summary.CurrencyPair);
+    <div class="ant-list-vertical">
+        <ListItem Class="schedule-container">
+            <ListItemMeta>
+                <AvatarTemplate>
+                    <Avatar Src="@Summary.GetImgLogoPath()" Size="large" />
+                </AvatarTemplate>
+                <TitleTemplate>
+                    <div class="schedule-title-container">
+                        <span>
+                            Buy <strong>@(Summary.Spend.ToString("N2")) @fiat</strong> worth of <strong>@crypto</strong> on <strong>@Summary.Exchange</strong> and @GetWithdrawalDescription(Summary.WithdrawalType).
+                        </span>
+
+                        <Tooltip Class="@GetScheduleIconClass(@Summary.IsPaused)"
+                                 Title="@($"This schedule is {(Summary.IsPaused ? "paused" : "active")}")">
+                            <Icon Type="@(Summary.IsPaused ? "pause" : "check")" Theme="outline" />
+                        </Tooltip>
+                    </div>
+                </TitleTemplate>
+
+                <DescriptionTemplate>
+                    <div class="schedule-description-list">
+                        <div class="description-container">
+                            <span>Repeats</span>
+                            <span>@Summary.CronDescription</span>
+                        </div>
+                        <div class="description-container">
+                            <span>Next on</span>
+                            <span>@GetNextOccurrence(Summary)</span>
+                        </div>
+                        <div class="description-container">
+                            <span>Total spent</span>
+                            <span>@Summary.TotalSpent.ToString("N2") @fiat</span>
+                        </div>
+                        <div class="description-container">
+                            <span>Total accumulated</span>
+                            <span>@Summary.TotalAccumulated.ToString("N8") @crypto</span>
+                        </div>
+                    </div>
+                </DescriptionTemplate>
+            </ListItemMeta>
+        </ListItem>
+    </div>
+}
+
+@code {
+    [Parameter] public ExchangeScheduleSummary? Summary { get; set; }
+
+    private string GetScheduleIconClass(bool isPaused)
+    {
+        return $"schedule-title-icon {(isPaused ? "paused" : "active")}";
+    }
+
+    private string GetNextOccurrence(ExchangeScheduleSummary schedule)
+    {
+        return schedule.IsPaused ? "<Paused>" : schedule.NextOccurence.ToString();
+    }
+
+    private string GetWithdrawalDescription(ExchangeWithdrawalType withdrawalType)
+    {
+        return withdrawalType switch
+        {
+            ExchangeWithdrawalType.Fixed => "withdraw to a fixed address",
+            ExchangeWithdrawalType.Dynamic => "withdraw to a new address each time",
+            _ => "do not withdraw"
+        };
+    }
+} 

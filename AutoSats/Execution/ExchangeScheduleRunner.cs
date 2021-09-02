@@ -46,7 +46,7 @@ namespace AutoSats.Execution
             var schedule = await this.db.ExchangeSchedules.FirstAsync(x => x.Id == id);
             var keys = Path.Combine(this.dataFolder, $"{id}.{ExecutionConsts.KeysFileExtension}");
 
-            this.exchangeService.Initialize(keys, schedule.Exchange);
+            this.exchangeService.Initialize(schedule.Exchange, keys);
 
             try
             {

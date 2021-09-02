@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Data
@@ -7,9 +8,6 @@ namespace AutoSats.Data
     {
         [Key]
         public int Id { get; set; }
-
-        [Required]
-        public string Title { get; set; } = null!;
 
         [Required]
         public string Exchange { get; set; } = null!;
@@ -28,6 +26,9 @@ namespace AutoSats.Data
 
         [Required]
         public ExchangeWithdrawalType WithdrawalType { get; set; }
+
+        [Required]
+        public DateTime Start { get; set; }
 
         public string? WithdrawalAddress { get; set; }
 

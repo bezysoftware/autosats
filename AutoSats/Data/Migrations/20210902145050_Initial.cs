@@ -13,13 +13,13 @@ namespace AutoSats.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
                     Exchange = table.Column<string>(type: "TEXT", nullable: false),
                     Cron = table.Column<string>(type: "TEXT", nullable: false),
                     IsPaused = table.Column<bool>(type: "INTEGER", nullable: false),
                     Spend = table.Column<decimal>(type: "TEXT", nullable: false),
                     CurrencyPair = table.Column<string>(type: "TEXT", nullable: false),
                     WithdrawalType = table.Column<int>(type: "INTEGER", nullable: false),
+                    Start = table.Column<DateTime>(type: "TEXT", nullable: false),
                     WithdrawalAddress = table.Column<string>(type: "TEXT", nullable: true),
                     WithdrawalLimit = table.Column<decimal>(type: "TEXT", nullable: false)
                 },

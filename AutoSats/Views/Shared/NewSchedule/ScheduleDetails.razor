@@ -1,4 +1,5 @@
-﻿@inject IExchangeService service
+﻿@inject IExchangeServiceFactory factory
+@inject IExchangeScheduler scheduler
 @inject MessageService message
 
 <div>
@@ -44,7 +45,7 @@
                 <FormItem Label="How often?" Required="true">
                     <EnumSelect TEnum="SchedulePeriod"
                                 @bind-Value="selectedPeriod"
-                                OnSelectedItemChanged="@(x => UpdateCronExpression(x, this.periodStartTime))" />
+                                OnSelectedItemChanged="@(x => UpdateCronExpression(x, context.Start))" />
                 </FormItem>
 
                 @if (selectedPeriod == SchedulePeriod.Cron)
@@ -67,7 +68,7 @@
                     </FormItem>
 
                     <FormItem Label="Start date" Required>
-                        <DatePicker @bind-Value="periodStartTime"
+                        <DatePicker @bind-Value="context.Start"
                                     TValue="DateTime"
                                     Class="element-stretch"
                                     OnChange="@(x => UpdateCronExpression(this.selectedPeriod, x.Date))" />
@@ -76,7 +77,7 @@
                 else
                 {
                     <FormItem Label="Start & time of day" Required>
-                        <DatePicker @bind-Value="periodStartTime"
+                        <DatePicker @bind-Value="context.Start"
                                     TValue="DateTime"
                                     ShowTime="@("HH:mm")"
                                     Class="element-stretch"
@@ -156,20 +157,20 @@
     private IEnumerable<string> currencies = Array.Empty<string>();
     private bool isLoadingCurrencies { get; set; }
     private SchedulePeriod selectedPeriod { get; set; }
-    private DateTime periodStartTime { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        this.periodStartTime = DateTime.Now;
+        var exchange = ExchangeKeys?.Exchange ?? throw new InvalidOperationException();
+
         this.isLoadingCurrencies = true;
-        this.currencies = await service.GetFiatCurrenciesAsync();
-        this.details.Currency = this.currencies.FirstOrDefault(x => x == "USD") ?? this.currencies.FirstOrDefault(x => x.StartsWith("USD"));
+        this.currencies = await factory.GetService(exchange.Name).GetFiatCurrenciesAsync();
+        this.details.Currency = this.currencies.FirstOrDefault(x => x == "USD") ?? this.currencies.FirstOrDefault(x => x.StartsWith("USD")) ?? this.currencies.First();
         this.isLoadingCurrencies = false;
     }
 
     private void SelectedPeriodChanged(SchedulePeriod period)
     {
-        UpdateCronExpression(period, this.periodStartTime);
+        UpdateCronExpression(period, this.details.Start);
     }
 
     private void UpdateCronExpression(SchedulePeriod period, DateTime start)
@@ -190,11 +191,31 @@
 
     private async Task SaveScheduleAsync(EditContext context)
     {
-        if (this.details.RunToVerify)
+        if (ExchangeKeys?.Exchange == null)
         {
-            await message.Info("Run to verify");
+            return;
         }
 
-        await DetailsChanged.InvokeAsync(details);
+        var pair = Currency.ToPair("BTC", this.details.Currency);
+        var schedule = new NewExchangeSchedule(
+            pair,
+            ExchangeKeys.Exchange.Name,
+            ExchangeKeys.ToKeysArray(),
+            this.details.Cron,
+            this.details.Start,
+            this.details.Spend,
+            this.details.WithdrawalType,
+            this.details.WithdrawalAddress,
+            this.details.WithdrawalLimit);
+
+        try
+        {
+            await scheduler.AddScheduleAsync(schedule, this.details.RunToVerify);
+            await DetailsChanged.InvokeAsync(details);
+        }
+        catch (Exception ex)
+        {
+            await message.Error($"Couldn't add the schedule: {ex.Message}");
+        }
     }
 }

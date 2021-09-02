@@ -1,0 +1,10 @@
+﻿@page "/schedule/{ScheduleId}"
+
+<SingleSchedule ScheduleId="ParsedScheduleId" ShowBackIcon="true" />
+
+@code {
+    [Parameter]
+    public string ScheduleId { get; set; } = string.Empty;
+
+    private int ParsedScheduleId => int.Parse(ScheduleId);
+}

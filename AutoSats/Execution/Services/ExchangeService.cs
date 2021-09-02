@@ -34,22 +34,13 @@ namespace AutoSats.Execution.Services
             this.api = api;
         }
 
-        public async Task<CheckConnectionResult> CheckConnectionAndInitializeAsync(string exchangeName, string key1, string key2, string? key3)
+        public void Initialize(string exchangeName, string key1, string key2, string? key3)
         {
-            var api = (ExchangeAPI)ExchangeAPI.GetExchangeAPI(exchangeName);
+            var api = ExchangeAPI.GetExchangeAPI(exchangeName);
 
-            try
-            {
-                api.LoadAPIKeysUnsecure(key1, key2, key3);
-                await api.GetAmountsAvailableToTradeAsync();
-                this.api = api;
-                return new CheckConnectionResult(true);
-            }
-            catch(Exception ex)
-            {
-                this.logger.LogError($"Check connection failed with supplied keys for exchange {exchangeName}", ex);
-                return new CheckConnectionResult(false, ex.Message);
-            }
+            api.LoadAPIKeysUnsecure(key1, key2, key3);
+
+            this.api = api;
         }
 
         public async Task<BuyResult> BuyAsync(string pair, decimal amount)

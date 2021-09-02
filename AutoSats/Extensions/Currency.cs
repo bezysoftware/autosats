@@ -10,5 +10,10 @@
 
             return (s[0], s[1]);
         }
+
+        public static string ToPair(string first, string second)
+        {
+            return $"{first}{CurrencyPairDelimiter}{second}";
+        }
     }
 }
