@@ -1,52 +1,9 @@
-﻿.summary-container {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    padding: 16px;
+﻿.summary-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 
-    ::deep .avatar {
-        margin-right: 16px;
-    }
-
-    .schedule-description {
-        display: flex;
-        flex-direction: column;
-
-        .schedule-description-title {
-            display: inline-block;
-            margin-bottom: 12px;
-            font-size: 16px;
-
-            strong {
-                font-weight: 600;
-            }
-        }
-
-        .schedule-description-list {
-            display: grid;
-            justify-content: space-between;
-            grid-template-columns: 1fr auto auto auto;
-
-            .schedule-description-container {
-                display: flex;
-                flex-flow: column;
-                margin-bottom: 18px;
-                margin-right: 24px;
-
-                &:last-child {
-                    text-align: right;
-                    margin-right: 0;
-                }
-
-                span:first-child {
-                    color: rgba(0,0,0,.45);
-                    font-size: 14px;
-                }
-
-                span:last-child {
-                    color: black;
-                    font-size: 15px;
-                }
-            }
-        }
+    ::deep button {
+        margin: 0 6px;
     }
 }

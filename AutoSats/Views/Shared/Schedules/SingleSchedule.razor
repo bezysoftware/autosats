@@ -10,18 +10,39 @@
     {
         <PageHeader Title="Schedule details" Ghost="true">
             <PageHeaderExtra>
-                <Button OnClick="@(_ => navigation.NavigateTo("/schedule/new"))">Create Another</Button>
+                <Button Type="link" OnClick="@(_ => navigation.NavigateTo("/schedule/new"))">Create another</Button>
             </PageHeaderExtra>
         </PageHeader>
     }
-    <Card>
-        @if (details != null)
-        {
+<Card>
+    @if (details != null)
+    {
         <ScheduleSummary Summary="details.Summary" />
         <Divider />
-        <Button>Click me</Button>
-        }
-    </Card>
+        <div class="summary-buttons">
+            <Popconfirm Title="Are you sure delete this schedule?"
+                        OnConfirm="DeleteScheduleAsync"
+                        OkText="Delete"
+                        CancelText="Cancel">
+                <Button Type="primary" Danger Icon="delete">
+                    Delete
+                </Button>
+            </Popconfirm>
+            @if (details.Summary.IsPaused)
+            {
+                <Button Icon="caret-right" OnClick="ResumeScheduleAsync">
+                    Resume
+                </Button>
+            }
+            else
+            {
+                <Button Icon="pause" OnClick="PauseScheduleAsync">
+                    Pause
+                </Button>
+            }
+        </div>
+    }
+</Card>
 
     <PageHeader Title="Timeline" Ghost="true" />
     <Card>
@@ -45,6 +66,29 @@
     private ExchangeScheduleDetails? details;
 
     protected override async Task OnParametersSetAsync()
+    {
+        await RefreshDetailsAsync();
+    }
+
+    private async Task DeleteScheduleAsync()
+    {
+        await scheduler.DeleteScheduleAsync(ScheduleId);
+        navigation.NavigateTo("/", true);
+    }
+
+    private async Task PauseScheduleAsync()
+    {
+        await scheduler.PauseScheduleAsync(ScheduleId);
+        await RefreshDetailsAsync();
+    }
+
+    private async Task ResumeScheduleAsync()
+    {
+        await scheduler.ResumeScheduleAsync(ScheduleId);
+        await RefreshDetailsAsync();
+    }
+
+    private async Task RefreshDetailsAsync()
     {
         this.details = await scheduler.GetScheduleDetailsAsync(ScheduleId);
     }
