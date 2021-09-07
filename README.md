@@ -1,4 +1,4 @@
-![example workflow](https://github.com/bezysoftware/autosats/actions/workflows/build/badge.svg)
+![docker build](https://github.com/bezysoftware/autosats/actions/workflows/build.yml/badge.svg)
 
 # AutoSats
 
