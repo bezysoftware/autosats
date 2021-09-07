@@ -5,6 +5,8 @@
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileFile>..\Dockerfile</DockerfileFile>
+    <DockerfileContext>.</DockerfileContext>
     <ContainerDevelopmentMode>Regular</ContainerDevelopmentMode>
   </PropertyGroup>
 

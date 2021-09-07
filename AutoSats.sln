@@ -7,10 +7,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoSats", "AutoSats\AutoSa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F30A1588-EDEC-4100-9F18-D408309EA538}"
 	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		Dockerfile = Dockerfile
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoSats.Tests", "AutoSats.Tests\AutoSats.Tests.csproj", "{4F893CE4-F382-461E-B43B-EE384889AFDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +26,10 @@ Global
 		{3DCBCEA7-A9B8-4ED4-AAFB-1E5011C211A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DCBCEA7-A9B8-4ED4-AAFB-1E5011C211A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DCBCEA7-A9B8-4ED4-AAFB-1E5011C211A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F893CE4-F382-461E-B43B-EE384889AFDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F893CE4-F382-461E-B43B-EE384889AFDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F893CE4-F382-461E-B43B-EE384889AFDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F893CE4-F382-461E-B43B-EE384889AFDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

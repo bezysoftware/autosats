@@ -1,20 +1,32 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+# restore solution packages
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS restore
 WORKDIR /src
 COPY ["AutoSats/AutoSats.csproj", "AutoSats/"]
-RUN dotnet restore "AutoSats/AutoSats.csproj"
+COPY ["AutoSats.Tests/AutoSats.Tests.csproj", "AutoSats.Tests/"]
+COPY ["AutoSats.sln", ""]
+RUN dotnet restore
+
+# build the main project
+FROM restore AS build
 COPY . .
 WORKDIR "/src/AutoSats"
-RUN dotnet build "AutoSats.csproj" -c Release -o /app/build
+RUN dotnet build -c Release -o /app/build
 
-FROM build AS publish
+# run tests
+FROM build AS test
+WORKDIR "/src/AutoSats.Tests"
+RUN dotnet test -c Release -o /app/build
+
+# publish
+FROM test as publish
+WORKDIR "/src/AutoSats"
 RUN dotnet publish "AutoSats.csproj" -c Release -o /app/publish
 
+# final
 FROM base AS final
 ENV ConnectionStrings__AutoSatsDatabase="Data Source=/app_data/AutoSats.db"
 RUN mkdir /app_data
