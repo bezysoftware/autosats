@@ -7,7 +7,9 @@
     <Layout>
         <div class="site-layout-content">@Body</div>
     </Layout>
-    <Footer Style="text-align: center;">footer</Footer>
+    <Footer Class="app-footer">
+        <AppFooter />
+    </Footer>
 </Layout>
 
 <style>
@@ -20,5 +22,9 @@
         width: 800px;
         align-self: center;
         height: 100%;
+    }
+
+    .app-footer {
+        padding: 0;
     }
 </style>

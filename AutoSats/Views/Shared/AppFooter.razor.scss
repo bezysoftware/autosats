@@ -1,0 +1,16 @@
+﻿.footer-container {
+    background: #001529;
+    padding: 12px;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    a { 
+        color: white;
+    }
+
+    ::deep .ant-divider {
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+    }
+}
