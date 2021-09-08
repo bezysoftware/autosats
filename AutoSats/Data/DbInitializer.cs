@@ -9,6 +9,14 @@ namespace AutoSats.Data
 
         public static void InitializeQuartzDatabase(string connectionString)
         {
+            var builder = new SQLiteConnectionStringBuilder(connectionString);
+            var path = Path.GetDirectoryName(builder.DataSource);
+
+            if (path != null && !Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            
             using var connection = new SQLiteConnection(connectionString);
             
             connection.Open();
