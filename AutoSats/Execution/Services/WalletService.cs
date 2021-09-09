@@ -14,7 +14,8 @@ namespace AutoSats.Execution.Services
 
         public async Task<string> GenerateDepositAddressAsync()
         {
-            var address = await this.client.GetNewAddressAsync();
+            var request = new GetNewAddressRequest { Label = "AutoSats" };
+            var address = await this.client.GetNewAddressAsync(request);
 
             return address.ToString();
         }

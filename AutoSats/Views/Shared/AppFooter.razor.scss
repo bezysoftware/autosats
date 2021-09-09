@@ -10,10 +10,16 @@
         color: white;
     }
 
-    ::deep .ant-divider {
-        border-left: 1px solid rgba(255, 255, 255, 0.2);
-        margin: 4px 8px;
-        align-self: stretch;
-        position: unset;
+    ::deep {
+        .ant-divider {
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 4px 8px;
+            align-self: stretch;
+            position: unset;
+        }
+        
+        .icon {
+            color: white;
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿@inject IExchangeServiceFactory factory
 @inject IExchangeScheduler scheduler
 @inject MessageService message
+@inject IWalletService wallet 
 
 <div>
     <Form Model="details" LabelColSpan="12" WrapperColSpan="12" OnFinish="SaveScheduleAsync">
@@ -94,13 +95,25 @@
             <GridCol Span="11">
                 <FormItem Label="Withdrawal" Required LabelColSpan="10" WrapperColSpan="14">
                     <EnumSelect TEnum="ExchangeWithdrawalType"
-                                @bind-Value="context.WithdrawalType" />
+                                Disabled="isGeneratingAddress"
+                                Loading="isGeneratingAddress && context.WithdrawalType == ExchangeWithdrawalType.Dynamic"
+                                @bind-Value="context.WithdrawalType" 
+                                OnSelectedItemChanged="WithdrawalTypeChanged"
+                                />
                 </FormItem>
 
                 @if (context.WithdrawalType == ExchangeWithdrawalType.Fixed)
                 {
                     <FormItem Label="Address" LabelColSpan="10" WrapperColSpan="14">
-                        <AntDesign.Input @bind-Value="context.WithdrawalAddress" />
+                        <AntDesign.Input @bind-Value="context.WithdrawalAddress">
+                            <Suffix>
+                                <Tooltip Title="@("Generate address")">
+                                    <Button Class="input-button" Type="@ButtonType.Text" Loading="isGeneratingAddress" OnClick="GenerateWithdrawalAddressAsync">
+                                        <Icon Type="setting" Theme="outline" />
+                                    </Button>
+                                </Tooltip>
+                            </Suffix>
+                        </AntDesign.Input>
                     </FormItem>
                 }
 
@@ -143,7 +156,7 @@
         <AntDesign.Text Type="secondary" Class="run-definition-description">
             @if (context.RunToVerify)
             {
-                <span>This will try to run your schedule definition right now and only schedule it if it succeeds.</span>
+                <span>This will try to run your schedule definition right now and only save it if it succeeds.</span>
             }
         </AntDesign.Text>
     </Form>
@@ -153,10 +166,12 @@
     [Parameter] public EventCallback<ViewModels.ScheduleDetails> DetailsChanged { get; set; }
     [Parameter] public ViewModels.ExchangeKeys? ExchangeKeys { get; set; }
 
+    private SchedulePeriod selectedPeriod { get; set; }
+
     private ViewModels.ScheduleDetails details = new ViewModels.ScheduleDetails();
     private IEnumerable<string> currencies = Array.Empty<string>();
-    private bool isLoadingCurrencies { get; set; }
-    private SchedulePeriod selectedPeriod { get; set; }
+    private bool isLoadingCurrencies;
+    private bool isGeneratingAddress;
 
     protected override async Task OnInitializedAsync()
     {
@@ -217,5 +232,35 @@
         {
             await message.Error($"Couldn't add the schedule: {ex.Message}");
         }
+    }
+
+    private async Task<bool> GenerateWithdrawalAddressAsync()
+    {
+        this.isGeneratingAddress = true;
+
+        try
+        {
+            this.details.WithdrawalAddress = await wallet.GenerateDepositAddressAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await message.Error($"Couldn't generate address from your wallet: {ex.Message}");
+            return false;
+        }
+        finally
+        {
+            this.isGeneratingAddress = false;
+        }
+    }
+
+    private async void WithdrawalTypeChanged(ExchangeWithdrawalType type)
+    {
+        if (type == ExchangeWithdrawalType.Dynamic && !(await GenerateWithdrawalAddressAsync()))
+        {
+            this.details.WithdrawalType = ExchangeWithdrawalType.None;
+        }
+
+        StateHasChanged();
     }
 }
