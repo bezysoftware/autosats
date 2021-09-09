@@ -109,12 +109,12 @@
         return e switch
         {
             ExchangeEventBuy buy when e.Error == null => $"Bought {buy.Received} {crypto} for {e.Schedule.Spend} {fiat}.",
-            ExchangeEventBuy buy => $"Failed to buy {crypto} for {e.Schedule.Spend} {fiat}.",
+            ExchangeEventBuy buy => $"Failed to buy {crypto}.",
             ExchangeEventWithdrawal withdraw when e.Error == null => $"Withdrew {withdraw.Amount} {crypto} to {withdraw.Address}.",
             ExchangeEventWithdrawal withdraw => $"Failed to withdraw {crypto} to {withdraw.Address}.",
-            ExchangeEventCreate => "Schedule created",
-            ExchangeEventPause => "Schedule paused",
-            ExchangeEventResume => "Schedule resumed",
+            ExchangeEventCreate => "Schedule created.",
+            ExchangeEventPause => "Schedule paused.",
+            ExchangeEventResume => "Schedule resumed.",
             _ => string.Empty
         };
     }
