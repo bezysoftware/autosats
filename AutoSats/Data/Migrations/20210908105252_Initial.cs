@@ -34,9 +34,16 @@ namespace AutoSats.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ScheduleId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Error = table.Column<string>(type: "TEXT", nullable: true)
+                    Error = table.Column<string>(type: "TEXT", nullable: true),
+                    OrderId = table.Column<string>(type: "TEXT", nullable: true),
+                    Price = table.Column<decimal>(type: "TEXT", nullable: true),
+                    Received = table.Column<decimal>(type: "TEXT", nullable: true),
+                    WithdrawalId = table.Column<string>(type: "TEXT", nullable: true),
+                    Amount = table.Column<decimal>(type: "TEXT", nullable: true),
+                    Address = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -49,48 +56,6 @@ namespace AutoSats.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "ExchangeBuys",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OrderId = table.Column<string>(type: "TEXT", nullable: true),
-                    Price = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Received = table.Column<decimal>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ExchangeBuys", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ExchangeBuys_ExchangeEvents_Id",
-                        column: x => x.Id,
-                        principalTable: "ExchangeEvents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ExchangeWithdrawals",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    WithdrawalId = table.Column<string>(type: "TEXT", nullable: true),
-                    Amount = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Address = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ExchangeWithdrawals", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ExchangeWithdrawals_ExchangeEvents_Id",
-                        column: x => x.Id,
-                        principalTable: "ExchangeEvents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_ExchangeEvents_ScheduleId",
                 table: "ExchangeEvents",
@@ -99,12 +64,6 @@ namespace AutoSats.Data.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ExchangeBuys");
-
-            migrationBuilder.DropTable(
-                name: "ExchangeWithdrawals");
-
             migrationBuilder.DropTable(
                 name: "ExchangeEvents");
 

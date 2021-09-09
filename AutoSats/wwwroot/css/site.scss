@@ -31,3 +31,11 @@ h3 {
         font-size: 15px;
     }
 }
+
+.ant-timeline-item-last {
+    padding-bottom: 0;
+    
+    .ant-timeline-item-content {
+        min-height: 0;
+    }
+}

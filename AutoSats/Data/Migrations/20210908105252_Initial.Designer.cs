@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoSats.Data.Migrations
 {
     [DbContext(typeof(SatsContext))]
-    [Migration("20210902145050_Initial")]
+    [Migration("20210908105252_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,11 +33,17 @@ namespace AutoSats.Data.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ScheduleId");
 
                     b.ToTable("ExchangeEvents");
+
+                    b.HasDiscriminator<string>("Type");
                 });
 
             modelBuilder.Entity("AutoSats.Data.ExchangeSchedule", b =>
@@ -94,7 +100,28 @@ namespace AutoSats.Data.Migrations
                     b.Property<decimal>("Received")
                         .HasColumnType("TEXT");
 
-                    b.ToTable("ExchangeBuys");
+                    b.HasDiscriminator().HasValue("Buy");
+                });
+
+            modelBuilder.Entity("AutoSats.Data.ExchangeEventCreate", b =>
+                {
+                    b.HasBaseType("AutoSats.Data.ExchangeEvent");
+
+                    b.HasDiscriminator().HasValue("Create");
+                });
+
+            modelBuilder.Entity("AutoSats.Data.ExchangeEventPause", b =>
+                {
+                    b.HasBaseType("AutoSats.Data.ExchangeEvent");
+
+                    b.HasDiscriminator().HasValue("Pause");
+                });
+
+            modelBuilder.Entity("AutoSats.Data.ExchangeEventResume", b =>
+                {
+                    b.HasBaseType("AutoSats.Data.ExchangeEvent");
+
+                    b.HasDiscriminator().HasValue("Resume");
                 });
 
             modelBuilder.Entity("AutoSats.Data.ExchangeEventWithdrawal", b =>
@@ -111,7 +138,7 @@ namespace AutoSats.Data.Migrations
                     b.Property<string>("WithdrawalId")
                         .HasColumnType("TEXT");
 
-                    b.ToTable("ExchangeWithdrawals");
+                    b.HasDiscriminator().HasValue("Withdraw");
                 });
 
             modelBuilder.Entity("AutoSats.Data.ExchangeEvent", b =>
@@ -123,24 +150,6 @@ namespace AutoSats.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Schedule");
-                });
-
-            modelBuilder.Entity("AutoSats.Data.ExchangeEventBuy", b =>
-                {
-                    b.HasOne("AutoSats.Data.ExchangeEvent", null)
-                        .WithOne()
-                        .HasForeignKey("AutoSats.Data.ExchangeEventBuy", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AutoSats.Data.ExchangeEventWithdrawal", b =>
-                {
-                    b.HasOne("AutoSats.Data.ExchangeEvent", null)
-                        .WithOne()
-                        .HasForeignKey("AutoSats.Data.ExchangeEventWithdrawal", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("AutoSats.Data.ExchangeSchedule", b =>

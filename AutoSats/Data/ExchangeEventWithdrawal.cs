@@ -11,5 +11,7 @@ namespace AutoSats.Data
 
         [Required]
         public string Address { get; set; } = null!;
+     
+        public override ExchangeEventType Type { get; set; } = ExchangeEventType.Withdraw;
     }
 }

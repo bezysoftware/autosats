@@ -3,6 +3,9 @@
     public enum ExchangeEventType
     {
         Buy,
-        Withdraw
+        Withdraw,
+        Pause,
+        Resume,
+        Create
     }
 }

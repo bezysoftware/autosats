@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AutoSats.Extensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Data
 {
@@ -11,5 +12,7 @@ namespace AutoSats.Data
 
         [Required]
         public decimal Received { get; set; }
+
+        public override ExchangeEventType Type { get; set; } = ExchangeEventType.Buy;
     }
 }

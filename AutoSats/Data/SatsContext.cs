@@ -24,9 +24,18 @@ namespace AutoSats.Data
         {
             modelBuilder.SetEnumConverterForAll();
 
-            modelBuilder.Entity<ExchangeEvent>().ToTable("ExchangeEvents");
-            modelBuilder.Entity<ExchangeEventBuy>().ToTable("ExchangeBuys");
-            modelBuilder.Entity<ExchangeEventWithdrawal>().ToTable("ExchangeWithdrawals");
+            modelBuilder.Entity<ExchangeEvent>()
+                .Property(x => x.Type)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<ExchangeEvent>()
+                .HasDiscriminator(x => x.Type)
+                .HasValue<ExchangeEventCreate>(ExchangeEventType.Create)
+                .HasValue<ExchangeEventPause>(ExchangeEventType.Pause)
+                .HasValue<ExchangeEventResume>(ExchangeEventType.Resume)
+                .HasValue<ExchangeEventBuy>(ExchangeEventType.Buy)
+                .HasValue<ExchangeEventWithdrawal>(ExchangeEventType.Withdraw);
+
         }
     }
 }

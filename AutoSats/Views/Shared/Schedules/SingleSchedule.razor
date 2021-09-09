@@ -46,16 +46,25 @@
 
     <PageHeader Title="Timeline" Ghost="true" />
     <Card>
-        <Timeline Mode="alternate">
-            <TimelineItem>Create a services site 2015-09-01</TimelineItem>
-            <TimelineItem Color="blue">Create a services site 2015-09-01</TimelineItem>
-            <TimelineItem Color="red">Create a services site 2015-09-01</TimelineItem>
-            <TimelineItem Color="green">Create a services site 2015-09-01</TimelineItem>
-            @*@foreach (var e in details?.Events ?? Array.Empty<ExchangeEvent>())
+        @if (details != null)
+        {
+        <Timeline Reverse="true" Mode="alternate">
+            <ChildContent>
+                @foreach (var e in details.Events.OrderBy(x => x.Timestamp))
                 {
-                    <TimelineItem>Create a services site 2015-09-01</TimelineItem>
-                }*@
+                    //todo: TimelineItem Label https://github.com/ant-design-blazor/ant-design-blazor/issues/1929
+                    <TimelineItem Color="@(e.Error == null ? "blue" : "red")">
+                        <ChildContent>@e.Timestamp.ToLocalTime() | @GetEventDescription(e)</ChildContent>
+                        <Dot>
+                            <Tooltip Title="e.Error">
+                                <Icon Type="@GetEventIcon(e)" Theme="outline" />
+                            </Tooltip>
+                        </Dot>
+                    </TimelineItem>
+                }
+            </ChildContent>
         </Timeline>
+        }
     </Card>
 </div>
 
@@ -91,5 +100,35 @@
     private async Task RefreshDetailsAsync()
     {
         this.details = await scheduler.GetScheduleDetailsAsync(ScheduleId);
+    }
+
+    private string GetEventDescription(ExchangeEvent e)
+    {
+        var (crypto, fiat) = Currency.Parse(e.Schedule.CurrencyPair);
+
+        return e switch
+        {
+            ExchangeEventBuy buy when e.Error == null => $"Bought {buy.Received} {crypto} for {e.Schedule.Spend} {fiat}.",
+            ExchangeEventBuy buy => $"Failed to buy {crypto} for {e.Schedule.Spend} {fiat}.",
+            ExchangeEventWithdrawal withdraw when e.Error == null => $"Withdrew {withdraw.Amount} {crypto} to {withdraw.Address}.",
+            ExchangeEventWithdrawal withdraw => $"Failed to withdraw {crypto} to {withdraw.Address}.",
+            ExchangeEventCreate => "Schedule created",
+            ExchangeEventPause => "Schedule paused",
+            ExchangeEventResume => "Schedule resumed",
+            _ => string.Empty
+        };
+    }
+
+    private string GetEventIcon(ExchangeEvent e)
+    {
+        return e.Type switch
+        {
+            ExchangeEventType.Pause => "pause",
+            ExchangeEventType.Resume => "caret-right",
+            ExchangeEventType.Buy => "dollar",
+            ExchangeEventType.Withdraw => "export",
+            ExchangeEventType.Create => "plus",
+            _ => string.Empty
+        };
     }
 } 

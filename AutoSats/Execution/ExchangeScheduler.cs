@@ -43,7 +43,7 @@ namespace AutoSats.Execution
         public async Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync()
         {
             var schedules = await this.db.ExchangeSchedules
-                .Include(x => x.Events.Where(e => e is ExchangeEventBuy))
+                .Include(x => x.Events.Where(e => e.Type == ExchangeEventType.Buy))
                 .AsNoTracking()
                 .OrderByDescending(x => x.IsPaused)
                 .ToArrayAsync();
@@ -94,6 +94,12 @@ namespace AutoSats.Execution
             await scheduler.PauseTrigger(GetTriggerKey(id));
 
             schedule.IsPaused = true;
+
+            this.db.Add(new ExchangeEventPause
+            {
+                Schedule = schedule,
+                Timestamp = DateTime.UtcNow
+            });
             this.db.SaveChanges();
         }
 
@@ -105,6 +111,12 @@ namespace AutoSats.Execution
             await scheduler.ResumeTrigger(GetTriggerKey(id));
 
             schedule.IsPaused = false;
+            
+            this.db.Add(new ExchangeEventResume
+            {
+                Schedule = schedule,
+                Timestamp = DateTime.UtcNow
+            });
             this.db.SaveChanges();
         }
 
@@ -113,8 +125,14 @@ namespace AutoSats.Execution
             using var tx = this.db.Database.BeginTransaction();
 
             var schedule = this.mapper.Map<ExchangeSchedule>(newSchedule);
+            var created = new ExchangeEventCreate
+            {
+                Schedule = schedule,
+                Timestamp = DateTime.UtcNow
+            };
 
             this.db.Add(schedule);
+            this.db.Add(created);
             this.db.SaveChanges();
 
             // save keys
