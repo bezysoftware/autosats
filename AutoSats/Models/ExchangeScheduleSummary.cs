@@ -22,7 +22,7 @@ namespace AutoSats.Models
 
         public decimal TotalAccumulated { get; set; }
 
-        public DateTime NextOccurence => this.nextOccurrence ??= GetNextOccurence();
+        public DateTime NextOccurrence => this.nextOccurrence ??= GetNextOccurrence();
 
         public string CronDescription => this.cronDescription ??= GetCronDescription();
 
@@ -33,9 +33,10 @@ namespace AutoSats.Models
             return ExpressionDescriptor.GetDescription(Cron, new Options { Locale = "en", Use24HourTimeFormat = true });
         }
 
-        private DateTime GetNextOccurence()
+        private DateTime GetNextOccurrence()
         {
-            return new CronExpression(Cron).GetNextValidTimeAfter(Start).GetValueOrDefault(DateTimeOffset.MinValue).UtcDateTime.ToLocalTime();
+            var after = Start > DateTime.UtcNow ? Start : DateTime.UtcNow;
+            return new CronExpression(Cron).GetNextValidTimeAfter(after).GetValueOrDefault(DateTimeOffset.MinValue).UtcDateTime.ToLocalTime();
         }
     }
 }

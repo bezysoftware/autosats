@@ -54,7 +54,7 @@ namespace AutoSats.Execution
                     TotalAccumulated = x.Events.Cast<ExchangeEventBuy>().Sum(e => e.Received),
                     TotalSpent = x.Events.Count * x.Spend
                 })
-                .OrderBy(x => x.NextOccurence)
+                .OrderBy(x => x.NextOccurrence)
                 .ToArray();
         }
 
