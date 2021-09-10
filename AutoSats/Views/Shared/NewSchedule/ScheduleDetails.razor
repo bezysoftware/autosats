@@ -121,15 +121,16 @@
                 {
                     <FormItem Label="Limit" Required LabelColSpan="10" WrapperColSpan="14">
                         <Tooltip Title="@("Once you accumulate at least this much BTC your entire balance will be withdrawn to your wallet")">
-                            <AntDesign.Input @bind-Value="context.WithdrawalLimit"
+                            <NumberInput @bind-Value="context.WithdrawalLimit"
                                              Class="element-stretch"
                                              Type="number"
                                              min="0"
-                                             step="0.01">
+                                             step="0.001"
+                                             >
                                 <AddOnAfter>
                                     BTC
                                 </AddOnAfter>
-                            </AntDesign.Input>
+                            </NumberInput>
                         </Tooltip>
                     </FormItem>
                 }
@@ -146,7 +147,7 @@
         <Row>
             <GridCol Offset="9" Span="12">
                 <FormItem>
-                    <Button HtmlType="submit" Block Type="primary">
+                    <Button HtmlType="submit" Block Type="primary" Disabled="isGeneratingAddress || isLoadingCurrencies">
                         @(context.RunToVerify ? "Verify and save" : "Save")
                     </Button>
                 </FormItem>
