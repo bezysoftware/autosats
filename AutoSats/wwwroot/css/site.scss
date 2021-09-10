@@ -1,4 +1,9 @@
-﻿#blazor-error-ui {
+﻿html {
+    width: 100vw;
+    overflow: hidden;
+}
+
+#blazor-error-ui {
     display: none;
 }
 
