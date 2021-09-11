@@ -93,7 +93,7 @@ namespace AutoSats.Execution.Services
             var fiatCurrencies = CultureInfo
                 .GetCultures(CultureTypes.SpecificCultures)
                 .Where(c => !c.IsNeutralCulture)
-                .Select(culture => new RegionInfo(culture.LCID))
+                .Select(culture => new RegionInfo(culture.Name))
                 .Select(ri => ri.ISOCurrencySymbol)
                 .Concat(ExecutionConsts.StableCoins)
                 .Distinct()
