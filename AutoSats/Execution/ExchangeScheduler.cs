@@ -167,6 +167,8 @@ namespace AutoSats.Execution
             catch(Exception ex)
             {
                 this.logger.LogError(ex, "Couldn't add new schedule");
+                this.db.ChangeTracker.Clear();
+                tx.Rollback();
                 File.Delete(keysFile);
                 throw;
             }

@@ -4,7 +4,7 @@
 @inject IWalletService wallet 
 
 <div>
-    <Form Model="details" LabelColSpan="12" WrapperColSpan="12" OnFinish="SaveScheduleAsync">
+    <Form Model="details" LabelColSpan="12" WrapperColSpan="12" OnFinish="SaveScheduleAsync" Loading="isSaving">
         <Row Gutter="12">
             <GridCol Span="24">
                 <Paragraph Class="schedule-description">
@@ -173,6 +173,7 @@
     private IEnumerable<string> currencies = Array.Empty<string>();
     private bool isLoadingCurrencies;
     private bool isGeneratingAddress;
+    private bool isSaving;
 
     protected override async Task OnInitializedAsync()
     {
@@ -212,6 +213,7 @@
             return;
         }
 
+        this.isSaving = true;
         var pair = Currency.ToPair("BTC", this.details.Currency);
         var schedule = new NewExchangeSchedule(
             pair,
@@ -233,6 +235,8 @@
         {
             await message.Error($"Couldn't add the schedule: {ex.Message}");
         }
+
+        this.isSaving = false;
     }
 
     private async Task<bool> GenerateWithdrawalAddressAsync()
