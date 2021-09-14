@@ -1,4 +1,4 @@
-﻿using System.Data.SQLite;
+﻿using Microsoft.Data.Sqlite;
 using System.IO;
 
 namespace AutoSats.Data
@@ -9,7 +9,7 @@ namespace AutoSats.Data
 
         public static void InitializeQuartzDatabase(string connectionString)
         {
-            var builder = new SQLiteConnectionStringBuilder(connectionString);
+            var builder = new SqliteConnectionStringBuilder(connectionString);
             var path = Path.GetDirectoryName(builder.DataSource);
 
             if (path != null && !Directory.Exists(path))
@@ -17,11 +17,11 @@ namespace AutoSats.Data
                 Directory.CreateDirectory(path);
             }
             
-            using var connection = new SQLiteConnection(connectionString);
+            using var connection = new SqliteConnection(connectionString);
             
             connection.Open();
 
-            if (new FileInfo(connection.FileName).Length > 0)
+            if (new FileInfo(connection.DataSource).Length > 0)
             {
                 return;
             }
@@ -29,13 +29,10 @@ namespace AutoSats.Data
             CreateQuartzTables(QuartzScriptPath, connection);
         }
 
-        private static void CreateQuartzTables(string scriptPath, SQLiteConnection connection)
+        private static void CreateQuartzTables(string scriptPath, SqliteConnection connection)
         {
             var sql = File.ReadAllText(scriptPath);
-            var command = new SQLiteCommand(connection)
-            {
-                CommandText = sql
-            };
+            var command = new SqliteCommand(sql, connection);
 
             command.ExecuteNonQuery();
         }

@@ -45,6 +45,9 @@ namespace AutoSats
                     x.UseProperties = true;
                     x.UseSQLite(connectionString);
                     x.UseJsonSerializer();
+                    // use Microsoft.Data.Sqlite.Core instead of System.Data.Sqlite.Core
+                    // todo: replace with built-in extension method once released: https://github.com/quartznet/quartznet/pull/1275
+                    x.SetProperty($"quartz.dataSource.{SchedulerBuilder.AdoProviderOptions.DefaultDataSourceName}.provider", "SQLite-Microsoft");
                 });
 
                 q.AddJob<ExchangeJob>(ExecutionConsts.ExchangeJobKey, x => x.StoreDurably());
