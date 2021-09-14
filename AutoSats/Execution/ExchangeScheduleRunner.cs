@@ -13,6 +13,8 @@ namespace AutoSats.Execution
 {
     public class ExchangeScheduleRunner : IExchangeScheduleRunner
     {
+        public const decimal DefaultWithdrawalFee = 0.00050000m;
+
         private readonly SatsContext db;
         private readonly ILogger<ExchangeScheduleRunner> logger;
         private readonly IExchangeService exchangeService;
@@ -110,7 +112,10 @@ namespace AutoSats.Execution
             }
 
             var (cryptoCurrency, _) = Currency.Parse(schedule.CurrencyPair);
+            
+            var fee = await GetWithdrawalFee(cryptoCurrency);
             var balance = await GetCurrencyBalance(cryptoCurrency);
+            
             if (balance < schedule.WithdrawalLimit)
             {
                 this.logger.LogInformation($"{cryptoCurrency} balance {balance} is less than withdrawal limit {schedule.WithdrawalLimit}");
@@ -124,11 +129,11 @@ namespace AutoSats.Execution
                 _ => throw new InvalidOperationException($"Unknown withdrawal type '{schedule.WithdrawalType}'")
             };
 
-            this.logger.LogInformation($"Going to withdraw '{balance}' of '{cryptoCurrency}' to address '{address}'");
+            this.logger.LogInformation($"Going to withdraw '{balance}' - '{fee}' fee reserve of '{cryptoCurrency}' to address '{address}'");
 
             try
             {
-                var id = await this.exchangeService.WithdrawAsync(cryptoCurrency, address, balance);
+                var id = await this.exchangeService.WithdrawAsync(cryptoCurrency, address, balance - fee);
 
                 this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
                 {
@@ -152,6 +157,23 @@ namespace AutoSats.Execution
                 });
 
                 throw;
+            }
+        }
+
+        private async Task<decimal> GetWithdrawalFee(string cryptoCurrency)
+        {
+            try
+            {
+                var fee = await this.exchangeService.GetWithdrawalFeeAsync(cryptoCurrency);
+
+                return fee == 0 
+                    ? DefaultWithdrawalFee 
+                    : fee;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, $"Couldn't get withdrawal fee for {cryptoCurrency}, using default");
+                return DefaultWithdrawalFee;
             }
         }
 

@@ -53,18 +53,24 @@ namespace AutoSats.Execution.Services
                 OrderType = OrderType.Market
             });
 
+            // if the order details are missing query them
+            if (result.Result == ExchangeAPIOrderResult.Unknown)
+            {
+                result = await Api.GetOrderDetailsAsync(result.OrderId);
+            }
+
             // query order details until it is fully filled
             while (result.Result == ExchangeAPIOrderResult.FilledPartially || result.Result == ExchangeAPIOrderResult.Pending)
             {
                 result = await Api.GetOrderDetailsAsync(result.OrderId);
             }
 
-            if (result.Result != ExchangeAPIOrderResult.Filled)
+            if (result.Result != ExchangeAPIOrderResult.Filled && result.AveragePrice == null && result.Price == null)
             {
-                throw new Exception($"{result.ResultCode}: {result.Message}");
+                throw new Exception($"{result.Result} : {result.ResultCode}: {result.Message}");
             }
 
-            return new BuyResult(result.OrderId, result.AmountFilled, result.AveragePrice ?? result.Price ?? 0);
+            return new BuyResult(result.OrderId, amount, result.AveragePrice ?? result.Price ?? 0);
         }
 
         public async Task<Dictionary<string, decimal>> GetBalancesAsync()
@@ -110,15 +116,34 @@ namespace AutoSats.Execution.Services
                 Address = address,
                 Amount = amount,
                 Currency = cryptoCurrency,
-                TakeFeeFromAmount = true
             });
 
-            if (!result.Success)
+            if (!result.Success && string.IsNullOrEmpty(result.Id))
             {
                 throw new ScheduleRunFailedException(result.Message);
             }
 
-            return result.Id;
+            return result.Id ?? "unknown";
+        }
+
+        public async Task<decimal> GetWithdrawalFeeAsync(string currency)
+        {
+            var c = currency.ToLower();
+            var fees = await Api.GetFeesAync();
+            var currencyFees = fees.Where(x => x.Key.ToLower().Contains(c)).ToArray();
+
+            if (currencyFees.Length > 1)
+            {
+                currencyFees = currencyFees.Where(x => x.Key.ToLower().Contains("withdraw")).ToArray();
+            }
+
+            if (currencyFees.Length == 0)
+            {
+                return 0;
+            }
+
+            // return conservatively highest found fee
+            return currencyFees.Max(x => x.Value);
         }
 
         public void Dispose()

@@ -40,5 +40,10 @@ namespace AutoSats.Execution.Services
         /// Gets a list of fiat currency symbols.
         /// </summary>
         Task<IEnumerable<string>> GetFiatCurrenciesAsync();
+
+        /// <summary>
+        /// Get withdrawal fee for given currency.
+        /// </summary>
+        Task<decimal> GetWithdrawalFeeAsync(string currency);
     }
 }
