@@ -38,6 +38,8 @@
                                         TItemValue="string"
                                         ValueName="@nameof(Balance.Currency)"
                                         Placeholder="Select currency"
+                                        EnableSearch
+                                        OnSearch="InsertCustomCurrency"
                                         Class="currencies-select">
                                     <LabelTemplate Context="ctx">
                                         <span class="balance-label">@ctx.Currency.ToUpper()</span>
@@ -183,12 +185,30 @@
     private ViewModels.ScheduleDetails details = new ViewModels.ScheduleDetails();
     private bool isGeneratingAddress;
     private bool isSaving;
+    private bool isSearchCurrencySet;
 
     protected override void OnInitialized()
     {
         var exchange = KeysWithBalances?.Keys.Exchange ?? throw new InvalidOperationException();
 
-        this.details.Currency = KeysWithBalances.Balances.OrderByDescending(x => x.Amount).FirstOrDefault()?.Currency;
+        this.details.Currency = KeysWithBalances.Balances.OrderByDescending(x => x.Amount).FirstOrDefault()?.Currency ?? string.Empty;
+    }
+
+    private void InsertCustomCurrency(string currency)
+    {
+        if (KeysWithBalances != null)
+        {
+            var currenciesCount = KeysWithBalances.Balances.Count();
+            KeysWithBalances = KeysWithBalances with
+            {
+                Balances = KeysWithBalances.Balances
+                    .Take(isSearchCurrencySet ? currenciesCount - 1 : currenciesCount)
+                    .Concat(new[] { new Balance(currency, 0) })
+                    .ToArray()
+            };
+            isSearchCurrencySet = true;
+            StateHasChanged();
+        }
     }
 
     private void SelectedPeriodChanged(SchedulePeriod period)
