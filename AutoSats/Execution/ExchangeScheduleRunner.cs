@@ -179,14 +179,10 @@ namespace AutoSats.Execution
 
         private async Task<decimal> GetCurrencyBalance(string currency)
         {
+            var c = currency.ToUpper();
             var balances = await this.exchangeService.GetBalancesAsync();
 
-            if (balances.TryGetValue(currency.ToUpper(), out var balance) || balances.TryGetValue(currency.ToLower(), out balance))
-            {
-                return balance;
-            }
-
-            return 0;
+            return balances.FirstOrDefault(x => x.Currency.ToUpper() == c)?.Amount ?? 0;
         }
 
     }

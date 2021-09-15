@@ -19,7 +19,7 @@ namespace AutoSats.Execution.Services
         /// <summary>
         /// Gets balances for all your currencies.
         /// </summary>
-        Task<Dictionary<string, decimal>> GetBalancesAsync();
+        Task<IEnumerable<Balance>> GetBalancesAsync();
 
         /// <summary>
         /// Buys given amount of the left currency in the specified pair with funds from the right currency in the pair.
@@ -35,11 +35,6 @@ namespace AutoSats.Execution.Services
         /// Withdraws given amount to target address. Returns withdrawal transaction id.
         /// </summary>
         Task<string> WithdrawAsync(string cryptoCurrency, string address, decimal amount);
-
-        /// <summary>
-        /// Gets a list of fiat currency symbols.
-        /// </summary>
-        Task<IEnumerable<string>> GetFiatCurrenciesAsync();
 
         /// <summary>
         /// Get withdrawal fee for given currency.

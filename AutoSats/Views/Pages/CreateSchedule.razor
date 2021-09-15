@@ -19,7 +19,7 @@
                 <ExchangeKeys KeysChanged="SetKeys" />
                 break;
             case 1:
-                <ScheduleDetails ExchangeKeys="exchangeKeys" DetailsChanged="SetDetails" />
+                <ScheduleDetails KeysWithBalances="keysWithBalances" DetailsChanged="SetDetails" />
                 break;
         }
 
@@ -28,7 +28,7 @@
 
 @code {
     private int currentStep = 0;
-    private ViewModels.ExchangeKeys? exchangeKeys;
+    private KeysWithBalances? keysWithBalances;
 
     private void OnStepChange(int current)
     {
@@ -38,9 +38,9 @@
         }
     }
 
-    private void SetKeys(ViewModels.ExchangeKeys keys)
+    private void SetKeys(KeysWithBalances keys)
     {
-        this.exchangeKeys = keys;
+        this.keysWithBalances = keys;
         this.currentStep = 1;
     }
 

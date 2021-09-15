@@ -73,9 +73,14 @@ namespace AutoSats.Execution.Services
             return new BuyResult(result.OrderId, amount, result.AveragePrice ?? result.Price ?? 0);
         }
 
-        public async Task<Dictionary<string, decimal>> GetBalancesAsync()
+        public async Task<IEnumerable<Balance>> GetBalancesAsync()
         {
-            return await Api.GetAmountsAvailableToTradeAsync();
+            var balances = await Api.GetAmountsAvailableToTradeAsync();
+            
+            return balances
+                .Select(x => new Balance(x.Key, x.Value))
+                .OrderByDescending(x => x.Amount)
+                .ToArray();
         }
 
         public async Task<decimal> GetPriceAsync(string pair)
@@ -83,30 +88,6 @@ namespace AutoSats.Execution.Services
             var result = await Api.GetTickerAsync(pair);
 
             return result.Last;
-        }
-
-        public async Task<IEnumerable<string>> GetFiatCurrenciesAsync()
-        {
-            var symbols = await Api.GetMarketSymbolsAsync();
-
-            var exchangeCurrencies = symbols
-                .Select(x => x.ToUpper())
-                .Where(x => x.Contains("BTC"))
-                .Distinct()
-                .Select(x => x.Replace("BTC", ""))
-                .ToArray();
-
-            var fiatCurrencies = CultureInfo
-                .GetCultures(CultureTypes.SpecificCultures)
-                .Where(c => !c.IsNeutralCulture)
-                .Select(culture => new RegionInfo(culture.Name))
-                .Select(ri => ri.ISOCurrencySymbol)
-                .Concat(ExecutionConsts.StableCoins)
-                .Distinct()
-                .Select(x => x.ToUpper())
-                .ToArray();
-
-            return fiatCurrencies.Intersect(exchangeCurrencies).ToArray();
         }
 
         public async Task<string> WithdrawAsync(string cryptoCurrency, string address, decimal amount)

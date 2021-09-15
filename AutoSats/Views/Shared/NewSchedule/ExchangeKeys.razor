@@ -110,7 +110,7 @@
 </div>
 
 @code {
-        [Parameter] public EventCallback<ViewModels.ExchangeKeys> KeysChanged { get; set; }
+        [Parameter] public EventCallback<KeysWithBalances> KeysChanged { get; set; }
 
     public string? NewExchangeName { get; set; }
 
@@ -125,8 +125,9 @@
 
         try
         {
-            await factory.GetService(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3).GetBalancesAsync();
-            await KeysChanged.InvokeAsync(keys);
+            var balances = await factory.GetService(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3).GetBalancesAsync();
+            var exceptBtc = balances.Where(x => x.Currency.ToLower() != "btc").ToArray();
+            await KeysChanged.InvokeAsync(new KeysWithBalances(keys, exceptBtc));
         }
         catch(Exception ex)
         {

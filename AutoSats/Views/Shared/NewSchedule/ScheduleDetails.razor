@@ -32,13 +32,23 @@
                                          Type="number"
                                          step="5">
                             <AddOnAfter>
-                                <Select DataSource="currencies"
+                                <Select DataSource="KeysWithBalances?.Balances"
                                         @bind-Value="context.Currency"
-                                        TItem="string"
+                                        TItem="Balance"
                                         TItemValue="string"
+                                        ValueName="@nameof(Balance.Currency)"
                                         Placeholder="Select currency"
-                                        Class="currencies-select"
-                                        Loading="isLoadingCurrencies" />
+                                        Class="currencies-select">
+                                    <LabelTemplate Context="ctx">
+                                        <span class="balance-label">@ctx.Currency.ToUpper()</span>
+                                    </LabelTemplate>
+                                    <ItemTemplate Context="ctx">
+                                        <div class="balance-item">
+                                            <span class="currency">@ctx.Currency.ToUpper()</span>
+                                            <span class="amount">@(ctx.Amount < 100 ? ctx.Amount.ToString("N2") : ctx.Amount.ToString("N0"))</span>
+                                        </div>
+                                    </ItemTemplate>
+                                </Select>
                             </AddOnAfter>
                         </AntDesign.Input>
                     </Tooltip>
@@ -148,7 +158,7 @@
         <Row>
             <GridCol Offset="9" Span="12">
                 <FormItem>
-                    <Button HtmlType="submit" Block Type="primary" Disabled="isGeneratingAddress || isLoadingCurrencies">
+                    <Button HtmlType="submit" Block Type="primary" Disabled="isGeneratingAddress">
                         @(context.RunToVerify ? "Verify and save" : "Save")
                     </Button>
                 </FormItem>
@@ -166,24 +176,19 @@
 
 @code {
     [Parameter] public EventCallback<ViewModels.ScheduleDetails> DetailsChanged { get; set; }
-    [Parameter] public ViewModels.ExchangeKeys? ExchangeKeys { get; set; }
+    [Parameter] public KeysWithBalances? KeysWithBalances { get; set; }
 
     private SchedulePeriod selectedPeriod { get; set; }
 
     private ViewModels.ScheduleDetails details = new ViewModels.ScheduleDetails();
-    private IEnumerable<string> currencies = Array.Empty<string>();
-    private bool isLoadingCurrencies;
     private bool isGeneratingAddress;
     private bool isSaving;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        var exchange = ExchangeKeys?.Exchange ?? throw new InvalidOperationException();
+        var exchange = KeysWithBalances?.Keys.Exchange ?? throw new InvalidOperationException();
 
-        this.isLoadingCurrencies = true;
-        this.currencies = await factory.GetService(exchange.Name).GetFiatCurrenciesAsync();
-        this.details.Currency = this.currencies.FirstOrDefault(x => x == "USD") ?? this.currencies.FirstOrDefault(x => x.StartsWith("USD")) ?? this.currencies.First();
-        this.isLoadingCurrencies = false;
+        this.details.Currency = KeysWithBalances.Balances.OrderByDescending(x => x.Amount).FirstOrDefault()?.Currency;
     }
 
     private void SelectedPeriodChanged(SchedulePeriod period)
@@ -209,7 +214,7 @@
 
     private async Task SaveScheduleAsync(EditContext context)
     {
-        if (ExchangeKeys?.Exchange == null)
+        if (KeysWithBalances?.Keys.Exchange == null)
         {
             return;
         }
@@ -218,8 +223,8 @@
         var pair = Currency.ToPair("BTC", this.details.Currency);
         var schedule = new NewExchangeSchedule(
             pair,
-            ExchangeKeys.Exchange.Name,
-            ExchangeKeys.ToKeysArray(),
+            KeysWithBalances.Keys.Exchange.Name,
+            KeysWithBalances.Keys.ToKeysArray(),
             this.details.Cron,
             this.details.Start,
             this.details.Spend,
