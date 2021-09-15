@@ -26,21 +26,22 @@
         <Row Gutter="12">
             <GridCol Span="12">
                 <FormItem Label="How much to spend?" Required>
-                            <AntDesign.Input @bind-Value="context.Spend"
-                                   Class="element-stretch"
-                                   Type="number"
-                                   step="5">
-                                <AddOnAfter>
-                                    <Select DataSource="currencies"
-                                            @bind-Value="context.Currency"
-                                            TItem="string"
-                                            TItemValue="string"
-                                            Placeholder="Select currency"
-                                            Class="currencies-select"
-                                            Loading="isLoadingCurrencies" />
-                                </AddOnAfter>
-                            </AntDesign.Input>
-                    
+                    <Tooltip Title="@("AutoSats will first fetch the current price and then place an order to spent the given amount. Because a market order will be placed, the amount actually spent might slightly differ compared to the entered value.")">
+                        <AntDesign.Input @bind-Value="context.Spend"
+                                         Class="element-stretch"
+                                         Type="number"
+                                         step="5">
+                            <AddOnAfter>
+                                <Select DataSource="currencies"
+                                        @bind-Value="context.Currency"
+                                        TItem="string"
+                                        TItemValue="string"
+                                        Placeholder="Select currency"
+                                        Class="currencies-select"
+                                        Loading="isLoadingCurrencies" />
+                            </AddOnAfter>
+                        </AntDesign.Input>
+                    </Tooltip>
                 </FormItem>
 
                 <FormItem Label="How often?" Required="true">
@@ -120,7 +121,7 @@
                 @if (context.WithdrawalType != ExchangeWithdrawalType.None)
                 {
                     <FormItem Label="Limit" Required LabelColSpan="10" WrapperColSpan="14">
-                        <Tooltip Title="@("Once you accumulate at least this much BTC your entire balance will be withdrawn to your wallet")">
+                        <Tooltip Title="@("Once you accumulate at least this much BTC your entire balance will be withdrawn to your wallet (minus any fees)")">
                             <NumberInput @bind-Value="context.WithdrawalLimit"
                                              Class="element-stretch"
                                              Type="number"
