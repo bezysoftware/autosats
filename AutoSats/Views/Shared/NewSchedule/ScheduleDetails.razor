@@ -25,38 +25,36 @@
         </Row>
         <Row Gutter="12">
             <GridCol Span="12">
-                <FormItem Label="How much to spend?" Required>
+                <FormItem Label="How much to spend" Required>
                     <Tooltip Title="@("AutoSats will first fetch the current price and then place an order to spent the given amount. Because a market order will be placed, the amount actually spent might slightly differ compared to the entered value.")">
-                        <AntDesign.Input @bind-Value="context.Spend"
+                        <NumberInput @bind-Value="context.Spend"
                                          Class="element-stretch"
                                          Type="number"
-                                         step="5">
+                                         step="any">
                             <AddOnAfter>
                                 <Select DataSource="KeysWithBalances?.Balances"
-                                        @bind-Value="context.Currency"
-                                        TItem="Balance"
-                                        TItemValue="string"
-                                        ValueName="@nameof(Balance.Currency)"
-                                        Placeholder="Select currency"
-                                        EnableSearch
-                                        OnSearch="InsertCustomCurrency"
+                                        @bind-Value="context.Symbol"
+                                        TItem="SymbolBalance"
+                                        TItemValue="Symbol"
+                                        ValueName="@nameof(Symbol)"
+                                        Placeholder="Currency"
                                         Class="currencies-select">
                                     <LabelTemplate Context="ctx">
-                                        <span class="balance-label">@ctx.Currency.ToUpper()</span>
+                                        <span class="balance-label">@ctx.Symbol.Spend</span>
                                     </LabelTemplate>
                                     <ItemTemplate Context="ctx">
                                         <div class="balance-item">
-                                            <span class="currency">@ctx.Currency.ToUpper()</span>
+                                            <span class="currency">@ctx.Symbol.Spend</span>
                                             <span class="amount">@(ctx.Amount < 100 ? ctx.Amount.ToString("N2") : ctx.Amount.ToString("N0"))</span>
                                         </div>
                                     </ItemTemplate>
                                 </Select>
                             </AddOnAfter>
-                        </AntDesign.Input>
+                        </NumberInput>
                     </Tooltip>
                 </FormItem>
 
-                <FormItem Label="How often?" Required="true">
+                <FormItem Label="How often" Required="true">
                     <EnumSelect TEnum="SchedulePeriod"
                                 @bind-Value="selectedPeriod"
                                 OnSelectedItemChanged="@(x => UpdateCronExpression(x, context.Start))" />
@@ -185,30 +183,12 @@
     private ViewModels.ScheduleDetails details = new ViewModels.ScheduleDetails();
     private bool isGeneratingAddress;
     private bool isSaving;
-    private bool isSearchCurrencySet;
 
     protected override void OnInitialized()
     {
         var exchange = KeysWithBalances?.Keys.Exchange ?? throw new InvalidOperationException();
 
-        this.details.Currency = KeysWithBalances.Balances.OrderByDescending(x => x.Amount).FirstOrDefault()?.Currency ?? string.Empty;
-    }
-
-    private void InsertCustomCurrency(string currency)
-    {
-        if (KeysWithBalances != null)
-        {
-            var currenciesCount = KeysWithBalances.Balances.Count();
-            KeysWithBalances = KeysWithBalances with
-            {
-                Balances = KeysWithBalances.Balances
-                    .Take(isSearchCurrencySet ? currenciesCount - 1 : currenciesCount)
-                    .Concat(new[] { new Balance(currency, 0) })
-                    .ToArray()
-            };
-            isSearchCurrencySet = true;
-            StateHasChanged();
-        }
+        this.details.Symbol = KeysWithBalances.Balances.OrderByDescending(x => x.Amount).FirstOrDefault()?.Symbol;
     }
 
     private void SelectedPeriodChanged(SchedulePeriod period)
@@ -234,20 +214,18 @@
 
     private async Task SaveScheduleAsync(EditContext context)
     {
-        if (KeysWithBalances?.Keys.Exchange == null)
+        if (KeysWithBalances?.Keys.Exchange == null || this.details.Symbol == null)
         {
             return;
         }
 
         this.isSaving = true;
-        var pair = Currency.ToPair("BTC", this.details.Currency);
         var schedule = new NewExchangeSchedule(
-            pair,
+            new SymbolBalance(this.details.Symbol, this.details.Spend),
             KeysWithBalances.Keys.Exchange.Name,
             KeysWithBalances.Keys.ToKeysArray(),
             this.details.Cron,
             this.details.Start,
-            this.details.Spend,
             this.details.WithdrawalType,
             this.details.WithdrawalAddress,
             this.details.WithdrawalLimit);

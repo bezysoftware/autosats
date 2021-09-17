@@ -19,6 +19,10 @@ namespace AutoSats.Configuration
 
         public string Hint { get; init; } = string.Empty;
 
+        public bool ReverseCurrencies { get; init; }
+
+        public BuyOrderType BuyOrderType { get; set; } = BuyOrderType.Market;
+
         public string[] Permissions { get; init; } = Array.Empty<string>();
     }
 }

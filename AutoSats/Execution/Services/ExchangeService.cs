@@ -43,20 +43,21 @@ namespace AutoSats.Execution.Services
             this.api = api;
         }
 
-        public async Task<BuyResult> BuyAsync(string pair, decimal amount)
+        public async Task<BuyResult> BuyAsync(string symbol, decimal amount, BuyOrderType orderType, bool invert)
         {
-            var result = await Api.PlaceOrderAsync(new ExchangeOrderRequest
+            var result = orderType switch
             {
-                Amount = amount,
-                IsBuy = true,
-                MarketSymbol = pair,
-                OrderType = OrderType.Market
-            });
+                BuyOrderType.Market => await BuyMarketAsync(symbol, amount, invert),
+                BuyOrderType.Limit => await BuyLimitAsync(symbol, amount, invert),
+                _ => throw new NotImplementedException()
+            };
+
+            var orderId = result.OrderId;
 
             // if the order details are missing query them
-            if (result.Result == ExchangeAPIOrderResult.Unknown)
+            if (result.Result == ExchangeAPIOrderResult.Unknown && orderId != null)
             {
-                result = await Api.GetOrderDetailsAsync(result.OrderId);
+                result = await Api.GetOrderDetailsAsync(orderId);
             }
 
             // query order details until it is fully filled
@@ -70,7 +71,7 @@ namespace AutoSats.Execution.Services
                 throw new Exception($"{result.Result} : {result.ResultCode}: {result.Message}");
             }
 
-            return new BuyResult(result.OrderId, amount, result.AveragePrice ?? result.Price ?? 0);
+            return new BuyResult(orderId ?? "unknown", result.AmountFilled != 0 ? result.AmountFilled : amount, result.AveragePrice ?? result.Price ?? 0);
         }
 
         public async Task<IEnumerable<Balance>> GetBalancesAsync()
@@ -83,9 +84,9 @@ namespace AutoSats.Execution.Services
                 .ToArray();
         }
 
-        public async Task<decimal> GetPriceAsync(string pair)
+        public async Task<decimal> GetPriceAsync(string symbol)
         {
-            var result = await Api.GetTickerAsync(pair);
+            var result = await Api.GetTickerAsync(symbol);
 
             return result.Last;
         }
@@ -127,10 +128,51 @@ namespace AutoSats.Execution.Services
             return currencyFees.Max(x => x.Value);
         }
 
+        public async Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency)
+        {
+            var symbols = await Api.GetMarketSymbolsAsync();
+            
+            return symbols
+                .Where(x => x.Contains(currency, StringComparison.OrdinalIgnoreCase))
+                .Select(x => Symbol.Normalize(x, currency))
+                .ToArray();
+        }
+
         public void Dispose()
         {
             this.api?.Dispose();
             this.api = null;
+        }
+
+        private Task<ExchangeOrderResult> BuyMarketAsync(string symbol, decimal amount, bool invert)
+        {
+            return Api.PlaceOrderAsync(new ExchangeOrderRequest
+            {
+                Amount = amount,
+                IsBuy = !invert,
+                MarketSymbol = symbol,
+                OrderType = OrderType.Market
+            });
+        }
+
+        private async Task<ExchangeOrderResult> BuyLimitAsync(string symbol, decimal amount, bool invert)
+        {
+            // If the exchange doesn't support Market OrderType, use Limit with a 1% price change.
+            // Ideally the exchange should clamp the price and use highest last price.
+            var price = await GetPriceAsync(symbol);
+
+            // get number of decimal places and match them in the calculated price (some exchanges have a limit on decimal places)
+            var decimals = price.ToString(CultureInfo.InvariantCulture).SkipWhile(c => c != '.').Count() - 1;
+            price = Math.Round(!invert ? price * 1.01m : price * 0.99m, decimals);
+
+            return await Api.PlaceOrderAsync(new ExchangeOrderRequest
+            {
+                Amount = amount,
+                IsBuy = !invert,
+                MarketSymbol = symbol,
+                OrderType = OrderType.Limit,
+                Price = price
+            });
         }
     }
 }

@@ -104,14 +104,15 @@
 
     private string GetEventDescription(ExchangeEvent e)
     {
-        var (crypto, fiat) = Currency.Parse(e.Schedule.CurrencyPair);
+        var spend = e.Schedule.SpendCurrency;
+        var accumulate = "BTC";
 
         return e switch
         {
-            ExchangeEventBuy buy when e.Error == null => $"Bought {buy.Received} {crypto} for {e.Schedule.Spend} {fiat}.",
-            ExchangeEventBuy buy => $"Failed to buy {crypto}.",
-            ExchangeEventWithdrawal withdraw when e.Error == null => $"Withdrew {withdraw.Amount} {crypto} to {withdraw.Address}.",
-            ExchangeEventWithdrawal withdraw => $"Failed to withdraw {crypto} to {withdraw.Address}.",
+            ExchangeEventBuy buy when e.Error == null => $"Bought {buy.Received:N6} {accumulate} for {e.Schedule.Spend:N2} {spend}.",
+            ExchangeEventBuy buy => $"Failed to buy {accumulate}.",
+            ExchangeEventWithdrawal withdraw when e.Error == null => $"Withdrew {withdraw.Amount:N6} {accumulate} to {withdraw.Address}.",
+            ExchangeEventWithdrawal withdraw => $"Failed to withdraw {accumulate} to {withdraw.Address}.",
             ExchangeEventCreate => "Schedule created.",
             ExchangeEventPause => "Schedule paused.",
             ExchangeEventResume => "Schedule resumed.",

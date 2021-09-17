@@ -11,7 +11,7 @@ namespace AutoSats.Models
         string Cron,
         bool IsPaused,
         decimal Spend,
-        string CurrencyPair,
+        string SpendCurrency,
         DateTime Start,
         ExchangeWithdrawalType WithdrawalType) : IExchange
     {

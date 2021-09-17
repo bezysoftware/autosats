@@ -1,7 +1,8 @@
-﻿using AutoSats.Data;
+﻿using AutoSats.Configuration;
+using AutoSats.Data;
 using AutoSats.Exceptions;
 using AutoSats.Execution.Services;
-using AutoSats.Extensions;
+using AutoSats.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -19,18 +20,21 @@ namespace AutoSats.Execution
         private readonly ILogger<ExchangeScheduleRunner> logger;
         private readonly IExchangeService exchangeService;
         private readonly IWalletService walletService;
+        private readonly ExchangeOptions[] exchangeOptions;
         private readonly string dataFolder;
 
         public ExchangeScheduleRunner(
             SatsContext db,
             ILogger<ExchangeScheduleRunner> logger,
             IExchangeService exchangeService,
-            IWalletService walletService)
+            IWalletService walletService,
+            ExchangeOptions[] exchangeOptions)
         {
             this.db = db;
             this.logger = logger;
             this.exchangeService = exchangeService;
             this.walletService = walletService;
+            this.exchangeOptions = exchangeOptions;
 
             // set data folder to the same location where the db is saved
             this.dataFolder = db.Database.GetDbConnection().ConnectionString
@@ -65,30 +69,34 @@ namespace AutoSats.Execution
         {
             try
             {
-                var (_, fiatCurrency) = Currency.Parse(schedule.CurrencyPair);
-                var balance = await GetCurrencyBalance(fiatCurrency);
+                var spendCurrency = schedule.SpendCurrency;
+                var balance = await GetCurrencyBalance(spendCurrency);
+
                 if (balance < schedule.Spend)
                 {
-                    throw new ScheduleRunFailedException($"Cannot spend '{schedule.Spend}' of '{schedule.CurrencyPair}' because the balance is only '{balance}'");
+                    throw new ScheduleRunFailedException($"Cannot spend '{schedule.Spend}' of '{schedule.Symbol}' because the balance is only '{balance}'");
                 }
 
-                var price = await this.exchangeService.GetPriceAsync(schedule.CurrencyPair);
-                var amount = schedule.Spend / price;
+                var price = await this.exchangeService.GetPriceAsync(schedule.Symbol);
+                var currenciesReversed = this.exchangeOptions.First(e => e.Name == schedule.Exchange).ReverseCurrencies;
+                var invert = !schedule.Symbol.EndsWith(spendCurrency, StringComparison.OrdinalIgnoreCase) ^ currenciesReversed;
+                var amount = invert ? schedule.Spend : schedule.Spend / price;
+                
+                this.logger.LogInformation($"Going to buy '{amount}' of '{schedule.Symbol}'");
 
-                this.logger.LogInformation($"Going to buy '{amount}' of '{schedule.CurrencyPair}'");
-
-                var result = await this.exchangeService.BuyAsync(schedule.CurrencyPair, amount);
+                var orderType = this.exchangeOptions.FirstOrDefault(x => x.Name == schedule.Exchange)?.BuyOrderType ?? BuyOrderType.Market;
+                var result = await this.exchangeService.BuyAsync(schedule.Symbol, amount, orderType, invert);
 
                 this.db.ExchangeBuys.Add(new ExchangeEventBuy
                 {
                     Schedule = schedule,
-                    Received = result.Amount,
+                    Received = invert ? result.AveragePrice * result.Amount : result.Amount,
                     Price = result.AveragePrice,
                     OrderId = result.OrderId,
                     Timestamp = DateTime.UtcNow
                 });
 
-                this.logger.LogInformation($"Bought '{result.Amount}' of '{schedule.CurrencyPair}' w/ avg price '{result.AveragePrice}', order id: '{result.OrderId}'");
+                this.logger.LogInformation($"Bought '{result.Amount}' of '{schedule.Symbol}' w/ avg price '{result.AveragePrice}', order id: '{result.OrderId}'");
             }
             catch (Exception ex)
             {
@@ -111,14 +119,14 @@ namespace AutoSats.Execution
                 return;
             }
 
-            var (cryptoCurrency, _) = Currency.Parse(schedule.CurrencyPair);
+            var withdrawCurrency = "BTC";
             
-            var fee = await GetWithdrawalFee(cryptoCurrency);
-            var balance = await GetCurrencyBalance(cryptoCurrency);
+            var fee = await GetWithdrawalFee(withdrawCurrency);
+            var balance = await GetCurrencyBalance(withdrawCurrency);
             
             if (balance < schedule.WithdrawalLimit)
             {
-                this.logger.LogInformation($"{cryptoCurrency} balance {balance} is less than withdrawal limit {schedule.WithdrawalLimit}");
+                this.logger.LogInformation($"{withdrawCurrency} balance {balance} is less than withdrawal limit {schedule.WithdrawalLimit}");
                 return;
             }
 
@@ -129,11 +137,11 @@ namespace AutoSats.Execution
                 _ => throw new InvalidOperationException($"Unknown withdrawal type '{schedule.WithdrawalType}'")
             };
 
-            this.logger.LogInformation($"Going to withdraw '{balance}' - '{fee}' fee reserve of '{cryptoCurrency}' to address '{address}'");
+            this.logger.LogInformation($"Going to withdraw '{balance}' - '{fee}' fee reserve of '{withdrawCurrency}' to address '{address}'");
 
             try
             {
-                var id = await this.exchangeService.WithdrawAsync(cryptoCurrency, address, balance - fee);
+                var id = await this.exchangeService.WithdrawAsync(withdrawCurrency, address, balance - fee);
 
                 this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
                 {
@@ -184,6 +192,5 @@ namespace AutoSats.Execution
 
             return balances.FirstOrDefault(x => x.Currency.ToUpper() == c)?.Amount ?? 0;
         }
-
     }
 }

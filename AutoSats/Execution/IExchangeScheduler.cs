@@ -1,5 +1,4 @@
-﻿using AutoSats.Data;
-using AutoSats.Models;
+﻿using AutoSats.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -36,5 +35,10 @@ namespace AutoSats.Execution
         /// Get schedule details including past events.
         /// </summary>
         Task<ExchangeScheduleDetails> GetScheduleDetailsAsync(int id);
+
+        /// <summary>
+        /// Get a list of available symbols with their balances.
+        /// </summary>
+        Task<IEnumerable<SymbolBalance>> GetSymbolBalancesAsync(string exchange, string key1, string key2, string? key3);
     }
 }

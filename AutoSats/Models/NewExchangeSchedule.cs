@@ -4,12 +4,11 @@ using System;
 namespace AutoSats.Models
 {
     public record NewExchangeSchedule(
-        string CurrencyPair,
+        SymbolBalance Amount,
         string Exchange,
         string[] Keys,
         string Cron,
         DateTime Start,
-        decimal Spend,
         ExchangeWithdrawalType WithdrawalType,
         string? WithdrawalAddress,
         decimal? WithdrawalLimit)

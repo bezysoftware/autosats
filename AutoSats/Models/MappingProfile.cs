@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using AutoSats.Data;
-using System.Collections.Generic;
 
 namespace AutoSats.Models
 {
@@ -8,7 +7,11 @@ namespace AutoSats.Models
     {
         public MappingProfile()
         {
-            CreateMap<NewExchangeSchedule, ExchangeSchedule>();
+            CreateMap<NewExchangeSchedule, ExchangeSchedule>()
+                .ForMember(x => x.Spend, opts => opts.MapFrom(x => x.Amount.Amount))
+                .ForMember(x => x.SpendCurrency, opts => opts.MapFrom(x => x.Amount.Symbol.Spend))
+                .ForMember(x => x.Symbol, opts => opts.MapFrom(x => x.Amount.Symbol.Original));
+
             CreateMap<ExchangeSchedule, ExchangeScheduleSummary>();
         }        
     }

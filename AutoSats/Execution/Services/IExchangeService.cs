@@ -22,14 +22,14 @@ namespace AutoSats.Execution.Services
         Task<IEnumerable<Balance>> GetBalancesAsync();
 
         /// <summary>
-        /// Buys given amount of the left currency in the specified pair with funds from the right currency in the pair.
+        /// Buys given amount of the left currency in the specified symbol with funds from the right currency in the pair.
         /// </summary>
-        Task<BuyResult> BuyAsync(string pair, decimal amount);
+        Task<BuyResult> BuyAsync(string symbol, decimal amount, BuyOrderType orderType, bool invert);
 
         /// <summary>
-        /// Returns last price for given trading pair (e.g. "btcusd").
+        /// Returns last price for given trading symbol (e.g. "btcusd").
         /// </summary>
-        Task<decimal> GetPriceAsync(string pair);
+        Task<decimal> GetPriceAsync(string symbol);
 
         /// <summary>
         /// Withdraws given amount to target address. Returns withdrawal transaction id.
@@ -40,5 +40,10 @@ namespace AutoSats.Execution.Services
         /// Get withdrawal fee for given currency.
         /// </summary>
         Task<decimal> GetWithdrawalFeeAsync(string currency);
+
+        /// <summary>
+        /// Get a list of available trading symbols where the given currency is present.
+        /// </summary>
+        Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency);
     }
 }

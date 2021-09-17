@@ -1,5 +1,5 @@
 ﻿@inject ExchangeOptions[] exchanges
-@inject IExchangeServiceFactory factory
+@inject IExchangeScheduler scheduler
 @inject MessageService message
 
 <div>
@@ -110,14 +110,13 @@
 </div>
 
 @code {
-        [Parameter] public EventCallback<KeysWithBalances> KeysChanged { get; set; }
+    [Parameter] public EventCallback<KeysWithBalances> KeysChanged { get; set; }
 
     public string? NewExchangeName { get; set; }
 
     private ViewModels.ExchangeKeys keys = new ViewModels.ExchangeKeys();
     private bool isLoadingBalance;
     private bool showExchangeModal;
-    private ElementReference rootRef;
 
     private async Task CheckBalanceAsync()
     {
@@ -125,9 +124,9 @@
 
         try
         {
-            var balances = await factory.GetService(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3).GetBalancesAsync();
-            var exceptBtc = balances.Where(x => x.Currency.ToLower() != "btc").ToArray();
-            await KeysChanged.InvokeAsync(new KeysWithBalances(keys, exceptBtc));
+            var balances = await scheduler.GetSymbolBalancesAsync(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3);
+
+            await KeysChanged.InvokeAsync(new KeysWithBalances(keys, balances));
         }
         catch(Exception ex)
         {
