@@ -1,8 +1,10 @@
-﻿@if (Summary != null)
+﻿@inject NavigationManager navigationManager
+
+@if (Summary != null)
 {
     var spendCurrency = Summary.SpendCurrency;
     <div class="ant-list-vertical">
-        <ListItem Class="schedule-container">
+        <ListItem Class="schedule-container" OnClick="ScheduleClick">
             <ListItemMeta>
                 <AvatarTemplate>
                     <Avatar Src="@Summary.GetImgLogoPath()" Size="large" />
@@ -47,6 +49,11 @@
 
 @code {
     [Parameter] public ExchangeScheduleSummary? Summary { get; set; }
+
+    private void ScheduleClick()
+    {
+        navigationManager.NavigateTo($"/schedule/{Summary!.Id}");
+    }
 
     private string GetScheduleIconClass(bool isPaused)
     {

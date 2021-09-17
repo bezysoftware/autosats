@@ -17,7 +17,11 @@
 <Card>
     @if (details != null)
     {
-        <ScheduleSummary Summary="details.Summary" />
+        <AntList TItem="ExchangeScheduleSummary" DataSource="new[] { details.Summary }">
+            <ChildContent Context="item">
+                <ScheduleSummary Summary="item" />
+            </ChildContent>
+        </AntList>
         <Divider />
         <div class="summary-buttons">
             <Popconfirm Title="Are you sure delete this schedule?"
@@ -48,13 +52,12 @@
     <Card>
         @if (details != null)
         {
-        <Timeline Reverse="true" Mode="alternate">
+        <Timeline Reverse="true" Mode="@TimelineMode.Left">
             <ChildContent>
                 @foreach (var e in details.Events.OrderBy(x => x.Timestamp))
                 {
-                    //todo: TimelineItem Label https://github.com/ant-design-blazor/ant-design-blazor/issues/1929
-                    <TimelineItem Color="@(e.Error == null ? "blue" : "red")">
-                        <ChildContent>@e.Timestamp.ToLocalTime() | @GetEventDescription(e)</ChildContent>
+                    <TimelineItem Color="@(e.Error == null ? "blue" : "red")" Label="@e.Timestamp.ToLocalTime().ToString()">
+                        <ChildContent>@GetEventDescription(e)</ChildContent>
                         <Dot>
                             <Tooltip Title="e.Error">
                                 <Icon Type="@GetEventIcon(e)" Theme="outline" />

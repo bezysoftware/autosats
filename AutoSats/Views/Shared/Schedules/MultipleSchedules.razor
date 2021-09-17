@@ -1,12 +1,11 @@
 ﻿@inject IExchangeScheduler scheduler
 @inject IExchangeService exchange
-@inject NavigationManager navigationManager
 
 <div>
     <PageHeader Title="Your active schedules" Ghost="true" />
 
     <Card>
-        <AntList DataSource="@ExchangeSchedules" ItemLayout="@ListItemLayout.Vertical" TItem="ExchangeScheduleSummary" OnItemClick="ScheduleClick">
+        <AntList DataSource="@ExchangeSchedules" ItemLayout="@ListItemLayout.Vertical" TItem="ExchangeScheduleSummary">
             <ChildContent Context="item">
                 <div class="schedule-summary">
                     <ScheduleSummary Summary="item" />
@@ -23,9 +22,4 @@
 @code
 {
     [Parameter] public ExchangeScheduleSummary[] ExchangeSchedules { get; set; } = Array.Empty<ExchangeScheduleSummary>();
-
-    private void ScheduleClick(ExchangeScheduleSummary schedule)
-    {
-        navigationManager.NavigateTo($"/schedule/{schedule.Id}");
-    }
 }
