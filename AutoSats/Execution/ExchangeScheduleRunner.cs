@@ -14,8 +14,6 @@ namespace AutoSats.Execution
 {
     public class ExchangeScheduleRunner : IExchangeScheduleRunner
     {
-        public const decimal DefaultWithdrawalFee = 0.00050000m;
-
         private readonly SatsContext db;
         private readonly ILogger<ExchangeScheduleRunner> logger;
         private readonly IExchangeService exchangeService;
@@ -78,10 +76,10 @@ namespace AutoSats.Execution
                 }
 
                 var price = await this.exchangeService.GetPriceAsync(schedule.Symbol);
-                var currenciesReversed = this.exchangeOptions.First(e => e.Name == schedule.Exchange).ReverseCurrencies;
+                var currenciesReversed = GetExchangeOptions(schedule.Exchange).ReverseCurrencies;
                 var invert = !schedule.Symbol.EndsWith(spendCurrency, StringComparison.OrdinalIgnoreCase) ^ currenciesReversed;
                 var amount = invert ? schedule.Spend : schedule.Spend / price;
-                
+
                 this.logger.LogInformation($"Going to buy '{amount}' of '{schedule.Symbol}'");
 
                 var orderType = this.exchangeOptions.FirstOrDefault(x => x.Name == schedule.Exchange)?.BuyOrderType ?? BuyOrderType.Market;
@@ -112,6 +110,11 @@ namespace AutoSats.Execution
             }
         }
 
+        private ExchangeOptions GetExchangeOptions(string exchange)
+        {
+            return this.exchangeOptions.First(e => e.Name == exchange);
+        }
+
         private async Task WithdrawAsync(ExchangeSchedule schedule)
         {
             if (schedule.WithdrawalType == ExchangeWithdrawalType.None)
@@ -120,8 +123,6 @@ namespace AutoSats.Execution
             }
 
             var withdrawCurrency = "BTC";
-            
-            var fee = await GetWithdrawalFee(withdrawCurrency);
             var balance = await GetCurrencyBalance(withdrawCurrency);
             
             if (balance < schedule.WithdrawalLimit)
@@ -129,6 +130,9 @@ namespace AutoSats.Execution
                 this.logger.LogInformation($"{withdrawCurrency} balance {balance} is less than withdrawal limit {schedule.WithdrawalLimit}");
                 return;
             }
+            
+            var options = GetExchangeOptions(schedule.Exchange);
+            var fee = await GetWithdrawalFee(withdrawCurrency, options.FallbackWithdrawalFee);
 
             var address = schedule.WithdrawalType switch
             {
@@ -168,20 +172,20 @@ namespace AutoSats.Execution
             }
         }
 
-        private async Task<decimal> GetWithdrawalFee(string cryptoCurrency)
+        private async Task<decimal> GetWithdrawalFee(string cryptoCurrency, decimal fallbackFee)
         {
             try
             {
                 var fee = await this.exchangeService.GetWithdrawalFeeAsync(cryptoCurrency);
 
                 return fee == 0 
-                    ? DefaultWithdrawalFee 
+                    ? fallbackFee
                     : fee;
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, $"Couldn't get withdrawal fee for {cryptoCurrency}, using default");
-                return DefaultWithdrawalFee;
+                return fallbackFee;
             }
         }
 
