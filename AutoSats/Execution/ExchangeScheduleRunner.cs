@@ -112,7 +112,7 @@ namespace AutoSats.Execution
 
         private ExchangeOptions GetExchangeOptions(string exchange)
         {
-            return this.exchangeOptions.First(e => e.Name == exchange);
+            return this.exchangeOptions.FirstOrDefault(e => e.Name == exchange) ?? new ExchangeOptions();
         }
 
         private async Task WithdrawAsync(ExchangeSchedule schedule)
