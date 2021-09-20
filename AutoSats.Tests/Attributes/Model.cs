@@ -6,5 +6,8 @@ namespace AutoSats.Tests.Attributes
     {
         [BitcoinAddress]
         public string Address { get; set; }
+
+        [RequiredIfNot(nameof(Address), "")]
+        public string AddressTag { get; set; }
     }
 }
