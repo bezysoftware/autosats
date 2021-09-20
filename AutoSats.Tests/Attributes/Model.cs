@@ -9,5 +9,8 @@ namespace AutoSats.Tests.Attributes
 
         [RequiredIfNot(nameof(Address), "")]
         public string AddressTag { get; set; }
+
+        [Cron]
+        public string Cron { get; set; }
     }
 }
