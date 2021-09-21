@@ -132,7 +132,7 @@ namespace AutoSats.Tests
                 ["USD"] = 3m,
             });
             
-            api.Setup(x => x.GetMarketSymbolsAsync()).ReturnsAsync(new[] { "BTC_USD", "BTC_EUR", "ETH_BTC", "MKR_BTC", "LTC_EUR" });
+            api.Setup(x => x.GetMarketSymbolsAsync()).ReturnsAsync(new[] { "BTC_USD", "BTC_EUR", "ETH_BTC", "MKR_BTC", "LTC_EUR", "CZK_BTC" });
             
 
             this.apiProvider.Setup(x => x.GetApi("exchange")).Returns(() => api.Object);
@@ -145,6 +145,7 @@ namespace AutoSats.Tests
                 new SymbolBalance(new Symbol("BTC_EUR", "BTC", "EUR"), 0),
                 new SymbolBalance(new Symbol("ETH_BTC", "BTC", "ETH"), 2),
                 new SymbolBalance(new Symbol("MKR_BTC", "BTC", "MKR"), 0),
+                new SymbolBalance(new Symbol("CZK_BTC", "BTC", "CZK"), 0),
             });
         }
     }
