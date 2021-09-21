@@ -14,17 +14,19 @@ namespace AutoSats.Execution.Services
     {
         private IExchangeAPI? api;
         private readonly ILogger<ExchangeService> logger;
+        private readonly IExchangeAPIProvider apiProvider;
 
         private IExchangeAPI Api => this.api ?? throw new InvalidOperationException("ExchangeService has not been initialized");
 
-        public ExchangeService(ILogger<ExchangeService> logger)
+        public ExchangeService(ILogger<ExchangeService> logger, IExchangeAPIProvider apiProvider)
         {
             this.logger = logger;
+            this.apiProvider = apiProvider;
         }
 
-        public void Initialize(string exchangeName, string? keysFileName)
+        public virtual IExchangeService Initialize(string exchangeName, string? keysFileName)
         {
-            var api = ExchangeAPI.GetExchangeAPI(exchangeName);
+            var api = this.apiProvider.GetApi(exchangeName);
 
             if (keysFileName != null)
             {
@@ -32,15 +34,19 @@ namespace AutoSats.Execution.Services
             }
 
             this.api = api;
+
+            return this;
         }
 
-        public void Initialize(string exchangeName, string key1, string key2, string? key3)
+        public virtual IExchangeService Initialize(string exchangeName, string key1, string key2, string? key3)
         {
-            var api = ExchangeAPI.GetExchangeAPI(exchangeName);
+            var api = this.apiProvider.GetApi(exchangeName);
 
             api.LoadAPIKeysUnsecure(key1, key2, key3);
 
             this.api = api;
+
+            return this;
         }
 
         public async Task<BuyResult> BuyAsync(string symbol, decimal amount, BuyOrderType orderType, bool invert)

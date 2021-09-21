@@ -62,6 +62,7 @@ namespace AutoSats
 
             services.AddSingleton(exchanges); 
             services.AddTransient<IExchangeService, ExchangeService>();
+            services.AddScoped<IExchangeAPIProvider, ExchangeAPIProvider>(); 
             services.AddScoped<IExchangeServiceFactory, ExchangeServiceFactory>();
             services.AddScoped<IExchangeScheduler, ExchangeScheduler>();
             services.AddScoped<IExchangeScheduleRunner, ExchangeScheduleRunner>();

@@ -9,12 +9,12 @@ namespace AutoSats.Execution.Services
         /// <summary>
         /// Initialize the service with keys coming from a file.
         /// </summary>
-        void Initialize(string exchangeName, string? keysFileName);
+        IExchangeService Initialize(string exchangeName, string? keysFileName);
 
         /// <summary>
         /// Initialize the service with supplied keys.
         /// </summary>
-        void Initialize(string exchangeName, string key1, string key2, string? key3);
+        IExchangeService Initialize(string exchangeName, string key1, string key2, string? key3);
         
         /// <summary>
         /// Gets balances for all your currencies.
