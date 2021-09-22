@@ -147,13 +147,14 @@ namespace AutoSats.Execution
 
             try
             {
-                var id = await this.exchangeService.WithdrawAsync(withdrawCurrency, address, balance - fee);
+                var amount = balance - fee;
+                var id = await this.exchangeService.WithdrawAsync(withdrawCurrency, address, amount);
 
                 this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
                 {
                     Schedule = schedule,
                     Address = address,
-                    Amount = schedule.WithdrawalLimit,
+                    Amount = amount,
                     Timestamp = DateTime.UtcNow,
                     WithdrawalId = id
                 });

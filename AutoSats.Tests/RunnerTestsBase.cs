@@ -3,6 +3,7 @@ using AutoSats.Data;
 using AutoSats.Execution;
 using AutoSats.Execution.Services;
 using ExchangeSharp;
+using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -47,6 +48,28 @@ namespace AutoSats.Tests
                 this.service,
                 this.wallet.Object,
                 this.options);
+        }
+
+        protected void AddSchedule(decimal spend, string spendCurrency, string symbol, ExchangeWithdrawalType withdrawalType = ExchangeWithdrawalType.None, decimal withdrawalLimit = 0, string withdrawalAddress = null)
+        {
+            this.db.Add(new ExchangeSchedule
+            {
+                Spend = spend,
+                SpendCurrency = spendCurrency,
+                Symbol = symbol,
+                Exchange = Exchange,
+                Cron = "",
+                WithdrawalType = withdrawalType,
+                WithdrawalAddress = withdrawalAddress,
+                WithdrawalLimit = withdrawalLimit
+            });
+            this.db.SaveChanges();
+        }
+
+        protected bool Verify(object expected, object actual)
+        {
+            actual.Should().BeEquivalentTo(expected);
+            return true;
         }
     }
 }

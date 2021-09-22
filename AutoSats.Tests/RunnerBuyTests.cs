@@ -141,17 +141,5 @@ namespace AutoSats.Tests
             };
             this.api.Verify(x => x.PlaceOrderAsync(It.Is<ExchangeOrderRequest>(x => Verify(request, x))), Times.Once());
         }
-
-        private void AddSchedule(decimal spend, string spendCurrency, string symbol)
-        {
-            this.db.Add(new ExchangeSchedule { Spend = spend, SpendCurrency = spendCurrency, Symbol = symbol, Exchange = Exchange, Cron = "" });
-            this.db.SaveChanges();
-        }
-
-        private bool Verify(object expected, object actual)
-        {
-            actual.Should().BeEquivalentTo(expected);
-            return true;
-        }
     }
 }
