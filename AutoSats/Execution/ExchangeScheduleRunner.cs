@@ -6,6 +6,7 @@ using AutoSats.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace AutoSats.Execution
         private readonly ILogger<ExchangeScheduleRunner> logger;
         private readonly IExchangeService exchangeService;
         private readonly IWalletService walletService;
-        private readonly ExchangeOptions[] exchangeOptions;
+        private readonly IEnumerable<ExchangeOptions> exchangeOptions;
         private readonly string dataFolder;
 
         public ExchangeScheduleRunner(
@@ -26,7 +27,7 @@ namespace AutoSats.Execution
             ILogger<ExchangeScheduleRunner> logger,
             IExchangeService exchangeService,
             IWalletService walletService,
-            ExchangeOptions[] exchangeOptions)
+            IEnumerable<ExchangeOptions> exchangeOptions)
         {
             this.db = db;
             this.logger = logger;
@@ -72,7 +73,7 @@ namespace AutoSats.Execution
 
                 if (balance < schedule.Spend)
                 {
-                    throw new ScheduleRunFailedException($"Cannot spend '{schedule.Spend}' of '{schedule.Symbol}' because the balance is only '{balance}'");
+                    throw new ScheduleRunFailedException($"Cannot spend '{schedule.Spend}' of '{spendCurrency}' because the balance is only '{balance}'");
                 }
 
                 var price = await this.exchangeService.GetPriceAsync(schedule.Symbol);
@@ -84,17 +85,18 @@ namespace AutoSats.Execution
 
                 var orderType = this.exchangeOptions.FirstOrDefault(x => x.Name == schedule.Exchange)?.BuyOrderType ?? BuyOrderType.Market;
                 var result = await this.exchangeService.BuyAsync(schedule.Symbol, amount, orderType, invert);
-
-                this.db.ExchangeBuys.Add(new ExchangeEventBuy
+                var buy = new ExchangeEventBuy
                 {
                     Schedule = schedule,
                     Received = invert ? result.AveragePrice * result.Amount : result.Amount,
                     Price = result.AveragePrice,
                     OrderId = result.OrderId,
                     Timestamp = DateTime.UtcNow
-                });
+                };
 
-                this.logger.LogInformation($"Bought '{result.Amount}' of '{schedule.Symbol}' w/ avg price '{result.AveragePrice}', order id: '{result.OrderId}'");
+                this.db.ExchangeBuys.Add(buy);
+
+                this.logger.LogInformation($"Received '{buy.Received}' of '{schedule.Symbol}' w/ avg price '{buy.Price}', order id: '{buy.OrderId}'");
             }
             catch (Exception ex)
             {

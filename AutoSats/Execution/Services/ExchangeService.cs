@@ -168,7 +168,7 @@ namespace AutoSats.Execution.Services
             var price = await GetPriceAsync(symbol);
 
             // get number of decimal places and match them in the calculated price (some exchanges have a limit on decimal places)
-            var decimals = price.ToString(CultureInfo.InvariantCulture).SkipWhile(c => c != '.').Count() - 1;
+            var decimals = Math.Clamp(price.ToString(CultureInfo.InvariantCulture).SkipWhile(c => c != '.').Count() - 1, 2, 10);
             price = Math.Round(!invert ? price * 1.01m : price * 0.99m, decimals);
 
             return await Api.PlaceOrderAsync(new ExchangeOrderRequest

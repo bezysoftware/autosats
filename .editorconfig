@@ -5,3 +5,6 @@ dotnet_style_qualification_for_field = true:warning
 
 # IDE0005: Using directive is unnecessary.
 dotnet_diagnostic.IDE0005.severity = warning
+
+# CA1051: Do not declare visible instance fields
+dotnet_diagnostic.CA1051.severity = none
