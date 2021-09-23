@@ -170,16 +170,16 @@ namespace AutoSats.Execution
                 }
 
                 // save quartz schedule
+                // in case of misfire (AutoSats was down) do nothing
+                var scheduler = await this.schedulerFactory.GetScheduler();
                 var key = GetTriggerKey(schedule.Id);
                 var trigger = TriggerBuilder
                     .Create()
                     .WithIdentity(key)
                     .ForJob(ExecutionConsts.ExchangeJobKey)
-                    .WithCronSchedule(newSchedule.Cron)
+                    .WithCronSchedule(newSchedule.Cron, x => x.WithMisfireHandlingInstructionDoNothing())
                     .StartAt(newSchedule.Start)
                     .Build();
-
-                var scheduler = await this.schedulerFactory.GetScheduler();
 
                 // todo: scheduler should use our own transaction
                 tx.Commit();
