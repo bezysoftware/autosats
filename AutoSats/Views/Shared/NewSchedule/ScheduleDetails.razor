@@ -26,7 +26,7 @@
         <Row Gutter="12">
             <GridCol Span="12">
                 <FormItem Label="How much to spend" Required>
-                    <Tooltip Title="@("AutoSats will first fetch the current price and then place an order to spent the given amount. Because a market order will be placed, the amount actually spent might slightly differ compared to the entered value.")">
+                    <Tooltip Title="@("AutoSats will first fetch the current price and then place an order to spend the given amount. Because a market order will be placed, the amount actually spent might slightly differ compared to the entered value.")">
                         <NumberInput @bind-Value="context.Spend"
                                          Class="element-stretch"
                                          Type="number"

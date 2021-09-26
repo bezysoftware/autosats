@@ -1,14 +1,24 @@
-[![docker build](https://github.com/bezysoftware/autosats/actions/workflows/build.yml/badge.svg)](https://github.com/bezysoftware/autosats/actions)
-
 # AutoSats
 
-AutoSats lets you periodically buy Bitcoin on exchanges and withdraw it to your own wallet. 
-It is the simplest non-custudial DCA solution you can run on your own node.
+[![build](https://github.com/bezysoftware/autosats/actions/workflows/build.yml/badge.svg)](https://github.com/bezysoftware/autosats/actions)
+![version](https://img.shields.io/docker/v/bezysoftware/autosats)
+
+AutoSats is the simplest non-custudial DCA solution you can run on your own node. It lets you periodically buy Bitcoin on exchanges and withdraw it to your own wallet. 
+
+![](Assets/Screenshot.png)
 
 ## What is DCA?
 
 > Dollar-cost averaging (DCA) is an investment strategy in which an investor divides up the total amount to be invested across periodic purchases of a target asset in an effort to reduce the impact of volatility on the overall purchase. The purchases occur regardless of the asset's price and at regular intervals.
 [Source](https://www.investopedia.com/terms/d/dollarcostaveraging.asp).
+
+## Supported exchanges
+
+* Bitfinex
+* Bitstamp
+* Coibase PRO
+* Poloniex
+* ...more coming in the future, see below how you can contribute
 
 ## Installation
 
@@ -30,10 +40,10 @@ Released version will be tagged and published to Dockerhub. The long term goal i
 
 ## Contributing
 
-AutoSats is currently in active development and help is certainly welcome. 
+AutoSats is in active development and help is certainly welcome. 
 Currently it will be mostly needed to cover more exchanges. 
 If you want to help to add your favorite exchange:
 
 1) Make sure it's supported by [ExchangeSharp](https://github.com/jjxtra/ExchangeSharp/) (if not then first raise a PR there)
-2) Test a schedule for your new exchange and create a PR. See this [sample Bitfinex PR](https://github.com/bezysoftware/autosats/pull/1)
+2) Test a schedule (including withdrawal) for your new exchange and create a PR. See this [sample Bitfinex PR](https://github.com/bezysoftware/autosats/pull/1)
 3) Attach screenshots from the exchange history screen showing the purchase and withdrawal

@@ -11,12 +11,6 @@ body {
     display: none;
 }
 
-.ant-card {
-    border-radius: 4px;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 8px 16px -8px;
-    border: none;
-}
-
 h3 {
     margin-top: 12px;
 }
@@ -41,16 +35,27 @@ h3 {
     }
 }
 
-.ant-timeline-item-last {
-    padding-bottom: 0;
-    
-    .ant-timeline-item-content {
-        min-height: 0;
-    }
-}
-
 .input-button {
     height: unset;
     padding: 0;
     line-height: 1;
+}
+
+/* ant overrides */
+.ant-layout-header {
+    background: #000428;
+}
+
+.ant-card {
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 8px 16px -8px;
+    border: none;
+}
+
+.ant-timeline-item-last {
+    padding-bottom: 0;
+
+    .ant-timeline-item-content {
+        min-height: 0;
+    }
 }
