@@ -22,7 +22,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push image
-        uses: akhilerm/tag-push-action@v1.0.0
+        uses: akhilerm/tag-push-action@main
         with:
           src: ghcr.io/bezysoftware/autosats:latest
           dst: |
