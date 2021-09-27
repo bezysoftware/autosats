@@ -24,19 +24,27 @@ AutoSats is the simplest non-custudial DCA solution you can run on your own node
 
 AutoSats can be run in a Docker container. See how to [install docker](https://docs.docker.com/engine/install/).
 
-Latest images which are built from the `main` branch are published to [Github Container Repository](https://github.com/bezysoftware/autosats/pkgs/container/autosats) and can be run using
+Latest released version is available on [docker hub](https://hub.docker.com/repository/docker/bezysoftware/autosats/) and can be run like this:
 
 ```bash
-docker run -e Bitcoin__Auth=username:password -e Bitcoin__Url="http://host.docker.internal:8332" -p 8080:80 ghcr.io/bezysoftware/autosats:latest
+docker run \
+    -e Bitcoin__Auth=<rpc_username:rpc_password> \
+    -e Bitcoin__Url="http://bitcoin:8332" \
+    --network umbrel_main_network \
+    -p 8081:80 \
+    bezysoftware/autosats:latest
 ```
 
-Make sure you:
-1) Set your RPC username & password to your running bitcoind instance (needed for withdrawals)
-2) Set bitcoind url, in this sample it assumes it runs on the host
+Let's go over the parameters:
+* `-e` sets an enviromental variable, AutoSats needs to know where Bitcoind is running and its RPC credentials
+* `--network` specifies the name of the Docker network that Bitcoind is running inside - you can ignore this if your Bitcoind isn't running inside a container
+  * In that case you might want to set `-e Bitcoin__Url="http://host.docker.internal:8332"`
+* `-p` exposes the inner port (80) to be available on an external port (8081) - the app will become available on this port (e.g. http://umbrel.local:8081) 
+* `bezysoftware/autosats:latest` is the name of the image, latest released version
+  * You can set a fixed version (`:v0.0.1`)
+  * Or you can use absolutely latest version `ghcr.io/bezysoftware/autosats:latest` (built from `main`) which is published to [Github Container Repository](https://github.com/bezysoftware/autosats/pkgs/container/autosats)
 
-AutoSats will be accessible on http://localhost:8080
-
-Released version will be tagged and published to Dockerhub. The long term goal is to make AutoSats available on [Umbrel](https://getumbrel.com/) and similar solutions.
+The long term goal is to make AutoSats available on [Umbrel](https://getumbrel.com/) and similar solutions with one-click install.
 
 ## Contributing
 
