@@ -54,10 +54,6 @@ namespace AutoSats.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CurrencyPair")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Exchange")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -68,7 +64,15 @@ namespace AutoSats.Data.Migrations
                     b.Property<decimal>("Spend")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("SpendCurrency")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Start")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Symbol")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("WithdrawalAddress")

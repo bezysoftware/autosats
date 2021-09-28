@@ -2,6 +2,7 @@
 using AutoSats.Data;
 using AutoSats.Exceptions;
 using AutoSats.Execution.Services;
+using AutoSats.Extensions;
 using AutoSats.Models;
 using ExchangeSharp;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace AutoSats.Execution
         private readonly IWalletService walletService;
         private readonly ISchedulerFactory schedulerFactory;
         private readonly IExchangeScheduleRunner runner;
+        private readonly IExchangeServiceFactory exchangeFactory;
         private readonly IMapper mapper;
 
         public ExchangeScheduler(
@@ -30,6 +32,7 @@ namespace AutoSats.Execution
             IWalletService walletService,
             ISchedulerFactory schedulerFactory,
             IExchangeScheduleRunner runner,
+            IExchangeServiceFactory exchangeFactory,
             IMapper mapper)
         {
             this.logger = logger;
@@ -37,7 +40,21 @@ namespace AutoSats.Execution
             this.walletService = walletService;
             this.schedulerFactory = schedulerFactory;
             this.runner = runner;
+            this.exchangeFactory = exchangeFactory;
             this.mapper = mapper;
+        }
+
+        public async Task<IEnumerable<SymbolBalance>> GetSymbolBalancesAsync(string exchange, string key1, string key2, string? key3)
+        {
+            var service = this.exchangeFactory.GetService(exchange, key1, key2, key3);
+            var balances = await service.GetBalancesAsync();
+            var symbols = await service.GetSymbolsWithAsync("BTC");
+
+            return symbols
+                .LeftJoin(balances, x => x.Spend.ToUpper(), x => x.Currency.ToUpper(), (symbol, balance) => new SymbolBalance(symbol, balance?.Amount ?? 0))
+                .OrderByDescending(x => x.Amount)
+                .ThenBy(x => x.Symbol.Spend)
+                .ToArray();
         }
 
         public async Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync()
@@ -71,7 +88,12 @@ namespace AutoSats.Execution
                 throw new ScheduleNotFoundException(id);
             }
 
-            var summary = this.mapper.Map<ExchangeScheduleSummary>(schedule);
+            var buys = schedule.Events.Where(e => e.Type == ExchangeEventType.Buy).Cast<ExchangeEventBuy>().ToArray();
+            var summary = this.mapper.Map<ExchangeScheduleSummary>(schedule) with
+            {
+                TotalAccumulated = buys.Sum(e => e.Received),
+                TotalSpent = buys.Length * schedule.Spend
+            };
 
             return new ExchangeScheduleDetails(summary, schedule.Events);
         }
@@ -148,16 +170,16 @@ namespace AutoSats.Execution
                 }
 
                 // save quartz schedule
+                // in case of misfire (AutoSats was down) do nothing
+                var scheduler = await this.schedulerFactory.GetScheduler();
                 var key = GetTriggerKey(schedule.Id);
                 var trigger = TriggerBuilder
                     .Create()
                     .WithIdentity(key)
                     .ForJob(ExecutionConsts.ExchangeJobKey)
-                    .WithCronSchedule(newSchedule.Cron)
+                    .WithCronSchedule(newSchedule.Cron, x => x.WithMisfireHandlingInstructionDoNothing())
                     .StartAt(newSchedule.Start)
                     .Build();
-
-                var scheduler = await this.schedulerFactory.GetScheduler();
 
                 // todo: scheduler should use our own transaction
                 tx.Commit();

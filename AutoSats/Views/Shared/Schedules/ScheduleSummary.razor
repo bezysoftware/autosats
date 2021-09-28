@@ -1,6 +1,6 @@
 ﻿@if (Summary != null)
 {
-    var (crypto, fiat) = Extensions.Currency.Parse(Summary.CurrencyPair);
+    var spendCurrency = Summary.SpendCurrency;
     <div class="ant-list-vertical">
         <ListItem Class="schedule-container">
             <ListItemMeta>
@@ -10,7 +10,7 @@
                 <TitleTemplate>
                     <div class="schedule-title-container">
                         <span>
-                            Buy <strong>@(Summary.Spend.ToString("N2")) @fiat</strong> worth of <strong>@crypto</strong> on <strong>@Summary.Exchange</strong> and @GetWithdrawalDescription(Summary.WithdrawalType).
+                            Buy <strong>@(Summary.Spend.ToString("N2")) @spendCurrency</strong> worth of <strong>BTC</strong> on <strong>@Summary.Exchange</strong> and @GetWithdrawalDescription(Summary.WithdrawalType).
                         </span>
 
                         <Tooltip Class="@GetScheduleIconClass(@Summary.IsPaused)"
@@ -32,11 +32,11 @@
                         </div>
                         <div class="description-container">
                             <span>Total spent</span>
-                            <span>@Summary.TotalSpent.ToString("N2") @fiat</span>
+                            <span>@Summary.TotalSpent.ToString("N2") @spendCurrency</span>
                         </div>
                         <div class="description-container">
                             <span>Total accumulated</span>
-                            <span>@Summary.TotalAccumulated.ToString("N8") @crypto</span>
+                            <span>@Summary.TotalAccumulated.ToString("N8") BTC</span>
                         </div>
                     </div>
                 </DescriptionTemplate>

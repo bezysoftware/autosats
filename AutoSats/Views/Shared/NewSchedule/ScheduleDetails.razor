@@ -25,25 +25,36 @@
         </Row>
         <Row Gutter="12">
             <GridCol Span="12">
-                <FormItem Label="How much to spend?" Required>
-                            <AntDesign.Input @bind-Value="context.Spend"
-                                   Class="element-stretch"
-                                   Type="number"
-                                   step="5">
-                                <AddOnAfter>
-                                    <Select DataSource="currencies"
-                                            @bind-Value="context.Currency"
-                                            TItem="string"
-                                            TItemValue="string"
-                                            Placeholder="Select currency"
-                                            Class="currencies-select"
-                                            Loading="isLoadingCurrencies" />
-                                </AddOnAfter>
-                            </AntDesign.Input>
-                    
+                <FormItem Label="How much to spend" Required>
+                    <Tooltip Title="@("AutoSats will first fetch the current price and then place an order to spend the given amount. Because a market order will be placed, the amount actually spent might slightly differ compared to the entered value.")">
+                        <NumberInput @bind-Value="context.Spend"
+                                         Class="element-stretch"
+                                         Type="number"
+                                         step="any">
+                            <AddOnAfter>
+                                <Select DataSource="KeysWithBalances?.Balances"
+                                        @bind-Value="context.Symbol"
+                                        TItem="SymbolBalance"
+                                        TItemValue="Symbol"
+                                        ValueName="@nameof(Symbol)"
+                                        Placeholder="Currency"
+                                        Class="currencies-select">
+                                    <LabelTemplate Context="ctx">
+                                        <span class="balance-label">@ctx.Symbol.Spend</span>
+                                    </LabelTemplate>
+                                    <ItemTemplate Context="ctx">
+                                        <div class="balance-item">
+                                            <span class="currency">@ctx.Symbol.Spend</span>
+                                            <span class="amount">@(ctx.Amount < 100 ? ctx.Amount.ToString("N2") : ctx.Amount.ToString("N0"))</span>
+                                        </div>
+                                    </ItemTemplate>
+                                </Select>
+                            </AddOnAfter>
+                        </NumberInput>
+                    </Tooltip>
                 </FormItem>
 
-                <FormItem Label="How often?" Required="true">
+                <FormItem Label="How often" Required="true">
                     <EnumSelect TEnum="SchedulePeriod"
                                 @bind-Value="selectedPeriod"
                                 OnSelectedItemChanged="@(x => UpdateCronExpression(x, context.Start))" />
@@ -120,7 +131,7 @@
                 @if (context.WithdrawalType != ExchangeWithdrawalType.None)
                 {
                     <FormItem Label="Limit" Required LabelColSpan="10" WrapperColSpan="14">
-                        <Tooltip Title="@("Once you accumulate at least this much BTC your entire balance will be withdrawn to your wallet")">
+                        <Tooltip Title="@("Once you accumulate at least this much BTC your entire balance will be withdrawn to your wallet (minus any fees)")">
                             <NumberInput @bind-Value="context.WithdrawalLimit"
                                              Class="element-stretch"
                                              Type="number"
@@ -147,7 +158,7 @@
         <Row>
             <GridCol Offset="9" Span="12">
                 <FormItem>
-                    <Button HtmlType="submit" Block Type="primary" Disabled="isGeneratingAddress || isLoadingCurrencies">
+                    <Button HtmlType="submit" Block Type="primary" Disabled="isGeneratingAddress">
                         @(context.RunToVerify ? "Verify and save" : "Save")
                     </Button>
                 </FormItem>
@@ -165,24 +176,19 @@
 
 @code {
     [Parameter] public EventCallback<ViewModels.ScheduleDetails> DetailsChanged { get; set; }
-    [Parameter] public ViewModels.ExchangeKeys? ExchangeKeys { get; set; }
+    [Parameter] public KeysWithBalances? KeysWithBalances { get; set; }
 
     private SchedulePeriod selectedPeriod { get; set; }
 
     private ViewModels.ScheduleDetails details = new ViewModels.ScheduleDetails();
-    private IEnumerable<string> currencies = Array.Empty<string>();
-    private bool isLoadingCurrencies;
     private bool isGeneratingAddress;
     private bool isSaving;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        var exchange = ExchangeKeys?.Exchange ?? throw new InvalidOperationException();
+        var exchange = KeysWithBalances?.Keys.Exchange ?? throw new InvalidOperationException();
 
-        this.isLoadingCurrencies = true;
-        this.currencies = await factory.GetService(exchange.Name).GetFiatCurrenciesAsync();
-        this.details.Currency = this.currencies.FirstOrDefault(x => x == "USD") ?? this.currencies.FirstOrDefault(x => x.StartsWith("USD")) ?? this.currencies.First();
-        this.isLoadingCurrencies = false;
+        this.details.Symbol = KeysWithBalances.Balances.OrderByDescending(x => x.Amount).FirstOrDefault()?.Symbol;
     }
 
     private void SelectedPeriodChanged(SchedulePeriod period)
@@ -208,20 +214,18 @@
 
     private async Task SaveScheduleAsync(EditContext context)
     {
-        if (ExchangeKeys?.Exchange == null)
+        if (KeysWithBalances?.Keys.Exchange == null || this.details.Symbol == null)
         {
             return;
         }
 
         this.isSaving = true;
-        var pair = Currency.ToPair("BTC", this.details.Currency);
         var schedule = new NewExchangeSchedule(
-            pair,
-            ExchangeKeys.Exchange.Name,
-            ExchangeKeys.ToKeysArray(),
+            new SymbolBalance(this.details.Symbol, this.details.Spend),
+            KeysWithBalances.Keys.Exchange.Name,
+            KeysWithBalances.Keys.ToKeysArray(),
             this.details.Cron,
             this.details.Start,
-            this.details.Spend,
             this.details.WithdrawalType,
             this.details.WithdrawalAddress,
             this.details.WithdrawalLimit);

@@ -1,6 +1,6 @@
 ﻿.no-schedules-container {
-    display: flex;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    top: calc(100vh / 2);
+    transform: translate(0%, -50%);
+    max-width: 800px;
 }

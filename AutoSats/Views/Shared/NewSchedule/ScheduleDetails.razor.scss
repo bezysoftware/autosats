@@ -7,6 +7,10 @@
     .currencies-select {
         width: 80px !important;
         padding: 0;
+
+        .balance-label {
+            margin: auto 0;
+        }
     }
 
     .element-stretch {
@@ -34,5 +38,16 @@
 
     .verify-checkbox {
         margin-bottom: 12px;
+    }
+}
+
+.balance-item {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+
+    .amount {
+        opacity: 0.6;
+        font-size: 13px;
     }
 }

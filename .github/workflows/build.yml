@@ -1,4 +1,4 @@
-name: Docker build
+name: build
 
 on:
   push:
@@ -31,6 +31,15 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
+      - name: Get docker tag
+        run: |
+            echo "${GITHUB_REF##*/}"
+            if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+                echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+            else
+                echo "IMAGE_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
+            fi
       
       - name: Build and push
         id: docker_build
@@ -39,10 +48,10 @@ jobs:
           context: ./
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ghcr.io/bezysoftware/autosats:latest
+          tags: ghcr.io/bezysoftware/autosats:${{ env.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
+          platforms: linux/arm64,linux/amd64
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

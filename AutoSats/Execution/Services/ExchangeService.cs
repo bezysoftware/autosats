@@ -14,17 +14,19 @@ namespace AutoSats.Execution.Services
     {
         private IExchangeAPI? api;
         private readonly ILogger<ExchangeService> logger;
+        private readonly IExchangeAPIProvider apiProvider;
 
         private IExchangeAPI Api => this.api ?? throw new InvalidOperationException("ExchangeService has not been initialized");
 
-        public ExchangeService(ILogger<ExchangeService> logger)
+        public ExchangeService(ILogger<ExchangeService> logger, IExchangeAPIProvider apiProvider)
         {
             this.logger = logger;
+            this.apiProvider = apiProvider;
         }
 
-        public void Initialize(string exchangeName, string? keysFileName)
+        public virtual IExchangeService Initialize(string exchangeName, string? keysFileName)
         {
-            var api = ExchangeAPI.GetExchangeAPI(exchangeName);
+            var api = this.apiProvider.GetApi(exchangeName);
 
             if (keysFileName != null)
             {
@@ -32,26 +34,37 @@ namespace AutoSats.Execution.Services
             }
 
             this.api = api;
+
+            return this;
         }
 
-        public void Initialize(string exchangeName, string key1, string key2, string? key3)
+        public virtual IExchangeService Initialize(string exchangeName, string key1, string key2, string? key3)
         {
-            var api = ExchangeAPI.GetExchangeAPI(exchangeName);
+            var api = this.apiProvider.GetApi(exchangeName);
 
             api.LoadAPIKeysUnsecure(key1, key2, key3);
 
             this.api = api;
+
+            return this;
         }
 
-        public async Task<BuyResult> BuyAsync(string pair, decimal amount)
+        public async Task<BuyResult> BuyAsync(string symbol, decimal amount, BuyOrderType orderType, bool invert)
         {
-            var result = await Api.PlaceOrderAsync(new ExchangeOrderRequest
+            var result = orderType switch
             {
-                Amount = amount,
-                IsBuy = true,
-                MarketSymbol = pair,
-                OrderType = OrderType.Market
-            });
+                BuyOrderType.Market => await BuyMarketAsync(symbol, amount, invert),
+                BuyOrderType.Limit => await BuyLimitAsync(symbol, amount, invert),
+                _ => throw new NotImplementedException()
+            };
+
+            var orderId = result.OrderId;
+
+            // if the order details are missing query them
+            if (result.Result == ExchangeAPIOrderResult.Unknown && orderId != null)
+            {
+                result = await Api.GetOrderDetailsAsync(orderId);
+            }
 
             // query order details until it is fully filled
             while (result.Result == ExchangeAPIOrderResult.FilledPartially || result.Result == ExchangeAPIOrderResult.Pending)
@@ -59,48 +72,35 @@ namespace AutoSats.Execution.Services
                 result = await Api.GetOrderDetailsAsync(result.OrderId);
             }
 
-            if (result.Result != ExchangeAPIOrderResult.Filled)
+            if (result.Result != ExchangeAPIOrderResult.Filled && result.AveragePrice == null && result.Price == null)
             {
-                throw new Exception($"{result.ResultCode}: {result.Message}");
+                throw new Exception($"{result.Result} : {result.ResultCode}: {result.Message}");
             }
 
-            return new BuyResult(result.OrderId, result.AmountFilled, result.AveragePrice ?? result.Price ?? 0);
+            var filled = result.AmountFilled.GetValueOrDefault();
+            if (filled == 0)
+            {
+                filled = amount;
+            }
+
+            return new BuyResult(orderId ?? "unknown", filled, result.AveragePrice ?? result.Price ?? 0);
         }
 
-        public async Task<Dictionary<string, decimal>> GetBalancesAsync()
+        public async Task<IEnumerable<Balance>> GetBalancesAsync()
         {
-            return await Api.GetAmountsAvailableToTradeAsync();
+            var balances = await Api.GetAmountsAvailableToTradeAsync();
+            
+            return balances
+                .Select(x => new Balance(x.Key, x.Value))
+                .OrderByDescending(x => x.Amount)
+                .ToArray();
         }
 
-        public async Task<decimal> GetPriceAsync(string pair)
+        public async Task<decimal> GetPriceAsync(string symbol)
         {
-            var result = await Api.GetTickerAsync(pair);
+            var result = await Api.GetTickerAsync(symbol);
 
             return result.Last;
-        }
-
-        public async Task<IEnumerable<string>> GetFiatCurrenciesAsync()
-        {
-            var symbols = await Api.GetMarketSymbolsAsync();
-
-            var exchangeCurrencies = symbols
-                .Select(x => x.ToUpper())
-                .Where(x => x.Contains("BTC"))
-                .Distinct()
-                .Select(x => x.Replace("BTC", ""))
-                .ToArray();
-
-            var fiatCurrencies = CultureInfo
-                .GetCultures(CultureTypes.SpecificCultures)
-                .Where(c => !c.IsNeutralCulture)
-                .Select(culture => new RegionInfo(culture.Name))
-                .Select(ri => ri.ISOCurrencySymbol)
-                .Concat(ExecutionConsts.StableCoins)
-                .Distinct()
-                .Select(x => x.ToUpper())
-                .ToArray();
-
-            return fiatCurrencies.Intersect(exchangeCurrencies).ToArray();
         }
 
         public async Task<string> WithdrawAsync(string cryptoCurrency, string address, decimal amount)
@@ -110,21 +110,81 @@ namespace AutoSats.Execution.Services
                 Address = address,
                 Amount = amount,
                 Currency = cryptoCurrency,
-                TakeFeeFromAmount = true
             });
 
-            if (!result.Success)
+            if (!result.Success && string.IsNullOrEmpty(result.Id))
             {
                 throw new ScheduleRunFailedException(result.Message);
             }
 
-            return result.Id;
+            return result.Id ?? "unknown";
+        }
+
+        public async Task<decimal> GetWithdrawalFeeAsync(string currency)
+        {
+            var c = currency.ToLower();
+            var fees = await Api.GetFeesAync();
+            var currencyFees = fees.Where(x => x.Key.ToLower().Contains(c)).ToArray();
+
+            if (currencyFees.Length > 1)
+            {
+                currencyFees = currencyFees.Where(x => x.Key.ToLower().Contains("withdraw")).ToArray();
+            }
+
+            if (currencyFees.Length == 0)
+            {
+                return 0;
+            }
+
+            // return conservatively highest found fee
+            return currencyFees.Max(x => x.Value);
+        }
+
+        public async Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency)
+        {
+            var symbols = await Api.GetMarketSymbolsAsync();
+            
+            return symbols
+                .Where(x => x.Contains(currency, StringComparison.OrdinalIgnoreCase))
+                .Select(x => Symbol.Normalize(x, currency))
+                .ToArray();
         }
 
         public void Dispose()
         {
             this.api?.Dispose();
             this.api = null;
+        }
+
+        private Task<ExchangeOrderResult> BuyMarketAsync(string symbol, decimal amount, bool invert)
+        {
+            return Api.PlaceOrderAsync(new ExchangeOrderRequest
+            {
+                Amount = amount,
+                IsBuy = !invert,
+                MarketSymbol = symbol,
+                OrderType = OrderType.Market
+            });
+        }
+
+        private async Task<ExchangeOrderResult> BuyLimitAsync(string symbol, decimal amount, bool invert)
+        {
+            // If the exchange doesn't support Market OrderType, use Limit with a 1% price change.
+            // Ideally the exchange should clamp the price and use highest last price.
+            var price = await GetPriceAsync(symbol);
+
+            // get number of decimal places and match them in the calculated price (some exchanges have a limit on decimal places)
+            var decimals = Math.Clamp(price.ToString(CultureInfo.InvariantCulture).SkipWhile(c => c != '.').Count() - 1, 2, 10);
+            price = Math.Round(!invert ? price * 1.01m : price * 0.99m, decimals);
+
+            return await Api.PlaceOrderAsync(new ExchangeOrderRequest
+            {
+                Amount = amount,
+                IsBuy = !invert,
+                MarketSymbol = symbol,
+                OrderType = OrderType.Limit,
+                Price = price
+            });
         }
     }
 }

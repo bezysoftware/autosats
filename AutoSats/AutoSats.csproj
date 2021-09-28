@@ -12,13 +12,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-    <PackageReference Include="Delegate.SassBuilder" Version="1.4.0" />
+	<PackageReference Include="LibSassBuilder" Version="1.6.4" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.3.3" />
     <PackageReference Include="Quartz.Serialization.Json" Version="3.3.3" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.114.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
-    <PackageReference Include="DigitalRuby.ExchangeSharp" Version="0.8.2" />
-    <PackageReference Include="NBitcoin" Version="6.0.8" />
+	<PackageReference Include="Bezysoftware.ExchangeSharp" Version="0.8.4" />
+    <PackageReference Include="NBitcoin" Version="6.0.10" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="AntDesign" Version="0.9.3" />
     <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />

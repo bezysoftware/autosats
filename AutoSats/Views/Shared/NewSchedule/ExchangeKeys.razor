@@ -1,9 +1,15 @@
 ﻿@inject ExchangeOptions[] exchanges
-@inject IExchangeServiceFactory factory
+@inject IExchangeScheduler scheduler
 @inject MessageService message
 
 <div>
-    <Form Model="keys" LabelColSpan="6" OnFinish="CheckBalanceAsync">
+    <Modal Visible="showExchangeModal" OnCancel="() => showExchangeModal = false" OnOk="AddExchange">
+        <Text>
+            Enter exchange name
+        </Text>
+        <Input @bind-Value="NewExchangeName"/>
+    </Modal>
+    <Form Model="keys" LabelColSpan="7" OnFinish="CheckBalanceAsync">
         <Row>
             <GridCol Span="12" Offset="6">
                 <FormItem>
@@ -94,7 +100,9 @@
             </FormItem>
 
             <AntDesign.Text Type="secondary" Class="check-balance-description">
-                This will attempt to retrieve your current balance, no order will be placed.
+                <span @ondblclick="OpenExchangeDialog">
+                    This will attempt to retrieve your current balance, no order will be placed.
+                </span>
             </AntDesign.Text>
 
         }
@@ -102,10 +110,13 @@
 </div>
 
 @code {
-    [Parameter] public EventCallback<ViewModels.ExchangeKeys> KeysChanged { get; set; }
+    [Parameter] public EventCallback<KeysWithBalances> KeysChanged { get; set; }
+
+    public string? NewExchangeName { get; set; }
 
     private ViewModels.ExchangeKeys keys = new ViewModels.ExchangeKeys();
     private bool isLoadingBalance;
+    private bool showExchangeModal;
 
     private async Task CheckBalanceAsync()
     {
@@ -113,8 +124,9 @@
 
         try
         {
-            await factory.GetService(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3).GetBalancesAsync();
-            await KeysChanged.InvokeAsync(keys);
+            var balances = await scheduler.GetSymbolBalancesAsync(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3);
+
+            await KeysChanged.InvokeAsync(new KeysWithBalances(keys, balances));
         }
         catch(Exception ex)
         {
@@ -122,5 +134,29 @@
         }
 
         this.isLoadingBalance = false;
+    }
+
+    private void OpenExchangeDialog()
+    {
+        this.showExchangeModal = true;
+    }
+
+    private void AddExchange()
+    {
+        if (!string.IsNullOrWhiteSpace(NewExchangeName))
+        {
+            this.exchanges = exchanges.Concat(new[] 
+            { 
+                new ExchangeOptions 
+                { 
+                    Name = NewExchangeName,
+                    Key1Name = "Key 1",
+                    Key2Name = "Key 2",
+                    Key3Name = "Key 3",
+                } 
+            }).ToArray();
+
+            this.showExchangeModal = false;
+        }
     }
 }

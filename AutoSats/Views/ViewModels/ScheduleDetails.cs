@@ -1,4 +1,5 @@
 ﻿using AutoSats.Data;
+using AutoSats.Models;
 using AutoSats.Validation;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -12,10 +13,10 @@ namespace AutoSats.Views.ViewModels
         public string Cron { get; set; } = string.Empty;
 
         [Required]
-        public string Currency { get; set; } = string.Empty;
+        public Symbol? Symbol { get; set; }
 
         [Required]
-        [Range(1, double.MaxValue, ErrorMessage = "Value must be greater than zero.")]
+        [Range(0.0000001, double.MaxValue, ErrorMessage = "Value must be greater than zero.")]
         public decimal Spend { get; set; }
 
         [Required]

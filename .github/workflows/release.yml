@@ -1,0 +1,30 @@
+name: release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: bezysoftware
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: bezysoftware
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image
+        uses: akhilerm/tag-push-action@main
+        with:
+          src: ghcr.io/bezysoftware/autosats:latest
+          dst: |
+            docker.io/bezysoftware/autosats:${{ github.event.release.tag_name }}
+            docker.io/bezysoftware/autosats:latest

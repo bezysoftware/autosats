@@ -9,6 +9,9 @@ namespace AutoSats.Execution
         /// </summary>
         Task RunScheduleAsync(int id);
 
+        /// <summary>
+        /// Folder where api keys files are to be placed.
+        /// </summary>
         string KeysPath { get; }
     }
 }

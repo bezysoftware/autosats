@@ -1,5 +1,4 @@
-﻿using AutoSats.Extensions;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Data
 {

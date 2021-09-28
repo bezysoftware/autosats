@@ -22,7 +22,10 @@ namespace AutoSats.Data
         public decimal Spend { get; set; }
 
         [Required]
-        public string CurrencyPair { get; set; } = null!;
+        public string Symbol { get; set; } = null!;
+
+        [Required]
+        public string SpendCurrency { get; set; } = null!;
 
         [Required]
         public ExchangeWithdrawalType WithdrawalType { get; set; }
