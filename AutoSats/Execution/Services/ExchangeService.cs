@@ -77,7 +77,13 @@ namespace AutoSats.Execution.Services
                 throw new Exception($"{result.Result} : {result.ResultCode}: {result.Message}");
             }
 
-            return new BuyResult(orderId ?? "unknown", result.AmountFilled != 0 ? result.AmountFilled : amount, result.AveragePrice ?? result.Price ?? 0);
+            var filled = result.AmountFilled.GetValueOrDefault();
+            if (filled == 0)
+            {
+                filled = amount;
+            }
+
+            return new BuyResult(orderId ?? "unknown", filled, result.AveragePrice ?? result.Price ?? 0);
         }
 
         public async Task<IEnumerable<Balance>> GetBalancesAsync()
