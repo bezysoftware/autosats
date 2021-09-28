@@ -53,5 +53,5 @@ Currently it will be mostly needed to cover more exchanges.
 If you want to help to add your favorite exchange:
 
 1) Make sure it's supported by [ExchangeSharp](https://github.com/jjxtra/ExchangeSharp/) (if not then first raise a PR there)
-2) Test a schedule (including withdrawal) for your new exchange and create a PR. See this [sample Bitfinex PR](https://github.com/bezysoftware/autosats/pull/1)
+2) Test a schedule (including withdrawal) for your new exchange and create a PR. See this [sample Bitfinex PR](https://github.com/bezysoftware/autosats/pull/3)
 3) Attach screenshots from the exchange history screen showing the purchase and withdrawal
