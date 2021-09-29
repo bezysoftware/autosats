@@ -88,8 +88,18 @@ namespace AutoSats.Execution.Services
 
         public async Task<IEnumerable<Balance>> GetBalancesAsync()
         {
-            var balances = await Api.GetAmountsAvailableToTradeAsync();
+            Dictionary<string, decimal> balances;
             
+            try
+            {
+                balances = await Api.GetAmountsAvailableToTradeAsync();
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogWarning(ex, $"Call to {nameof(Api.GetAmountsAvailableToTradeAsync)} failed, trying {nameof(Api.GetAmountsAsync)}");
+                balances = await Api.GetAmountsAsync();
+            }
+
             return balances
                 .Select(x => new Balance(x.Key, x.Value))
                 .OrderByDescending(x => x.Amount)

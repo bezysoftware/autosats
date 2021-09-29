@@ -1,4 +1,5 @@
-﻿using NBitcoin.RPC;
+﻿using Microsoft.Extensions.Logging;
+using NBitcoin.RPC;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
@@ -8,10 +9,12 @@ namespace AutoSats.Execution.Services
 {
     public class WalletService : IWalletService
     {
+        private readonly ILogger<WalletService> logger;
         private readonly RPCClient client;
 
-        public WalletService(RPCClient client)
+        public WalletService(ILogger<WalletService> logger, RPCClient client)
         {
+            this.logger = logger;
             this.client = client;
         }
 
@@ -23,6 +26,7 @@ namespace AutoSats.Execution.Services
             }
             catch (RPCException ex) when (ex.RPCCode == RPCErrorCode.RPC_WALLET_NOT_FOUND)
             {
+                this.logger.LogWarning(ex, "Wallet is not loaded, trying to either load it or create a new one");
                 await LoadOrCreateWalletAsync();
                 return await GetNewAddressAsync();
             }
@@ -35,11 +39,13 @@ namespace AutoSats.Execution.Services
 
             if (wallets.Wallets.Any())
             {
+                this.logger.LogInformation($"Loading wallet {wallets.Wallets[0].Name}");
                 await this.client.LoadWalletAsync(wallets.Wallets[0].Name);
             }
             else
             {
-                await this.client.CreateWalletAsync("autosats");
+                this.logger.LogInformation("Creating new wallet for AutoSats");
+                await this.client.CreateWalletAsync("AutoSats");
             }
         }
 
