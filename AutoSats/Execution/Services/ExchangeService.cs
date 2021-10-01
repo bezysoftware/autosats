@@ -88,18 +88,8 @@ namespace AutoSats.Execution.Services
 
         public async Task<IEnumerable<Balance>> GetBalancesAsync()
         {
-            Dictionary<string, decimal> balances;
+            var balances = await Api.GetAmountsAsync();
             
-            try
-            {
-                balances = await Api.GetAmountsAvailableToTradeAsync();
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogWarning(ex, $"Call to {nameof(Api.GetAmountsAvailableToTradeAsync)} failed, trying {nameof(Api.GetAmountsAsync)}");
-                balances = await Api.GetAmountsAsync();
-            }
-
             return balances
                 .Select(x => new Balance(x.Key, x.Value))
                 .OrderByDescending(x => x.Amount)
@@ -150,13 +140,13 @@ namespace AutoSats.Execution.Services
             return currencyFees.Max(x => x.Value);
         }
 
-        public async Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency)
+        public async Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency, char[] prefixes)
         {
             var symbols = await Api.GetMarketSymbolsAsync();
             
             return symbols
                 .Where(x => x.Contains(currency, StringComparison.OrdinalIgnoreCase))
-                .Select(x => Symbol.Normalize(x, currency))
+                .Select(x => Symbol.Normalize(x, currency, prefixes))
                 .ToArray();
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using AutoSats.Extensions;
+using System.Linq;
 
 namespace AutoSats.Models
 {
@@ -6,11 +7,11 @@ namespace AutoSats.Models
     {
         public readonly static string[] Delimiters = new[] { " ", "-", "_", "/", ":" };
 
-        public static Symbol Normalize(string symbol, string accumulate)
+        public static Symbol Normalize(string symbol, string accumulate, char[] prefixes)
         {
             var normalized = Delimiters.Aggregate(symbol.ToUpper(), (acc, d) => acc.Replace(d, ""));
 
-            return new Symbol(symbol, accumulate, normalized.Replace(accumulate, ""));
+            return new Symbol(symbol, accumulate.TrimStart(1, prefixes), normalized.Replace(accumulate, "").TrimStart(1, prefixes));
         }
 
         public void Deconstruct(out string accumulate, out string spend)

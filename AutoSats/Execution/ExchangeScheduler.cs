@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoSats.Configuration;
 using AutoSats.Data;
 using AutoSats.Exceptions;
 using AutoSats.Execution.Services;
@@ -25,6 +26,7 @@ namespace AutoSats.Execution
         private readonly IExchangeScheduleRunner runner;
         private readonly IExchangeServiceFactory exchangeFactory;
         private readonly IMapper mapper;
+        private readonly IEnumerable<ExchangeOptions> exchangeOptions;
 
         public ExchangeScheduler(
             ILogger<ExchangeScheduler> logger, 
@@ -33,7 +35,8 @@ namespace AutoSats.Execution
             ISchedulerFactory schedulerFactory,
             IExchangeScheduleRunner runner,
             IExchangeServiceFactory exchangeFactory,
-            IMapper mapper)
+            IMapper mapper,
+            IEnumerable<ExchangeOptions> exchangeOptions)
         {
             this.logger = logger;
             this.db = db;
@@ -42,13 +45,15 @@ namespace AutoSats.Execution
             this.runner = runner;
             this.exchangeFactory = exchangeFactory;
             this.mapper = mapper;
+            this.exchangeOptions = exchangeOptions;
         }
 
         public async Task<IEnumerable<SymbolBalance>> GetSymbolBalancesAsync(string exchange, string key1, string key2, string? key3)
         {
             var service = this.exchangeFactory.GetService(exchange, key1, key2, key3);
             var balances = await service.GetBalancesAsync();
-            var symbols = await service.GetSymbolsWithAsync("BTC");
+            var options = GetExchangeOptions(exchange);
+            var symbols = await service.GetSymbolsWithAsync(options.BitcoinSymbol, options.TickerPrefixes);
 
             return symbols
                 .LeftJoin(balances, x => x.Spend.ToUpper(), x => x.Currency.ToUpper(), (symbol, balance) => new SymbolBalance(symbol, balance?.Amount ?? 0))
@@ -211,6 +216,11 @@ namespace AutoSats.Execution
         private static TriggerKey GetTriggerKey(int id)
         {
             return new TriggerKey($"{id}");
+        }
+
+        private ExchangeOptions GetExchangeOptions(string exchange)
+        {
+            return this.exchangeOptions.FirstOrDefault(e => e.Name == exchange) ?? new ExchangeOptions();
         }
     }
 }

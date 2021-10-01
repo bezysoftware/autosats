@@ -18,7 +18,7 @@ namespace AutoSats.Tests
 
             this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 6,
                 ["BTC"] = 1
@@ -43,7 +43,7 @@ namespace AutoSats.Tests
             this.api.Setup(x => x.WithdrawAsync(It.IsAny<ExchangeWithdrawalRequest>())).ReturnsAsync(new ExchangeWithdrawalResponse { Id = "123" });
             this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 6,
                 ["BTC"] = 1.5m
@@ -81,7 +81,7 @@ namespace AutoSats.Tests
             this.api.Setup(x => x.WithdrawAsync(It.IsAny<ExchangeWithdrawalRequest>())).ReturnsAsync(new ExchangeWithdrawalResponse { Id = "123" });
             this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 6,
                 ["BTC"] = 1.5m

@@ -25,6 +25,10 @@ namespace AutoSats.Configuration
 
         public decimal FallbackWithdrawalFee { get; set; }
 
+        public string BitcoinSymbol { get; set; } = "BTC";
+
+        public char[] TickerPrefixes { get; set; } = Array.Empty<char>();
+
         public string[] Permissions { get; init; } = Array.Empty<string>();
     }
 }

@@ -124,7 +124,8 @@ namespace AutoSats.Execution
                 return;
             }
 
-            var withdrawCurrency = "BTC";
+            var options = GetExchangeOptions(schedule.Exchange);
+            var withdrawCurrency = options.BitcoinSymbol;
             var balance = await GetCurrencyBalance(withdrawCurrency);
             
             if (balance < schedule.WithdrawalLimit)
@@ -133,7 +134,6 @@ namespace AutoSats.Execution
                 return;
             }
             
-            var options = GetExchangeOptions(schedule.Exchange);
             var fee = await GetWithdrawalFee(withdrawCurrency, options.FallbackWithdrawalFee);
 
             var address = schedule.WithdrawalType switch

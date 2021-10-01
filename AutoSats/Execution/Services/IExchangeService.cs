@@ -44,6 +44,6 @@ namespace AutoSats.Execution.Services
         /// <summary>
         /// Get a list of available trading symbols where the given currency is present.
         /// </summary>
-        Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency);
+        Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency, char[] prefixes);
     }
 }

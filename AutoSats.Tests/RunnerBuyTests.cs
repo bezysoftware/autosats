@@ -18,7 +18,7 @@ namespace AutoSats.Tests
         {
             AddSchedule(5, "EUR", "BTCEUR");
 
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 4
             });
@@ -39,7 +39,7 @@ namespace AutoSats.Tests
 
             this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 6
             });
@@ -72,7 +72,7 @@ namespace AutoSats.Tests
             this.options.Add(new ExchangeOptions { Name = Exchange, BuyOrderType = Models.BuyOrderType.Limit });
             this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 200
             });
@@ -97,7 +97,7 @@ namespace AutoSats.Tests
 
             this.api.Setup(x => x.GetTickerAsync("LTCBTC")).ReturnsAsync(new ExchangeTicker { Last = 0.003m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 0.003m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["LTC"] = 6
             });
@@ -123,7 +123,7 @@ namespace AutoSats.Tests
             this.options.Add(new ExchangeOptions { Name = Exchange, BuyOrderType = Models.BuyOrderType.Limit });
             this.api.Setup(x => x.GetTickerAsync("LTCBTC")).ReturnsAsync(new ExchangeTicker { Last = 0.00300m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 0.003m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["LTC"] = 6
             });
