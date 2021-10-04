@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoSats.Execution.Services
@@ -12,29 +13,20 @@ namespace AutoSats.Execution.Services
             this.serviceProvider = serviceProvider;
         }
 
-        public IExchangeService GetService(string exchangeName)
+        public async Task<IExchangeService> GetServiceAsync(string exchangeName, string? fileName)
         {
             var service = GetServiceFromProvider();
 
-            service.Initialize(exchangeName, null);
+            await service.InitializeAsync(exchangeName, fileName);
 
             return service;
         }
 
-        public IExchangeService GetService(string exchangeName, string? fileName)
+        public async Task<IExchangeService> GetServiceAsync(string exchangeName, string key1, string key2, string? key3)
         {
             var service = GetServiceFromProvider();
 
-            service.Initialize(exchangeName, fileName);
-
-            return service;
-        }
-
-        public IExchangeService GetService(string exchangeName, string key1, string key2, string? key3)
-        {
-            var service = GetServiceFromProvider();
-
-            service.Initialize(exchangeName, key1, key2, key3);
+            await service.InitializeAsync(exchangeName, key1, key2, key3);
 
             return service;
         }

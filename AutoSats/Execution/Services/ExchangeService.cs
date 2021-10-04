@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services
 {
-    public class ExchangeService : IExchangeService, IDisposable
+    public class ExchangeService : IExchangeService
     {
         private IExchangeAPI? api;
         private readonly ILogger<ExchangeService> logger;
@@ -24,9 +24,9 @@ namespace AutoSats.Execution.Services
             this.apiProvider = apiProvider;
         }
 
-        public virtual IExchangeService Initialize(string exchangeName, string? keysFileName)
+        public virtual async Task<IExchangeService> InitializeAsync(string exchangeName, string? keysFileName)
         {
-            var api = this.apiProvider.GetApi(exchangeName);
+            var api = await this.apiProvider.GetApiAsync(exchangeName);
 
             if (keysFileName != null)
             {
@@ -38,9 +38,9 @@ namespace AutoSats.Execution.Services
             return this;
         }
 
-        public virtual IExchangeService Initialize(string exchangeName, string key1, string key2, string? key3)
+        public virtual async Task<IExchangeService> InitializeAsync(string exchangeName, string key1, string key2, string? key3)
         {
-            var api = this.apiProvider.GetApi(exchangeName);
+            var api = await this.apiProvider.GetApiAsync(exchangeName);
 
             api.LoadAPIKeysUnsecure(key1, key2, key3);
 
@@ -67,7 +67,7 @@ namespace AutoSats.Execution.Services
             }
 
             // query order details until it is fully filled
-            while (result.Result == ExchangeAPIOrderResult.FilledPartially || result.Result == ExchangeAPIOrderResult.Pending)
+            while (result.Result == ExchangeAPIOrderResult.FilledPartially || result.Result == ExchangeAPIOrderResult.Open || result.Result == ExchangeAPIOrderResult.PendingOpen)
             {
                 result = await Api.GetOrderDetailsAsync(result.OrderId);
             }

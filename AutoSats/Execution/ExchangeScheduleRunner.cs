@@ -17,7 +17,7 @@ namespace AutoSats.Execution
     {
         private readonly SatsContext db;
         private readonly ILogger<ExchangeScheduleRunner> logger;
-        private readonly IExchangeService exchangeService;
+        private readonly IExchangeServiceFactory exchangeServiceFactory;
         private readonly IWalletService walletService;
         private readonly IEnumerable<ExchangeOptions> exchangeOptions;
         private readonly string dataFolder;
@@ -25,13 +25,13 @@ namespace AutoSats.Execution
         public ExchangeScheduleRunner(
             SatsContext db,
             ILogger<ExchangeScheduleRunner> logger,
-            IExchangeService exchangeService,
+            IExchangeServiceFactory exchangeServiceFactory,
             IWalletService walletService,
             IEnumerable<ExchangeOptions> exchangeOptions)
         {
             this.db = db;
             this.logger = logger;
-            this.exchangeService = exchangeService;
+            this.exchangeServiceFactory = exchangeServiceFactory;
             this.walletService = walletService;
             this.exchangeOptions = exchangeOptions;
 
@@ -51,12 +51,12 @@ namespace AutoSats.Execution
             var schedule = await this.db.ExchangeSchedules.FirstAsync(x => x.Id == id);
             var keys = Path.Combine(this.dataFolder, $"{id}.{ExecutionConsts.KeysFileExtension}");
 
-            this.exchangeService.Initialize(schedule.Exchange, keys);
+            using var service = await this.exchangeServiceFactory.GetServiceAsync(schedule.Exchange, keys);
 
             try
             {
-                await BuyAsync(schedule);
-                await WithdrawAsync(schedule);
+                await BuyAsync(service, schedule);
+                await WithdrawAsync(service, schedule);
             }
             finally
             {
@@ -64,19 +64,19 @@ namespace AutoSats.Execution
             }
         }
 
-        private async Task BuyAsync(ExchangeSchedule schedule)
+        private async Task BuyAsync(IExchangeService service, ExchangeSchedule schedule)
         {
             try
             {
                 var spendCurrency = schedule.SpendCurrency;
-                var balance = await GetCurrencyBalance(spendCurrency);
+                var balance = await GetCurrencyBalance(service, spendCurrency);
 
                 if (balance < schedule.Spend)
                 {
                     throw new ScheduleRunFailedException($"Cannot spend '{schedule.Spend}' of '{spendCurrency}' because the balance is only '{balance}'");
                 }
 
-                var price = await this.exchangeService.GetPriceAsync(schedule.Symbol);
+                var price = await service.GetPriceAsync(schedule.Symbol);
                 var currenciesReversed = GetExchangeOptions(schedule.Exchange).ReverseCurrencies;
                 var invert = !schedule.Symbol.EndsWith(spendCurrency, StringComparison.OrdinalIgnoreCase) ^ currenciesReversed;
                 var amount = invert ? schedule.Spend : schedule.Spend / price;
@@ -84,7 +84,7 @@ namespace AutoSats.Execution
                 this.logger.LogInformation($"Going to buy '{amount}' of '{schedule.Symbol}'");
 
                 var orderType = this.exchangeOptions.FirstOrDefault(x => x.Name == schedule.Exchange)?.BuyOrderType ?? BuyOrderType.Market;
-                var result = await this.exchangeService.BuyAsync(schedule.Symbol, amount, orderType, invert);
+                var result = await service.BuyAsync(schedule.Symbol, amount, orderType, invert);
                 var buy = new ExchangeEventBuy
                 {
                     Schedule = schedule,
@@ -117,7 +117,7 @@ namespace AutoSats.Execution
             return this.exchangeOptions.FirstOrDefault(e => e.Name == exchange) ?? new ExchangeOptions();
         }
 
-        private async Task WithdrawAsync(ExchangeSchedule schedule)
+        private async Task WithdrawAsync(IExchangeService service, ExchangeSchedule schedule)
         {
             if (schedule.WithdrawalType == ExchangeWithdrawalType.None)
             {
@@ -125,7 +125,7 @@ namespace AutoSats.Execution
             }
 
             var withdrawCurrency = "BTC";
-            var balance = await GetCurrencyBalance(withdrawCurrency);
+            var balance = await GetCurrencyBalance(service, withdrawCurrency);
             
             if (balance < schedule.WithdrawalLimit)
             {
@@ -134,7 +134,7 @@ namespace AutoSats.Execution
             }
             
             var options = GetExchangeOptions(schedule.Exchange);
-            var fee = await GetWithdrawalFee(withdrawCurrency, options.FallbackWithdrawalFee);
+            var fee = await GetWithdrawalFee(service, withdrawCurrency, options.FallbackWithdrawalFee);
 
             var address = schedule.WithdrawalType switch
             {
@@ -148,7 +148,7 @@ namespace AutoSats.Execution
             try
             {
                 var amount = balance - fee;
-                var id = await this.exchangeService.WithdrawAsync(withdrawCurrency, address, amount);
+                var id = await service.WithdrawAsync(withdrawCurrency, address, amount);
 
                 this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
                 {
@@ -175,11 +175,11 @@ namespace AutoSats.Execution
             }
         }
 
-        private async Task<decimal> GetWithdrawalFee(string cryptoCurrency, decimal fallbackFee)
+        private async Task<decimal> GetWithdrawalFee(IExchangeService service, string cryptoCurrency, decimal fallbackFee)
         {
             try
             {
-                var fee = await this.exchangeService.GetWithdrawalFeeAsync(cryptoCurrency);
+                var fee = await service.GetWithdrawalFeeAsync(cryptoCurrency);
 
                 return fee == 0 
                     ? fallbackFee
@@ -192,10 +192,10 @@ namespace AutoSats.Execution
             }
         }
 
-        private async Task<decimal> GetCurrencyBalance(string currency)
+        private async Task<decimal> GetCurrencyBalance(IExchangeService service, string currency)
         {
             var c = currency.ToUpper();
-            var balances = await this.exchangeService.GetBalancesAsync();
+            var balances = await service.GetBalancesAsync();
 
             return balances.FirstOrDefault(x => x.Currency.ToUpper() == c)?.Amount ?? 0;
         }

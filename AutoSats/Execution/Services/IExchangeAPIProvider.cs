@@ -1,9 +1,10 @@
 ﻿using ExchangeSharp;
+using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services
 {
     public interface IExchangeAPIProvider
     {
-        IExchangeAPI GetApi(string name);
+        Task<IExchangeAPI> GetApiAsync(string name);
     }
 }
