@@ -50,7 +50,7 @@ namespace AutoSats.Execution
 
         public async Task<IEnumerable<SymbolBalance>> GetSymbolBalancesAsync(string exchange, string key1, string key2, string? key3)
         {
-            var service = this.exchangeFactory.GetService(exchange, key1, key2, key3);
+            var service = await this.exchangeFactory.GetServiceAsync(exchange, key1, key2, key3);
             var balances = await service.GetBalancesAsync();
             var options = GetExchangeOptions(exchange);
             var symbols = await service.GetSymbolsWithAsync(options.BitcoinSymbol, options.TickerPrefixes);

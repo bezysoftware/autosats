@@ -62,8 +62,8 @@ namespace AutoSats.Tests
             this.service = new ExchangeService(Mock.Of<ILogger<ExchangeService>>(), this.apiProvider.Object);
             this.serviceProvider = new Mock<IExchangeServiceFactory>();
             this.serviceProvider
-                .Setup(x => x.GetService("exchange", "key1", "key2", null))
-                .Returns<string, string, string, string>((exchange, key1, key2, key3) => this.service.Initialize(exchange, key1, key2, key3));
+                .Setup(x => x.GetServiceAsync("exchange", "key1", "key2", null))
+                .Returns((string exchange, string key1, string key2, string key3) => this.service.InitializeAsync(exchange, key1, key2, key3));
 
             this.runner = new Mock<IExchangeScheduleRunner>();
             this.escheduler = new ExchangeScheduler(
@@ -137,7 +137,7 @@ namespace AutoSats.Tests
             api.Setup(x => x.GetMarketSymbolsAsync()).ReturnsAsync(new[] { "BTC_USD", "BTC_EUR", "ETH_BTC", "MKR_BTC", "LTC_EUR", "CZK_BTC" });
             
 
-            this.apiProvider.Setup(x => x.GetApi("exchange")).Returns(() => api.Object);
+            this.apiProvider.Setup(x => x.GetApiAsync("exchange")).ReturnsAsync(() => api.Object);
 
             var result = await this.escheduler.GetSymbolBalancesAsync("exchange", "key1", "key2", null);
 

@@ -1,20 +1,21 @@
 ﻿using AutoSats.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services
 {
-    public interface IExchangeService
+    public interface IExchangeService : IDisposable
     {
         /// <summary>
         /// Initialize the service with keys coming from a file.
         /// </summary>
-        IExchangeService Initialize(string exchangeName, string? keysFileName);
+        Task<IExchangeService> InitializeAsync(string exchangeName, string? keysFileName);
 
         /// <summary>
         /// Initialize the service with supplied keys.
         /// </summary>
-        IExchangeService Initialize(string exchangeName, string key1, string key2, string? key3);
+        Task<IExchangeService> InitializeAsync(string exchangeName, string key1, string key2, string? key3);
         
         /// <summary>
         /// Gets balances for all your currencies.
