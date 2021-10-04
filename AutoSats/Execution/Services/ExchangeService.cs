@@ -103,11 +103,12 @@ namespace AutoSats.Execution.Services
             return result.Last;
         }
 
-        public async Task<string> WithdrawAsync(string cryptoCurrency, string address, decimal amount)
+        public async Task<string> WithdrawAsync(string cryptoCurrency, string? address, decimal amount)
         {
             var result = await Api.WithdrawAsync(new ExchangeWithdrawalRequest
             {
                 Address = address,
+                AddressTag = "AutoSats",
                 Amount = amount,
                 Currency = cryptoCurrency,
             });

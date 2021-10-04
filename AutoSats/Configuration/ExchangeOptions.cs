@@ -27,6 +27,8 @@ namespace AutoSats.Configuration
 
         public string BitcoinSymbol { get; set; } = "BTC";
 
+        public WithdrawalType WithdrawalType { get; set; }
+
         public char[] TickerPrefixes { get; set; } = Array.Empty<char>();
 
         public string[] Permissions { get; init; } = Array.Empty<string>();
