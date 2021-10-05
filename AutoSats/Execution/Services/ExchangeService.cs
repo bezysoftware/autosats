@@ -110,7 +110,7 @@ namespace AutoSats.Execution.Services
                 Address = address,
                 AddressTag = "AutoSats",
                 Amount = amount,
-                Currency = cryptoCurrency,
+                Currency = cryptoCurrency
             });
 
             if (!result.Success && string.IsNullOrEmpty(result.Id))
@@ -119,26 +119,6 @@ namespace AutoSats.Execution.Services
             }
 
             return result.Id ?? "unknown";
-        }
-
-        public async Task<decimal> GetWithdrawalFeeAsync(string currency)
-        {
-            var c = currency.ToLower();
-            var fees = await Api.GetFeesAync();
-            var currencyFees = fees.Where(x => x.Key.ToLower().Contains(c)).ToArray();
-
-            if (currencyFees.Length > 1)
-            {
-                currencyFees = currencyFees.Where(x => x.Key.ToLower().Contains("withdraw")).ToArray();
-            }
-
-            if (currencyFees.Length == 0)
-            {
-                return 0;
-            }
-
-            // return conservatively highest found fee
-            return currencyFees.Max(x => x.Value);
         }
 
         public async Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency, char[] prefixes)
