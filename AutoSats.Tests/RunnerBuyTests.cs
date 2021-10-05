@@ -23,7 +23,6 @@ namespace AutoSats.Tests
                 ["EUR"] = 4
             });
 
-
             await Assert.ThrowsAsync<ScheduleRunFailedException>(() => this.runner.RunScheduleAsync(1));
 
             var events = this.db.ExchangeEvents.ToList();
