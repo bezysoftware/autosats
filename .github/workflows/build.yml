@@ -48,10 +48,13 @@ jobs:
           context: ./
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
+          push: true
           tags: ghcr.io/bezysoftware/autosats:${{ env.IMAGE_TAG }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           platforms: linux/arm64,linux/amd64
 
       - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+        run: |
+            echo ${{ steps.docker_build.outputs.digest }}
+            echo ghcr.io/bezysoftware/autosats:${{ env.IMAGE_TAG }}
