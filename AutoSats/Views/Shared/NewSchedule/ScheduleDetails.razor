@@ -114,13 +114,19 @@
                 else
                 {
                     <FormItem Label="Withdrawal" Required LabelColSpan="10" WrapperColSpan="14">
-                        <Select DataSource="withdrawalTypes"
-                                TItem="ExchangeWithdrawalType"
+                        <Select TItem="ExchangeWithdrawalType"
                                 TItemValue="ExchangeWithdrawalType"
                                 Disabled="isGeneratingAddress"
                                 Loading="isGeneratingAddress && context.WithdrawalType == ExchangeWithdrawalType.Dynamic"
                                 @bind-Value="context.WithdrawalType"
-                                OnSelectedItemChanged="WithdrawalTypeChanged" />
+                                OnSelectedItemChanged="WithdrawalTypeChanged">
+                            <SelectOptions>
+                                @foreach (var w in withdrawalTypes ?? Enumerable.Empty<ExchangeWithdrawalType>())
+                                {
+                                    <SelectOption TItemValue="ExchangeWithdrawalType" TItem="ExchangeWithdrawalType" Value="w" Label="@(EnumHelper<ExchangeWithdrawalType>.GetDisplayName(w))" />
+                                }
+                            </SelectOptions>
+                        </Select>
                     </FormItem>
 
                     @if (context.WithdrawalType == ExchangeWithdrawalType.Fixed)
