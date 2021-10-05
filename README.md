@@ -17,6 +17,7 @@ AutoSats is the simplest non-custudial DCA solution you can run on your own node
 * Bitfinex
 * Bitstamp
 * Coibase PRO
+* Kraken
 * Poloniex
 * ...more coming in the future, see below how you can contribute
 
