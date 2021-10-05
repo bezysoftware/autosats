@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
+using System.Linq;
 
 namespace AutoSats
 {
@@ -58,7 +59,12 @@ namespace AutoSats
             services.AddAntDesign();
             services.AddHttpClient();
 
-            var exchanges = Configuration.GetSection("Exchanges").Get<ExchangeOptions[]>();
+            var exchanges = Configuration
+                .GetSection("Exchanges")
+                .Get<ExchangeOptions[]>()
+                .OrderBy(x => x.Name)
+                .ToArray()
+                .AsEnumerable();
 
             services.AddSingleton(exchanges); 
             services.AddTransient<IExchangeService, ExchangeService>();

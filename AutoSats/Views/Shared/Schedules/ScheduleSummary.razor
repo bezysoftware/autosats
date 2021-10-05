@@ -63,6 +63,7 @@
         return withdrawalType switch
         {
             ExchangeWithdrawalType.Fixed => "withdraw to a fixed address",
+            ExchangeWithdrawalType.Named => "withdraw to a named address",
             ExchangeWithdrawalType.Dynamic => "withdraw to a new address each time",
             _ => "do not withdraw"
         };

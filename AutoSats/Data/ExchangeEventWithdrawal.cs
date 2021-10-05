@@ -9,8 +9,7 @@ namespace AutoSats.Data
         [Required]
         public decimal Amount { get; set; }
 
-        [Required]
-        public string Address { get; set; } = null!;
+        public string? Address { get; set; }
      
         public override ExchangeEventType Type { get; set; } = ExchangeEventType.Withdraw;
     }

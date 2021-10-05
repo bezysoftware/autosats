@@ -104,48 +104,82 @@
             </GridCol>
 
             <GridCol Span="11">
-                <FormItem Label="Withdrawal" Required LabelColSpan="10" WrapperColSpan="14">
-                    <EnumSelect TEnum="ExchangeWithdrawalType"
+                @if (exchange?.WithdrawalType == WithdrawalType.None)
+                {
+                    <Alert Type="@AlertType.Warning">
+                        Withdrawal isn't currently supported for this exchange.
+                        Feel free to contribute this feature on <a target="_blank" href="https://github.com/bezysoftware/autosats/issues">GitHub</a>.
+                    </Alert>
+                }
+                else
+                {
+                    <FormItem Label="Withdrawal" Required LabelColSpan="10" WrapperColSpan="14">
+                        <Select TItem="ExchangeWithdrawalType"
+                                TItemValue="ExchangeWithdrawalType"
                                 Disabled="isGeneratingAddress"
                                 Loading="isGeneratingAddress && context.WithdrawalType == ExchangeWithdrawalType.Dynamic"
-                                @bind-Value="context.WithdrawalType" 
-                                OnSelectedItemChanged="WithdrawalTypeChanged"
-                                />
-                </FormItem>
-
-                @if (context.WithdrawalType == ExchangeWithdrawalType.Fixed)
-                {
-                    <FormItem Label="Address" LabelColSpan="10" WrapperColSpan="14">
-                        <AntDesign.Input @bind-Value="context.WithdrawalAddress">
-                            <Suffix>
-                                <Tooltip Title="@("Generate address")">
-                                    <Button Class="input-button" Type="@ButtonType.Text" Loading="isGeneratingAddress" OnClick="GenerateWithdrawalAddressAsync">
-                                        <Icon Type="setting" Theme="outline" />
-                                    </Button>
-                                </Tooltip>
-                            </Suffix>
-                        </AntDesign.Input>
+                                @bind-Value="context.WithdrawalType"
+                                OnSelectedItemChanged="WithdrawalTypeChanged">
+                            <SelectOptions>
+                                @foreach (var w in withdrawalTypes ?? Enumerable.Empty<ExchangeWithdrawalType>())
+                                {
+                                    <SelectOption TItemValue="ExchangeWithdrawalType" TItem="ExchangeWithdrawalType" Value="w" Label="@(EnumHelper<ExchangeWithdrawalType>.GetDisplayName(w))" />
+                                }
+                            </SelectOptions>
+                        </Select>
                     </FormItem>
-                }
 
-                @if (context.WithdrawalType != ExchangeWithdrawalType.None)
-                {
-                    <FormItem Label="Limit" Required LabelColSpan="10" WrapperColSpan="14">
-                        <Tooltip Title="@("Once you accumulate at least this much BTC your entire balance will be withdrawn to your wallet (minus any fees)")">
-                            <NumberInput @bind-Value="context.WithdrawalLimit"
+                    @if (context.WithdrawalType == ExchangeWithdrawalType.Fixed)
+                    {
+                        <FormItem Label="Address" LabelColSpan="10" WrapperColSpan="14">
+                            <AntDesign.Input @bind-Value="context.WithdrawalAddress">
+                                <Suffix>
+                                    <Tooltip Title="@("Generate address")">
+                                        <Button Class="input-button" Type="@ButtonType.Text" Loading="isGeneratingAddress" OnClick="GenerateWithdrawalAddressAsync">
+                                            <Icon Type="setting" Theme="outline" />
+                                        </Button>
+                                    </Tooltip>
+                                </Suffix>
+                            </AntDesign.Input>
+                        </FormItem>
+                    }
+
+                    @if (context.WithdrawalType != ExchangeWithdrawalType.None)
+                    {
+                        <FormItem Label="Limit" Required LabelColSpan="10" WrapperColSpan="14">
+                            <Tooltip Title="@("Once you accumulate at least this much BTC your entire balance will be withdrawn to your wallet (minus any fees)")">
+                                <NumberInput @bind-Value="context.WithdrawalLimit"
                                              Class="element-stretch"
                                              Type="number"
                                              min="0"
-                                             step="0.001"
-                                             >
-                                <AddOnAfter>
-                                    BTC
-                                </AddOnAfter>
-                            </NumberInput>
-                        </Tooltip>
-                    </FormItem>
-                }
+                                             step="0.001">
+                                    <AddOnAfter>
+                                        BTC
+                                    </AddOnAfter>
+                                </NumberInput>
+                            </Tooltip>
+                        </FormItem>
 
+                        @if (context.WithdrawalType == ExchangeWithdrawalType.Named)
+                        {   
+                            <div class="named-withdrawal">
+                                <Alert Type="@AlertType.Info">
+                                    @exchange?.Name supports withdrawal only to named pre-approved addresses.
+                                    Make sure you set one up in <a href="@exchange?.ApiUrl" target="_blank">@exchange?.ApiName</a>
+                                    and name it <strong>AutoSats</strong>. That's where your balance will be withdrawn to.
+                                </Alert>
+                                <Button Loading="isGeneratingAddress" OnClick="GenerateTempWithdrawalAddressAsync">
+                                    Generate address
+                                </Button>
+                                @if (tempAddress != null)
+                                {
+                                    <AntDesign.Input @bind-Value="tempAddress"
+                                                     ReadOnly="true" />
+                                }
+                            </div>
+                        }
+                    }
+                }
             </GridCol>
         </Row>
         <Row Justify="center">
@@ -179,15 +213,20 @@
     [Parameter] public KeysWithBalances? KeysWithBalances { get; set; }
 
     private SchedulePeriod selectedPeriod { get; set; }
+    private string? tempAddress { get; set; }
+    private IEnumerable<ExchangeWithdrawalType>? withdrawalTypes { get; set; }
 
     private ViewModels.ScheduleDetails details = new ViewModels.ScheduleDetails();
     private bool isGeneratingAddress;
     private bool isSaving;
+    private ExchangeOptions? exchange;
 
     protected override void OnInitialized()
     {
-        var exchange = KeysWithBalances?.Keys.Exchange ?? throw new InvalidOperationException();
-
+        this.exchange = KeysWithBalances?.Keys.Exchange ?? throw new InvalidOperationException();
+        this.withdrawalTypes = exchange?.WithdrawalType == WithdrawalType.Address
+            ? new[] { ExchangeWithdrawalType.None, ExchangeWithdrawalType.Fixed, ExchangeWithdrawalType.Dynamic }
+            : new[] { ExchangeWithdrawalType.None, ExchangeWithdrawalType.Named };
         this.details.Symbol = KeysWithBalances.Balances.OrderByDescending(x => x.Amount).FirstOrDefault()?.Symbol;
     }
 
@@ -241,6 +280,15 @@
         }
 
         this.isSaving = false;
+    }
+
+    private async Task GenerateTempWithdrawalAddressAsync()
+    {
+        if (await GenerateWithdrawalAddressAsync())
+        {
+            this.tempAddress = this.details.WithdrawalAddress;
+            this.details.WithdrawalAddress = null;
+        }
     }
 
     private async Task<bool> GenerateWithdrawalAddressAsync()

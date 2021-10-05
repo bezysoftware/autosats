@@ -18,7 +18,7 @@ namespace AutoSats.Tests
 
             this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 6,
                 ["BTC"] = 1
@@ -43,7 +43,7 @@ namespace AutoSats.Tests
             this.api.Setup(x => x.WithdrawAsync(It.IsAny<ExchangeWithdrawalRequest>())).ReturnsAsync(new ExchangeWithdrawalResponse { Id = "123" });
             this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 6,
                 ["BTC"] = 1.5m
@@ -65,12 +65,39 @@ namespace AutoSats.Tests
             var request = new ExchangeWithdrawalRequest
             {
                 Address = "address",
+                AddressTag = "AutoSats",
                 Amount = 1.5m,
                 Currency = "BTC"
             };
             this.api.Verify(x => x.WithdrawAsync(It.Is<ExchangeWithdrawalRequest>(x => Verify(request, x))), Times.Once());
         }
 
+        [Fact]
+        public async Task WithdrawSucceedsToNamedAddress()
+        {
+            AddSchedule(5, "EUR", "BTCEUR", ExchangeWithdrawalType.Named, 1, "address");
+
+            this.api.Setup(x => x.WithdrawAsync(It.IsAny<ExchangeWithdrawalRequest>())).ReturnsAsync(new ExchangeWithdrawalResponse { Id = "123" });
+            this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
+            this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            {
+                ["EUR"] = 6,
+                ["BTC"] = 1.5m
+            });
+
+            await this.runner.RunScheduleAsync(1);
+
+            // withdraw called
+            var request = new ExchangeWithdrawalRequest
+            {
+                Address = null,
+                AddressTag = "AutoSats",
+                Amount = 1.5m,
+                Currency = "BTC"
+            };
+            this.api.Verify(x => x.WithdrawAsync(It.Is<ExchangeWithdrawalRequest>(x => Verify(request, x))), Times.Once());
+        }
 
         [Fact]
         public async Task WithdrawSucceedsToDynamicAddress()
@@ -81,7 +108,7 @@ namespace AutoSats.Tests
             this.api.Setup(x => x.WithdrawAsync(It.IsAny<ExchangeWithdrawalRequest>())).ReturnsAsync(new ExchangeWithdrawalResponse { Id = "123" });
             this.api.Setup(x => x.GetTickerAsync("BTCEUR")).ReturnsAsync(new ExchangeTicker { Last = 30000m });
             this.api.Setup(x => x.PlaceOrderAsync(It.IsAny<ExchangeOrderRequest>())).ReturnsAsync(new ExchangeOrderResult { AveragePrice = 30000m });
-            this.api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            this.api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["EUR"] = 6,
                 ["BTC"] = 1.5m
@@ -103,6 +130,7 @@ namespace AutoSats.Tests
             var request = new ExchangeWithdrawalRequest
             {
                 Address = "dynamicaddress",
+                AddressTag = "AutoSats",
                 Amount = 1.5m,
                 Currency = "BTC"
             };

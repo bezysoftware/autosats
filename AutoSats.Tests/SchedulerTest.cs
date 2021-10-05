@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoSats.Configuration;
 using AutoSats.Data;
 using AutoSats.Execution;
 using AutoSats.Execution.Services;
@@ -72,7 +73,8 @@ namespace AutoSats.Tests
                 this.schedulerFactory.Object,
                 this.runner.Object,
                 this.serviceProvider.Object,
-                this.mapper);
+                this.mapper,
+                Array.Empty<ExchangeOptions>());
         }
 
         public void Dispose()
@@ -125,7 +127,7 @@ namespace AutoSats.Tests
         {
             var api = new Mock<IExchangeAPI>();
 
-            api.Setup(x => x.GetAmountsAvailableToTradeAsync()).ReturnsAsync(new Dictionary<string, decimal>
+            api.Setup(x => x.GetAmountsAsync()).ReturnsAsync(new Dictionary<string, decimal>
             {
                 ["BTC"] = 1m,
                 ["ETH"] = 2m,

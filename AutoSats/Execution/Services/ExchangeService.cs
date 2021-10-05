@@ -88,18 +88,8 @@ namespace AutoSats.Execution.Services
 
         public async Task<IEnumerable<Balance>> GetBalancesAsync()
         {
-            Dictionary<string, decimal> balances;
+            var balances = await Api.GetAmountsAsync();
             
-            try
-            {
-                balances = await Api.GetAmountsAvailableToTradeAsync();
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogWarning(ex, $"Call to {nameof(Api.GetAmountsAvailableToTradeAsync)} failed, trying {nameof(Api.GetAmountsAsync)}");
-                balances = await Api.GetAmountsAsync();
-            }
-
             return balances
                 .Select(x => new Balance(x.Key, x.Value))
                 .OrderByDescending(x => x.Amount)
@@ -113,13 +103,14 @@ namespace AutoSats.Execution.Services
             return result.Last;
         }
 
-        public async Task<string> WithdrawAsync(string cryptoCurrency, string address, decimal amount)
+        public async Task<string> WithdrawAsync(string cryptoCurrency, string? address, decimal amount)
         {
             var result = await Api.WithdrawAsync(new ExchangeWithdrawalRequest
             {
                 Address = address,
+                AddressTag = "AutoSats",
                 Amount = amount,
-                Currency = cryptoCurrency,
+                Currency = cryptoCurrency
             });
 
             if (!result.Success && string.IsNullOrEmpty(result.Id))
@@ -130,33 +121,13 @@ namespace AutoSats.Execution.Services
             return result.Id ?? "unknown";
         }
 
-        public async Task<decimal> GetWithdrawalFeeAsync(string currency)
-        {
-            var c = currency.ToLower();
-            var fees = await Api.GetFeesAync();
-            var currencyFees = fees.Where(x => x.Key.ToLower().Contains(c)).ToArray();
-
-            if (currencyFees.Length > 1)
-            {
-                currencyFees = currencyFees.Where(x => x.Key.ToLower().Contains("withdraw")).ToArray();
-            }
-
-            if (currencyFees.Length == 0)
-            {
-                return 0;
-            }
-
-            // return conservatively highest found fee
-            return currencyFees.Max(x => x.Value);
-        }
-
-        public async Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency)
+        public async Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency, char[] prefixes)
         {
             var symbols = await Api.GetMarketSymbolsAsync();
             
             return symbols
                 .Where(x => x.Contains(currency, StringComparison.OrdinalIgnoreCase))
-                .Select(x => Symbol.Normalize(x, currency))
+                .Select(x => Symbol.Normalize(x, currency, prefixes))
                 .ToArray();
         }
 

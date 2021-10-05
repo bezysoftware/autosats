@@ -124,6 +124,7 @@ namespace AutoSats.Execution
                 return;
             }
 
+            var options = GetExchangeOptions(schedule.Exchange);
             var withdrawCurrency = "BTC";
             var balance = await GetCurrencyBalance(service, withdrawCurrency);
             
@@ -132,29 +133,26 @@ namespace AutoSats.Execution
                 this.logger.LogInformation($"{withdrawCurrency} balance {balance} is less than withdrawal limit {schedule.WithdrawalLimit}");
                 return;
             }
-            
-            var options = GetExchangeOptions(schedule.Exchange);
-            var fee = await GetWithdrawalFee(service, withdrawCurrency, options.FallbackWithdrawalFee);
 
             var address = schedule.WithdrawalType switch
             {
                 ExchangeWithdrawalType.Fixed => schedule.WithdrawalAddress ?? throw new InvalidOperationException("WithdrawalType is Fixed, but address is null"),
+                ExchangeWithdrawalType.Named => null,
                 ExchangeWithdrawalType.Dynamic => await this.walletService.GenerateDepositAddressAsync(),
                 _ => throw new InvalidOperationException($"Unknown withdrawal type '{schedule.WithdrawalType}'")
             };
 
-            this.logger.LogInformation($"Going to withdraw '{balance}' - '{fee}' fee reserve of '{withdrawCurrency}' to address '{address}'");
+            this.logger.LogInformation($"Going to withdraw '{balance}' of '{withdrawCurrency}' to address '{address}'");
 
             try
             {
-                var amount = balance - fee;
-                var id = await service.WithdrawAsync(withdrawCurrency, address, amount);
+                var id = await service.WithdrawAsync(withdrawCurrency, address, balance);
 
                 this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
                 {
                     Schedule = schedule,
                     Address = address,
-                    Amount = amount,
+                    Amount = balance,
                     Timestamp = DateTime.UtcNow,
                     WithdrawalId = id
                 });
@@ -175,29 +173,15 @@ namespace AutoSats.Execution
             }
         }
 
-        private async Task<decimal> GetWithdrawalFee(IExchangeService service, string cryptoCurrency, decimal fallbackFee)
-        {
-            try
-            {
-                var fee = await service.GetWithdrawalFeeAsync(cryptoCurrency);
-
-                return fee == 0 
-                    ? fallbackFee
-                    : fee;
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, $"Couldn't get withdrawal fee for {cryptoCurrency}, using default");
-                return fallbackFee;
-            }
-        }
-
-        private async Task<decimal> GetCurrencyBalance(IExchangeService service, string currency)
+        private async Task<decimal> GetCurrencyBalance(IExchangeService service, string currency, string fallbackCurrency = "BTC")
         {
             var c = currency.ToUpper();
             var balances = await service.GetBalancesAsync();
 
-            return balances.FirstOrDefault(x => x.Currency.ToUpper() == c)?.Amount ?? 0;
+            // some exchanges use a different symbol for trading (XXBT) and for reporting balance (BTC), try both 
+            var balance = balances.FirstOrDefault(x => x.Currency.ToUpper() == c) ?? balances.FirstOrDefault(x => x.Currency.ToUpper() == fallbackCurrency);
+
+            return balance?.Amount ?? 0;
         }
     }
 }

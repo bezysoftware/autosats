@@ -11,6 +11,9 @@ namespace AutoSats.Data
         Fixed,
 
         [Display(Name = "New address each time")]
-        Dynamic
+        Dynamic,
+
+        [Display(Name = "Fixed named address")]
+        Named
     }
 }

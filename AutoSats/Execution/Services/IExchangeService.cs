@@ -35,16 +35,11 @@ namespace AutoSats.Execution.Services
         /// <summary>
         /// Withdraws given amount to target address. Returns withdrawal transaction id.
         /// </summary>
-        Task<string> WithdrawAsync(string cryptoCurrency, string address, decimal amount);
-
-        /// <summary>
-        /// Get withdrawal fee for given currency.
-        /// </summary>
-        Task<decimal> GetWithdrawalFeeAsync(string currency);
+        Task<string> WithdrawAsync(string cryptoCurrency, string? address, decimal amount);
 
         /// <summary>
         /// Get a list of available trading symbols where the given currency is present.
         /// </summary>
-        Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency);
+        Task<IEnumerable<Symbol>> GetSymbolsWithAsync(string currency, char[] prefixes);
     }
 }
