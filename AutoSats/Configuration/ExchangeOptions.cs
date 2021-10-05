@@ -23,8 +23,6 @@ namespace AutoSats.Configuration
 
         public BuyOrderType BuyOrderType { get; set; } = BuyOrderType.Market;
 
-        public decimal FallbackWithdrawalFee { get; set; }
-
         public string BitcoinSymbol { get; set; } = "BTC";
 
         public WithdrawalType WithdrawalType { get; set; }
