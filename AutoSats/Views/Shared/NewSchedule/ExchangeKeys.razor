@@ -124,6 +124,7 @@
 
         try
         {
+            await Task.Yield();
             var balances = await scheduler.GetSymbolBalancesAsync(keys.Exchange!.Name!, keys.Key1!, keys.Key2!, keys.Key3);
 
             await KeysChanged.InvokeAsync(new KeysWithBalances(keys, balances));
@@ -145,15 +146,15 @@
     {
         if (!string.IsNullOrWhiteSpace(NewExchangeName))
         {
-            this.exchanges = exchanges.Concat(new[] 
-            { 
-                new ExchangeOptions 
-                { 
+            this.exchanges = exchanges.Concat(new[]
+            {
+                new ExchangeOptions
+                {
                     Name = NewExchangeName,
                     Key1Name = "Key 1",
                     Key2Name = "Key 2",
                     Key3Name = "Key 3",
-                } 
+                }
             }).ToArray();
 
             this.showExchangeModal = false;

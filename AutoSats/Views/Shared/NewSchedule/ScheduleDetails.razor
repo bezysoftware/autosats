@@ -271,6 +271,7 @@
 
         try
         {
+            await Task.Yield();
             await scheduler.AddScheduleAsync(schedule, this.details.RunToVerify);
             await DetailsChanged.InvokeAsync(details);
         }
@@ -297,6 +298,7 @@
 
         try
         {
+            await Task.Yield();
             this.details.WithdrawalAddress = await wallet.GenerateDepositAddressAsync();
             return true;
         }

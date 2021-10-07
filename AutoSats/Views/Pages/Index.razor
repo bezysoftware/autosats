@@ -11,16 +11,26 @@ else if (exchangeSchedules.Length > 1)
 }
 else
 {
-    <SingleSchedule ScheduleId="exchangeSchedules[0].Id" />
+    <SingleSchedule ScheduleId="exchangeSchedules[0].Id" ScheduleDeleted="SingleScheduleDeleted" />
 }
 
 @code
 {
     private ExchangeScheduleSummary[] exchangeSchedules { get; set; } = Array.Empty<ExchangeScheduleSummary>();
 
-    protected override async Task OnInitializedAsync()
+    private Task SingleScheduleDeleted()
+    {
+        return InitializeSchedulesAsync();
+    }
+
+    private async Task InitializeSchedulesAsync()
     {
         var schedules = await scheduler.ListSchedulesAsync();
         exchangeSchedules = schedules.ToArray();
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return InitializeSchedulesAsync();
     }
 }
