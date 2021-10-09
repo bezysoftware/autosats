@@ -69,7 +69,7 @@ namespace AutoSats.Execution
             try
             {
                 var spendCurrency = schedule.SpendCurrency;
-                var balance = await GetCurrencyBalance(service, spendCurrency);
+                var (_, balance) = await GetCurrencyBalance(service, spendCurrency);
 
                 if (balance < schedule.Spend)
                 {
@@ -125,8 +125,7 @@ namespace AutoSats.Execution
             }
 
             var options = GetExchangeOptions(schedule.Exchange);
-            var withdrawCurrency = "BTC";
-            var balance = await GetCurrencyBalance(service, withdrawCurrency);
+            var (withdrawCurrency, balance) = await GetCurrencyBalance(service, options.BitcoinSymbol);
             
             if (balance < schedule.WithdrawalLimit)
             {
@@ -173,15 +172,27 @@ namespace AutoSats.Execution
             }
         }
 
-        private async Task<decimal> GetCurrencyBalance(IExchangeService service, string currency, string fallbackCurrency = "BTC")
+        private async Task<(string currency, decimal balance)> GetCurrencyBalance(IExchangeService service, string currency, string fallbackCurrency = "BTC")
         {
             var c = currency.ToUpper();
             var balances = await service.GetBalancesAsync();
 
             // some exchanges use a different symbol for trading (XXBT) and for reporting balance (BTC), try both 
-            var balance = balances.FirstOrDefault(x => x.Currency.ToUpper() == c) ?? balances.FirstOrDefault(x => x.Currency.ToUpper() == fallbackCurrency);
+            var balanceCurrency = balances.FirstOrDefault(x => x.Currency.ToUpper() == c);
 
-            return balance?.Amount ?? 0;
+            if (balanceCurrency != null)
+            {
+                return (c, balanceCurrency.Amount);
+            }
+
+            var balanceFallback = balances.FirstOrDefault(x => x.Currency.ToUpper() == fallbackCurrency);
+
+            if (balanceFallback != null)
+            {
+                return (c, balanceFallback.Amount);
+            }
+
+            return (currency, 0);
         }
     }
 }
