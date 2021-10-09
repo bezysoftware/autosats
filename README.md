@@ -17,6 +17,7 @@ AutoSats is the simplest non-custudial DCA solution you can run on your own node
 * Bitfinex
 * Bitstamp
 * Coibase PRO
+* FTX
 * Kraken
 * Poloniex
 * ...more coming in the future, see below how you can contribute
@@ -32,7 +33,7 @@ docker run \
     -e Bitcoin__Auth=<rpc_username:rpc_password> \
     -e Bitcoin__Url="http://bitcoin:8332" \
     --network umbrel_main_network \
-    -p 8081:80 \
+    -p 3311:80 \
     -v autosats:/app_data \
     -d \
     bezysoftware/autosats:latest
@@ -42,7 +43,7 @@ Let's go over the parameters:
 * `-e` sets an enviromental variable, AutoSats needs to know where Bitcoind is running and its RPC credentials
 * `--network` specifies the name of the Docker network that Bitcoind is running inside - you can ignore this if your Bitcoind isn't running inside a container
   * In that case you might want to set `-e Bitcoin__Url="http://host.docker.internal:8332"`
-* `-p` exposes the inner port (80) to be available on an external port (8081) - the app will become available on this port (e.g. http://umbrel.local:8081) 
+* `-p` exposes the inner port (80) to be available on an external port (3311) - the app will become available on this port (e.g. http://umbrel.local:3311) 
 * `-v` mounts a volume on the host to persist data inside the container
 * `-d` run the container in detached mode (your console won't be blocked)
 * `bezysoftware/autosats:latest` is the name of the image, latest released version
