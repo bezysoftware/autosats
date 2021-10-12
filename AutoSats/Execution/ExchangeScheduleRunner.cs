@@ -133,6 +133,7 @@ namespace AutoSats.Execution
                 return;
             }
 
+            var amount = balance - ExecutionConsts.FeeReserve;
             var address = schedule.WithdrawalType switch
             {
                 ExchangeWithdrawalType.Fixed => schedule.WithdrawalAddress ?? throw new InvalidOperationException("WithdrawalType is Fixed, but address is null"),
@@ -141,17 +142,17 @@ namespace AutoSats.Execution
                 _ => throw new InvalidOperationException($"Unknown withdrawal type '{schedule.WithdrawalType}'")
             };
 
-            this.logger.LogInformation($"Going to withdraw '{balance}' of '{withdrawCurrency}' to address '{address}'");
+            this.logger.LogInformation($"Going to withdraw '{amount}' of '{withdrawCurrency}' to address '{address}'");
 
             try
             {
-                var id = await service.WithdrawAsync(withdrawCurrency, address, balance);
+                var id = await service.WithdrawAsync(withdrawCurrency, address, amount);
 
                 this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
                 {
                     Schedule = schedule,
                     Address = address,
-                    Amount = balance,
+                    Amount = amount,
                     Timestamp = DateTime.UtcNow,
                     WithdrawalId = id
                 });

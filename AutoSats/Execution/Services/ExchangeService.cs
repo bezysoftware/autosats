@@ -108,9 +108,10 @@ namespace AutoSats.Execution.Services
             var result = await Api.WithdrawAsync(new ExchangeWithdrawalRequest
             {
                 Address = address,
-                AddressTag = "AutoSats",
+                AddressTag = string.IsNullOrEmpty(address) ? "AutoSats" : null, // only set tag when adress is missing
                 Amount = amount,
-                Currency = cryptoCurrency
+                Currency = cryptoCurrency,
+                TakeFeeFromAmount = false
             });
 
             if (!result.Success && string.IsNullOrEmpty(result.Id))
