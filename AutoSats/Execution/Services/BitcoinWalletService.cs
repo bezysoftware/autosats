@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services
 {
-    public class WalletService : IWalletService
+    public class BitcoinWalletService : IWalletService
     {
-        private readonly ILogger<WalletService> logger;
+        private readonly ILogger<BitcoinWalletService> logger;
         private readonly RPCClient client;
 
-        public WalletService(ILogger<WalletService> logger, RPCClient client)
+        public BitcoinWalletService(ILogger<BitcoinWalletService> logger, RPCClient client)
         {
             this.logger = logger;
             this.client = client;
