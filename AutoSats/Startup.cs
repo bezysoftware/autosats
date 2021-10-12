@@ -27,6 +27,7 @@ namespace AutoSats
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration.GetConnectionString("AutoSatsDatabase");
+            var walletType = Configuration.GetSection("Wallet").GetValue<WalletType>("Type");
 
             DbInitializer.InitializeQuartzDatabase(connectionString);
 
@@ -54,7 +55,7 @@ namespace AutoSats
                 q.AddJob<ExchangeJob>(ExecutionConsts.ExchangeJobKey, x => x.StoreDurably());
             });
 
-            services.AddBitcoinRPC();
+            services.AddWalletServices(walletType);
             services.AddAutoMapper(typeof(Startup));
             services.AddAntDesign();
             services.AddHttpClient();
@@ -72,7 +73,6 @@ namespace AutoSats
             services.AddScoped<IExchangeServiceFactory, ExchangeServiceFactory>();
             services.AddScoped<IExchangeScheduler, ExchangeScheduler>();
             services.AddScoped<IExchangeScheduleRunner, ExchangeScheduleRunner>();
-            services.AddScoped<IWalletService, WalletService>();
 
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/Views/Pages");
         }

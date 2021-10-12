@@ -30,8 +30,8 @@ Latest released version is available on [docker hub](https://hub.docker.com/repo
 
 ```bash
 docker run \
-    -e Bitcoin__Auth=<rpc_username:rpc_password> \
-    -e Bitcoin__Url="http://bitcoin:8332" \
+    -e Wallet__Bitcoind__Auth=<rpc_username:rpc_password> \
+    -e Wallet__Bitcoind__Url="http://bitcoin:8332" \
     --network umbrel_main_network \
     -p 3311:80 \
     -v autosats:/app_data \
@@ -50,7 +50,24 @@ Let's go over the parameters:
   * You can set a fixed version (`:v0.0.1`)
   * Or you can use absolutely latest version `ghcr.io/bezysoftware/autosats:latest` (built from `main`) which is published to [Github Container Repository](https://github.com/bezysoftware/autosats/pkgs/container/autosats)
 
-The long term goal is to make AutoSats available on [Umbrel](https://getumbrel.com/) and similar solutions with one-click install.
+There is also an option to use a lightning wallet instead of Bitcoind wallet (this will be used in Umbrel):
+
+```bash
+docker run \
+    -e Wallet__Type=lightning \
+    -e Wallet__Lightning__ConnectionType=lndREST \
+    -e Wallet__Lightning__BaseUri=<uri> \
+    -e Wallet__Lightning__MacaroonFilePath=<path> \
+    -e Wallet__Lightning__AllowInsecure=true \
+    --network umbrel_main_network \
+    -p 3311:80 \
+    -v autosats:/app_data \
+    -v /lnd:/lnd:ro \
+    -d \
+    bezysoftware/autosats:latest
+```
+
+The long term goal is to make AutoSats available on [Umbrel](https://github.com/getumbrel/umbrel/pull/1039) and similar solutions with one-click install.
 
 ## Contributing
 
