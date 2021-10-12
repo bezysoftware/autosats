@@ -59,15 +59,15 @@ namespace AutoSats.Tests
             var e = events[1] as ExchangeEventWithdrawal;
             e.Type.Should().Be(ExchangeEventType.Withdraw);
             e.Address.Should().Be("address");
-            e.Amount.Should().Be(1.5m);
+            e.Amount.Should().Be(1.5m - Execution.ExecutionConsts.FeeReserve);
 
             // withdraw called
             var request = new ExchangeWithdrawalRequest
             {
                 Address = "address",
-                AddressTag = "AutoSats",
-                Amount = 1.5m,
-                Currency = "BTC"
+                Amount = 1.5m - Execution.ExecutionConsts.FeeReserve,
+                Currency = "BTC",
+                TakeFeeFromAmount = false
             };
             this.api.Verify(x => x.WithdrawAsync(It.Is<ExchangeWithdrawalRequest>(x => Verify(request, x))), Times.Once());
         }
@@ -93,8 +93,9 @@ namespace AutoSats.Tests
             {
                 Address = null,
                 AddressTag = "AutoSats",
-                Amount = 1.5m,
-                Currency = "BTC"
+                Amount = 1.5m - Execution.ExecutionConsts.FeeReserve,
+                Currency = "BTC",
+                TakeFeeFromAmount = false
             };
             this.api.Verify(x => x.WithdrawAsync(It.Is<ExchangeWithdrawalRequest>(x => Verify(request, x))), Times.Once());
         }
@@ -124,15 +125,15 @@ namespace AutoSats.Tests
             var e = events[1] as ExchangeEventWithdrawal;
             e.Type.Should().Be(ExchangeEventType.Withdraw);
             e.Address.Should().Be("dynamicaddress");
-            e.Amount.Should().Be(1.5m);
+            e.Amount.Should().Be(1.5m - Execution.ExecutionConsts.FeeReserve);
 
             // withdraw called
             var request = new ExchangeWithdrawalRequest
             {
                 Address = "dynamicaddress",
-                AddressTag = "AutoSats",
-                Amount = 1.5m,
-                Currency = "BTC"
+                Amount = 1.5m - Execution.ExecutionConsts.FeeReserve,
+                Currency = "BTC",
+                TakeFeeFromAmount = false
             };
             this.api.Verify(x => x.WithdrawAsync(It.Is<ExchangeWithdrawalRequest>(x => Verify(request, x))), Times.Once());
         }
