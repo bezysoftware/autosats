@@ -1,5 +1,8 @@
-﻿<div class="footer-container">
+﻿@inject IOptions<ApplicationOptions> options
+<div class="footer-container">
     <span>Made in Prague with <span class="icon">🧡</span></span>
     <Divider Type="DirectionVHType.Vertical" />
     <span>Open source on <a target="_blank" href="https://github.com/bezysoftware/autosats">github</a> <Icon Type="github" Theme="outline" Class="icon" /></span>
+    <Divider Type="DirectionVHType.Vertical" />
+    <span><a href="https://github.com/bezysoftware/autosats/releases/tag/@options.Value.Version">@options.Value.Version</a></span>
 </div>

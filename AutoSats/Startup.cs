@@ -75,6 +75,7 @@ namespace AutoSats
             services.AddScoped<IExchangeScheduleRunner, ExchangeScheduleRunner>();
 
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/Views/Pages");
+            services.Configure<ApplicationOptions>(Configuration.GetSection("Application"));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SatsContext db)
