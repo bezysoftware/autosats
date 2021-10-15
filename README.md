@@ -1,9 +1,9 @@
 # AutoSats
 
 [![build](https://github.com/bezysoftware/autosats/actions/workflows/build.yml/badge.svg)](https://github.com/bezysoftware/autosats/actions)
-![version](https://img.shields.io/docker/v/bezysoftware/autosats?sort=semver)
+[![version](https://img.shields.io/docker/v/bezysoftware/autosats?sort=semver&cacheSeconds=3600)](https://hub.docker.com/repository/docker/bezysoftware/autosats)
 
-AutoSats is the simplest non-custodial DCA solution you can run on your own node. It lets you periodically buy Bitcoin on exchanges and withdraw it to your own wallet. 
+AutoSats is the easiest non-custudial DCA solution you can run on your own node. It lets you periodically buy bitcoin on exchanges according to your defined schedule and automatically withdraw it to your own wallet once it hits a specified threshold.
 
 ![](Assets/Screenshot.png)
 
@@ -16,7 +16,7 @@ AutoSats is the simplest non-custodial DCA solution you can run on your own node
 
 * Bitfinex
 * Bitstamp
-* Coibase PRO
+* Coinbase PRO
 * FTX
 * Kraken
 * Poloniex
