@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NBitcoin;
 using NBitcoin.RPC;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace AutoSats.Extensions
 {
@@ -31,12 +33,23 @@ namespace AutoSats.Extensions
             services.AddScoped<IWalletService, LightningWalletService>();
 
             services
-                .AddOptions<LightningConnectionString>()
-                .Configure<IConfiguration>((options, configuration) => configuration.GetSection("Wallet:Lightning").Bind(options));
+                .AddOptions<LightningConnectionStringCertificate>()
+                .Configure<IConfiguration>((options, configuration) =>
+                {
+                    configuration.GetSection("Wallet:Lightning").Bind(options);
+                    if (!string.IsNullOrEmpty(options.CertificatePath))
+                    {
+                        var cert = new X509Certificate2(X509Certificate.CreateFromCertFile(options.CertificatePath));
+                        using (var sha256 = SHA256.Create())
+                        {
+                            options.CertificateThumbprint = sha256.ComputeHash(cert.RawData);
+                        }
+                    }
+                });
 
             services.AddSingleton(provider =>
             {
-                var options = provider.GetRequiredService<IOptions<LightningConnectionString>>();
+                var options = provider.GetRequiredService<IOptions<LightningConnectionStringCertificate>>();
                 return new LightningClientFactory(Network.Main).Create(options.Value);
             });
 
