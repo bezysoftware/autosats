@@ -5,8 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NBitcoin;
-using NBitcoin.DataEncoders;
 using NBitcoin.RPC;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace AutoSats.Extensions
@@ -40,7 +40,10 @@ namespace AutoSats.Extensions
                     if (!string.IsNullOrEmpty(options.CertificatePath))
                     {
                         var cert = new X509Certificate2(X509Certificate.CreateFromCertFile(options.CertificatePath));
-                        options.CertificateThumbprint = Encoders.Hex.DecodeData(cert.Thumbprint);
+                        using (var sha256 = SHA256.Create())
+                        {
+                            options.CertificateThumbprint = sha256.ComputeHash(cert.RawData);
+                        }
                     }
                 });
 
