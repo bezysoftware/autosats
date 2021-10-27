@@ -22,7 +22,7 @@
         </FormItem>
 
         <FormItem WrapperColOffset="8" WrapperColSpan="8">
-            <Button Block Type="primary" HtmlType="submit">
+            <Button Block Type="primary" HtmlType="submit" Loading="LoginRunning">
                 Login
             </Button>
         </FormItem>
@@ -33,9 +33,13 @@
     public LoginRequest Model { get; set; } = new LoginRequest();
     public FormValidateStatus ValidateStatus { get; set; } = FormValidateStatus.Default;
     public string? Help { get; set; }
+    public bool LoginRunning { get; set; }
 
     private async Task LoginAsync(EditContext context)
     {
+        ValidateStatus = FormValidateStatus.Default;
+        LoginRunning = true;
+
         var model = (LoginRequest)context.Model;
         var authModule = await JSRunTime.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
         var result = await authModule.InvokeAsync<bool>("SignIn", model.Password, "/");
@@ -48,5 +52,7 @@
         {
             ValidateStatus = FormValidateStatus.Error;
         }
+
+        LoginRunning = false;
     }
 }
