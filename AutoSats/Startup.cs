@@ -3,8 +3,11 @@ using AutoSats.Data;
 using AutoSats.Execution;
 using AutoSats.Execution.Services;
 using AutoSats.Extensions;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -58,7 +61,26 @@ namespace AutoSats
             services.AddWalletServices(walletType);
             services.AddAutoMapper(typeof(Startup));
             services.AddAntDesign();
+            services.AddHttpContextAccessor();
             services.AddHttpClient();
+            services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.Cookie.Name = "AutoSats";
+                    options.Cookie.SameSite = SameSiteMode.Strict;
+                });
+
+            services.AddAuthorization(x =>
+            {
+                if (string.IsNullOrEmpty(Configuration.GetSection("Application").GetValue<string>("Password")))
+                {
+                    // no authorization
+                    x.DefaultPolicy = new AuthorizationPolicyBuilder()
+                        .RequireAssertion(_ => true)
+                        .Build();
+                }
+            });
 
             var exchanges = Configuration
                 .GetSection("Exchanges")
@@ -73,6 +95,7 @@ namespace AutoSats
             services.AddScoped<IExchangeServiceFactory, ExchangeServiceFactory>();
             services.AddScoped<IExchangeScheduler, ExchangeScheduler>();
             services.AddScoped<IExchangeScheduleRunner, ExchangeScheduleRunner>();
+            services.AddSingleton<ILoginService, LoginService>();
 
             services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/Views/Pages");
             services.Configure<ApplicationOptions>(Configuration.GetSection("Application"));
@@ -93,8 +116,11 @@ namespace AutoSats
 
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapDefaultControllerRoute();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });

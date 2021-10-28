@@ -1,6 +1,13 @@
 <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(AppLayout)" />
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(AppLayout)">
+            <NotAuthorized>
+                <Login />
+            </NotAuthorized>
+            <Authorizing>
+                Authorizing
+            </Authorizing>
+        </AuthorizeRouteView>
     </Found>
     <NotFound>
         <LayoutView Layout="@typeof(AppLayout)">

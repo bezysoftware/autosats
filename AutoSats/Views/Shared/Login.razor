@@ -1,0 +1,58 @@
+﻿@inject IHttpClientFactory http
+@inject NavigationManager navigation
+@inject IJSRuntime JSRunTime
+
+<div class="login-container">
+    <Form Model="Model" OnFinish="LoginAsync" Layout="@FormLayout.Vertical" ValidateMode="FormValidateMode.Complex">
+
+        <FormItem WrapperColOffset="8" 
+                  WrapperColSpan="8"
+                  LabelColOffset="8"
+                  Label="AutoSats Password" 
+                  ValidateStatus="ValidateStatus">
+            <InputPassword @bind-Value="context.Password" />
+            @if (ValidateStatus == FormValidateStatus.Error) 
+            {
+                <span class="error">Incorrect password</span>
+            }
+            else 
+            {
+                <span>&nbsp;</span>
+            }
+        </FormItem>
+
+        <FormItem WrapperColOffset="8" WrapperColSpan="8">
+            <Button Block Type="primary" HtmlType="submit" Loading="LoginRunning">
+                Login
+            </Button>
+        </FormItem>
+    </Form>
+</div>
+
+@code {
+    public LoginRequest Model { get; set; } = new LoginRequest();
+    public FormValidateStatus ValidateStatus { get; set; } = FormValidateStatus.Default;
+    public string? Help { get; set; }
+    public bool LoginRunning { get; set; }
+
+    private async Task LoginAsync(EditContext context)
+    {
+        ValidateStatus = FormValidateStatus.Default;
+        LoginRunning = true;
+
+        var model = (LoginRequest)context.Model;
+        var authModule = await JSRunTime.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
+        var result = await authModule.InvokeAsync<bool>("SignIn", model.Password, "/");
+
+        if (result)
+        {
+            this.navigation.NavigateTo("/", true);
+        }
+        else
+        {
+            ValidateStatus = FormValidateStatus.Error;
+        }
+
+        LoginRunning = false;
+    }
+}

@@ -1,0 +1,14 @@
+﻿.login-container {
+    position: absolute;
+    top: calc(100vh / 2);
+    transform: translate(0%, -50%);
+    width: 800px;
+}
+
+.error {
+    color: red;
+}
+
+::deep .ant-form-item {
+    margin-bottom: 12px;
+}
