@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-bullseye-slim AS base
 WORKDIR /app
 EXPOSE 80
 
 # restore solution packages
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS restore
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS restore
 WORKDIR /src
 COPY ["AutoSats/AutoSats.csproj", "AutoSats/"]
 COPY ["AutoSats.Tests/AutoSats.Tests.csproj", "AutoSats.Tests/"]
