@@ -1,7 +1,6 @@
-﻿namespace AutoSats.Models
+﻿namespace AutoSats.Models;
+
+public interface IExchange
 {
-    public interface IExchange
-    {
-        string? Name { get; }
-    }
+    string? Name { get; }
 }

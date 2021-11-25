@@ -1,7 +1,6 @@
-﻿namespace AutoSats.Models
+﻿namespace AutoSats.Models;
+
+public class ScheduleRunResult
 {
-    public class ScheduleRunResult
-    {
-        
-    }
+
 }

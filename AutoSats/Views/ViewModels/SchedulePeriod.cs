@@ -1,10 +1,9 @@
-﻿namespace AutoSats.Views.ViewModels
+﻿namespace AutoSats.Views.ViewModels;
+
+public enum SchedulePeriod
 {
-    public enum SchedulePeriod
-    {
-        Daily,
-        Weekly,
-        Monthly,
-        Cron,
-    }
+    Daily,
+    Weekly,
+    Monthly,
+    Cron,
 }

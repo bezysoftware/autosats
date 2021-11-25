@@ -8,3 +8,5 @@ dotnet_diagnostic.IDE0005.severity = warning
 
 # CA1051: Do not declare visible instance fields
 dotnet_diagnostic.CA1051.severity = none
+[*.cs]
+csharp_style_namespace_declarations=file_scoped:silent

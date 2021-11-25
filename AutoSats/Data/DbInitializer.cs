@@ -1,40 +1,39 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.IO;
 
-namespace AutoSats.Data
+namespace AutoSats.Data;
+
+public static class DbInitializer
 {
-    public static class DbInitializer
+    private const string QuartzScriptPath = "Data/Quartz.sql";
+
+    public static void InitializeQuartzDatabase(string connectionString)
     {
-        private const string QuartzScriptPath = "Data/Quartz.sql";
+        var builder = new SqliteConnectionStringBuilder(connectionString);
+        var path = Path.GetDirectoryName(builder.DataSource);
 
-        public static void InitializeQuartzDatabase(string connectionString)
+        if (path != null && !Directory.Exists(path))
         {
-            var builder = new SqliteConnectionStringBuilder(connectionString);
-            var path = Path.GetDirectoryName(builder.DataSource);
-
-            if (path != null && !Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            
-            using var connection = new SqliteConnection(connectionString);
-            
-            connection.Open();
-
-            if (new FileInfo(connection.DataSource).Length > 0)
-            {
-                return;
-            }
-
-            CreateQuartzTables(QuartzScriptPath, connection);
+            Directory.CreateDirectory(path);
         }
 
-        private static void CreateQuartzTables(string scriptPath, SqliteConnection connection)
-        {
-            var sql = File.ReadAllText(scriptPath);
-            var command = new SqliteCommand(sql, connection);
+        using var connection = new SqliteConnection(connectionString);
 
-            command.ExecuteNonQuery();
+        connection.Open();
+
+        if (new FileInfo(connection.DataSource).Length > 0)
+        {
+            return;
         }
+
+        CreateQuartzTables(QuartzScriptPath, connection);
+    }
+
+    private static void CreateQuartzTables(string scriptPath, SqliteConnection connection)
+    {
+        var sql = File.ReadAllText(scriptPath);
+        var command = new SqliteCommand(sql, connection);
+
+        command.ExecuteNonQuery();
     }
 }

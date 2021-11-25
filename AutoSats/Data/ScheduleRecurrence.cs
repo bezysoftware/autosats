@@ -1,11 +1,10 @@
-﻿namespace AutoSats.Data
+﻿namespace AutoSats.Data;
+
+public enum ScheduleRecurrence
 {
-    public enum ScheduleRecurrence
-    {
-        Unknown,
-        Daily,
-        Weekly,
-        Monthly,
-        Cron
-    }
+    Unknown,
+    Daily,
+    Weekly,
+    Monthly,
+    Cron
 }

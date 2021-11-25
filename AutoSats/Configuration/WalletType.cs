@@ -1,8 +1,7 @@
-﻿namespace AutoSats.Configuration
+﻿namespace AutoSats.Configuration;
+
+public enum WalletType
 {
-    public enum WalletType
-    {
-        Bitcoind,
-        Lightning
-    }
+    Bitcoind,
+    Lightning
 }
