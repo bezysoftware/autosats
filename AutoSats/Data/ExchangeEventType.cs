@@ -1,11 +1,10 @@
-﻿namespace AutoSats.Data
+﻿namespace AutoSats.Data;
+
+public enum ExchangeEventType
 {
-    public enum ExchangeEventType
-    {
-        Buy,
-        Withdraw,
-        Pause,
-        Resume,
-        Create
-    }
+    Buy,
+    Withdraw,
+    Pause,
+    Resume,
+    Create
 }

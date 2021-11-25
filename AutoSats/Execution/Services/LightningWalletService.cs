@@ -1,34 +1,30 @@
 ﻿using BTCPayServer.Lightning;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
-namespace AutoSats.Execution.Services
+namespace AutoSats.Execution.Services;
+
+public class LightningWalletService : IWalletService
 {
-    public class LightningWalletService : IWalletService
+    private readonly ILogger<LightningWalletService> logger;
+    private readonly ILightningClient client;
+
+    public LightningWalletService(ILogger<LightningWalletService> logger, ILightningClient client)
     {
-        private readonly ILogger<LightningWalletService> logger;
-        private readonly ILightningClient client;
+        this.logger = logger;
+        this.client = client;
+    }
 
-        public LightningWalletService(ILogger<LightningWalletService> logger, ILightningClient client)
+    public async Task<string> GenerateDepositAddressAsync()
+    {
+        try
         {
-            this.logger = logger;
-            this.client = client;
+            var address = await this.client.GetDepositAddress();
+
+            return address.ToString();
         }
-
-        public async Task<string> GenerateDepositAddressAsync()
+        catch (Exception ex)
         {
-            try
-            {
-                var address = await this.client.GetDepositAddress();
-
-                return address.ToString();
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, "Failed to retrieve lightning wallet deposit address");
-                throw;
-            }
+            this.logger.LogError(ex, "Failed to retrieve lightning wallet deposit address");
+            throw;
         }
     }
 }

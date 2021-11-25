@@ -8,6 +8,7 @@
     <DockerfileFile>..\Dockerfile</DockerfileFile>
     <DockerfileContext>.</DockerfileContext>
     <ContainerDevelopmentMode>Regular</ContainerDevelopmentMode>
+	<ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

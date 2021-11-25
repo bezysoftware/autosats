@@ -1,9 +1,8 @@
-﻿namespace AutoSats.Configuration
-{
-    public class ApplicationOptions
-    {
-        public string? Version { get; set; }
+﻿namespace AutoSats.Configuration;
 
-        public string? Password { get; set; }
-    }
+public class ApplicationOptions
+{
+    public string? Version { get; set; }
+
+    public string? Password { get; set; }
 }

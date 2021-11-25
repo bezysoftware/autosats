@@ -1,6 +1,5 @@
-﻿namespace AutoSats.Models
+﻿namespace AutoSats.Models;
+
+public record CheckConnectionResult(bool Success, string? Message = null)
 {
-    public record CheckConnectionResult(bool Success, string? Message = null)
-    {    
-    }
 }

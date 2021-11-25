@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿namespace AutoSats.Execution.Services;
 
-namespace AutoSats.Execution.Services
+public interface IWalletService
 {
-    public interface IWalletService
-    {
-        Task<string> GenerateDepositAddressAsync();
-    }
+    Task<string> GenerateDepositAddressAsync();
 }

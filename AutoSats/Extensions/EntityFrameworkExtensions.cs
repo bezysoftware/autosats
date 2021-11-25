@@ -1,24 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
 
-namespace AutoSats.Extensions
+namespace AutoSats.Extensions;
+
+public static class EntityFrameworkExtensions
 {
-    public static class EntityFrameworkExtensions
+    public static void SetEnumConverterForAll(this ModelBuilder builder)
     {
-        public static void SetEnumConverterForAll(this ModelBuilder builder)
+        foreach (var entityType in builder.Model.GetEntityTypes())
         {
-            foreach (var entityType in builder.Model.GetEntityTypes())
+            foreach (var property in entityType.GetProperties())
             {
-                foreach (var property in entityType.GetProperties())
+                if (property?.ClrType?.BaseType?.IsEnum ?? false)
                 {
-                    if (property?.ClrType?.BaseType?.IsEnum ?? false)
-                    {
-                        var type = typeof(EnumToStringConverter<>).MakeGenericType(property.ClrType);
-                        var converter = Activator.CreateInstance(type, new ConverterMappingHints()) as ValueConverter;
+                    var type = typeof(EnumToStringConverter<>).MakeGenericType(property.ClrType);
+                    var converter = Activator.CreateInstance(type, new ConverterMappingHints()) as ValueConverter;
 
-                        property.SetValueConverter(converter);
-                    }
+                    property.SetValueConverter(converter);
                 }
             }
         }

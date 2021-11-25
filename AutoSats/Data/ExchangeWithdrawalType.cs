@@ -1,19 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AutoSats.Data
+namespace AutoSats.Data;
+
+public enum ExchangeWithdrawalType
 {
-    public enum ExchangeWithdrawalType
-    {
-        [Display(Name = "No withdrawal")]
-        None,
+    [Display(Name = "No withdrawal")]
+    None,
 
-        [Display(Name = "Fixed address")]
-        Fixed,
+    [Display(Name = "Fixed address")]
+    Fixed,
 
-        [Display(Name = "New address each time")]
-        Dynamic,
+    [Display(Name = "New address each time")]
+    Dynamic,
 
-        [Display(Name = "Fixed named address")]
-        Named
-    }
+    [Display(Name = "Fixed named address")]
+    Named
 }

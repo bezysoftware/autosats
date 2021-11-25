@@ -1,8 +1,7 @@
-﻿namespace AutoSats.Models
+﻿namespace AutoSats.Models;
+
+public enum BuyOrderType
 {
-    public enum BuyOrderType
-    {
-        Market,
-        Limit
-    }
+    Market,
+    Limit
 }

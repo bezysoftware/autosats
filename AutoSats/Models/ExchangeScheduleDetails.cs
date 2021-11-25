@@ -1,11 +1,7 @@
-﻿using AutoSats.Data;
-using System.Collections.Generic;
+﻿namespace AutoSats.Models;
 
-namespace AutoSats.Models
+public record ExchangeScheduleDetails(
+    ExchangeScheduleSummary Summary,
+    IEnumerable<ExchangeEvent> Events)
 {
-    public record ExchangeScheduleDetails(
-        ExchangeScheduleSummary Summary,
-        IEnumerable<ExchangeEvent> Events)
-    {        
-    }
 }

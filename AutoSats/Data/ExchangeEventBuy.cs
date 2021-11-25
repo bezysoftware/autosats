@@ -1,17 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AutoSats.Data
+namespace AutoSats.Data;
+
+public class ExchangeEventBuy : ExchangeEvent
 {
-    public class ExchangeEventBuy : ExchangeEvent
-    {
-        public string? OrderId { get; set; }
-     
-        [Required]
-        public decimal Price { get; set; }
+    public string? OrderId { get; set; }
 
-        [Required]
-        public decimal Received { get; set; }
+    [Required]
+    public decimal Price { get; set; }
 
-        public override ExchangeEventType Type { get; set; } = ExchangeEventType.Buy;
-    }
+    [Required]
+    public decimal Received { get; set; }
+
+    public override ExchangeEventType Type { get; set; } = ExchangeEventType.Buy;
 }

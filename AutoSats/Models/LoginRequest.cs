@@ -1,7 +1,6 @@
-﻿namespace AutoSats.Models
+﻿namespace AutoSats.Models;
+
+public class LoginRequest
 {
-    public class LoginRequest
-    {
-        public string? Password { get; set; }
-    }
+    public string? Password { get; set; }
 }

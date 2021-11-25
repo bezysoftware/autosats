@@ -1,9 +1,8 @@
 ﻿using BTCPayServer.Lightning;
 
-namespace AutoSats.Configuration
+namespace AutoSats.Configuration;
+
+public class LightningConnectionStringCertificate : LightningConnectionString
 {
-    public class LightningConnectionStringCertificate : LightningConnectionString
-    {
-        public string? CertificatePath { get; set; }
-    }
+    public string? CertificatePath { get; set; }
 }
