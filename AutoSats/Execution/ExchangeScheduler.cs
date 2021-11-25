@@ -6,7 +6,6 @@ using AutoSats.Models;
 using ExchangeSharp;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using System.IO;
 
 namespace AutoSats.Execution;
 

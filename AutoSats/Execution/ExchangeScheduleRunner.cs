@@ -3,7 +3,6 @@ using AutoSats.Exceptions;
 using AutoSats.Execution.Services;
 using AutoSats.Models;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
 
 namespace AutoSats.Execution;
 

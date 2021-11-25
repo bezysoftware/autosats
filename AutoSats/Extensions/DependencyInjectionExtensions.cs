@@ -1,8 +1,6 @@
 ﻿using AutoSats.Configuration;
 using AutoSats.Execution.Services;
 using BTCPayServer.Lightning;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NBitcoin;
 using NBitcoin.RPC;

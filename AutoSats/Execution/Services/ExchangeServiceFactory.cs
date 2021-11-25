@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace AutoSats.Execution.Services;
+﻿namespace AutoSats.Execution.Services;
 
 public class ExchangeServiceFactory : IExchangeServiceFactory
 {
