@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AutoSats.Exceptions;
+﻿namespace AutoSats.Exceptions;
 
 public class ScheduleRunFailedException : Exception
 {

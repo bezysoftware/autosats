@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace AutoSats.Execution.Services;
+﻿namespace AutoSats.Execution.Services;
 
 public interface ILoginService
 {

@@ -1,15 +1,9 @@
 ﻿using AutoSats.Configuration;
-using AutoSats.Data;
 using AutoSats.Exceptions;
 using AutoSats.Execution.Services;
 using AutoSats.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AutoSats.Execution;
 

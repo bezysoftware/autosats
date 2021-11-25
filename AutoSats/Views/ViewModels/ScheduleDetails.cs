@@ -1,7 +1,5 @@
-﻿using AutoSats.Data;
-using AutoSats.Models;
+﻿using AutoSats.Models;
 using AutoSats.Validation;
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Views.ViewModels;

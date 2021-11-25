@@ -1,5 +1,4 @@
 ﻿using AutoSats.Models;
-using System.Collections.Generic;
 
 namespace AutoSats.Views.ViewModels;
 

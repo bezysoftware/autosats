@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-namespace AutoSats.Extensions;
+﻿namespace AutoSats.Extensions;
 
 public static class StringExtensions
 {

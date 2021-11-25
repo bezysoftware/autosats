@@ -1,7 +1,4 @@
 ﻿using BTCPayServer.Lightning;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services;
 

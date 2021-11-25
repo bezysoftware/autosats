@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Quartz;
-using System;
-using System.Threading.Tasks;
+﻿using Quartz;
 
 namespace AutoSats.Execution;
 

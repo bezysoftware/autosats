@@ -1,5 +1,4 @@
 ﻿using ExchangeSharp;
-using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services;
 

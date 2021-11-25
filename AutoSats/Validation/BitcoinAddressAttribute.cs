@@ -1,5 +1,4 @@
 ﻿using NBitcoin;
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Validation;

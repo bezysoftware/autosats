@@ -1,7 +1,5 @@
-﻿using AutoSats.Data;
-using CronExpressionDescriptor;
+﻿using CronExpressionDescriptor;
 using Quartz;
-using System;
 
 namespace AutoSats.Models;
 

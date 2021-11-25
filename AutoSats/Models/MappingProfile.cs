@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoSats.Data;
 
 namespace AutoSats.Models;
 

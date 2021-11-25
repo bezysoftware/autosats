@@ -1,19 +1,12 @@
 ﻿using AutoMapper;
 using AutoSats.Configuration;
-using AutoSats.Data;
 using AutoSats.Exceptions;
 using AutoSats.Execution.Services;
-using AutoSats.Extensions;
 using AutoSats.Models;
 using ExchangeSharp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Quartz;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AutoSats.Execution;
 

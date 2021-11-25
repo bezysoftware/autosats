@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace AutoSats.Extensions;
+﻿namespace AutoSats.Extensions;
 
 public static class LinqExtensions
 {

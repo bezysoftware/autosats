@@ -1,7 +1,4 @@
 ﻿using AutoSats.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services;
 

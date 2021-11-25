@@ -1,5 +1,4 @@
 ﻿using AutoSats.Models;
-using System;
 
 namespace AutoSats.Configuration;
 

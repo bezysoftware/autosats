@@ -1,9 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using NBitcoin.RPC;
+﻿using NBitcoin.RPC;
 using Newtonsoft.Json;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services;
 

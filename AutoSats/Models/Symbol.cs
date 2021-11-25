@@ -1,7 +1,4 @@
-﻿using AutoSats.Extensions;
-using System.Linq;
-
-namespace AutoSats.Models;
+﻿namespace AutoSats.Models;
 
 public record Symbol(string Original, string Accumulate, string Spend)
 {

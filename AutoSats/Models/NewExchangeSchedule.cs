@@ -1,7 +1,4 @@
-﻿using AutoSats.Data;
-using System;
-
-namespace AutoSats.Models;
+﻿namespace AutoSats.Models;
 
 public record NewExchangeSchedule(
     SymbolBalance Amount,

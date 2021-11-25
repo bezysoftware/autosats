@@ -1,7 +1,6 @@
 ﻿using AutoSats.Execution.Services;
 using AutoSats.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace AutoSats.Controllers;
 

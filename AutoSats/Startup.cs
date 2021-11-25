@@ -1,8 +1,6 @@
 using AutoSats.Configuration;
-using AutoSats.Data;
 using AutoSats.Execution;
 using AutoSats.Execution.Services;
-using AutoSats.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -14,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
-using System.Linq;
 
 namespace AutoSats;
 

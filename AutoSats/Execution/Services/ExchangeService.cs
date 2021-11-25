@@ -1,12 +1,7 @@
 ﻿using AutoSats.Exceptions;
 using AutoSats.Models;
 using ExchangeSharp;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AutoSats.Execution.Services;
 

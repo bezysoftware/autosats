@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace AutoSats.Execution;
+﻿namespace AutoSats.Execution;
 
 public interface IExchangeScheduleRunner
 {

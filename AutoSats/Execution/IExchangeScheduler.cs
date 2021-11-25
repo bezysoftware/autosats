@@ -1,6 +1,4 @@
 ﻿using AutoSats.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace AutoSats.Execution;
 
