@@ -62,11 +62,22 @@ public class ExchangeScheduler : IExchangeScheduler
             .OrderByDescending(x => x.IsPaused)
             .ToArrayAsync();
 
+        var balancesTasks = schedules
+            .Select(x => (x.Id, x.Exchange, Keys: GetKeysFilePath(x)))
+            .Select(x => (x.Id, Balances: this.exchangeFactory.GetServiceAsync(x.Exchange, x.Keys).ContinueWith(e => e.Result.GetBalancesAsync()).Unwrap()))
+            .ToArray();
+
+        await Task.WhenAll(balancesTasks.Select(x => x.Balances));
+
+        var balances = balancesTasks.ToDictionary(x => x.Id, x => x.Balances.Result);
+
         return schedules
             .Select(x => this.mapper.Map<ExchangeScheduleSummary>(x) with
             {
                 TotalAccumulated = x.Events.Cast<ExchangeEventBuy>().Sum(e => e.Received),
-                TotalSpent = x.Events.Count * x.Spend
+                TotalSpent = x.Events.Count * x.Spend,
+                AvailableBTC = balances.GetValueOrDefault(x.Id)?.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
+                AvailableSpend = balances.GetValueOrDefault(x.Id)?.FirstOrDefault(a => a.Currency == x.SpendCurrency)?.Amount
             })
             .OrderBy(x => x.NextOccurrence)
             .ToArray();
@@ -85,11 +96,17 @@ public class ExchangeScheduler : IExchangeScheduler
             throw new ScheduleNotFoundException(id);
         }
 
+        var balances = await (await this.exchangeFactory
+            .GetServiceAsync(schedule.Exchange, GetKeysFilePath(schedule)))
+            .GetBalancesAsync();
+        
         var buys = schedule.Events.Where(e => e.Type == ExchangeEventType.Buy).Cast<ExchangeEventBuy>().ToArray();
         var summary = this.mapper.Map<ExchangeScheduleSummary>(schedule) with
         {
             TotalAccumulated = buys.Sum(e => e.Received),
-            TotalSpent = buys.Length * schedule.Spend
+            TotalSpent = buys.Length * schedule.Spend,
+            AvailableBTC = balances.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
+            AvailableSpend = balances.FirstOrDefault(a => a.Currency == schedule.SpendCurrency)?.Amount
         };
 
         return new ExchangeScheduleDetails(summary, schedule.Events);
@@ -155,7 +172,7 @@ public class ExchangeScheduler : IExchangeScheduler
         this.db.SaveChanges();
 
         // save keys
-        var keysFile = Path.Combine(this.runner.KeysPath, $"{schedule.Id}.{ExecutionConsts.KeysFileExtension}");
+        var keysFile = GetKeysFilePath(schedule);
         CryptoUtility.SaveUnprotectedStringsToFile(keysFile, newSchedule.Keys);
 
         try
@@ -213,5 +230,10 @@ public class ExchangeScheduler : IExchangeScheduler
     private ExchangeOptions GetExchangeOptions(string exchange)
     {
         return this.exchangeOptions.FirstOrDefault(e => e.Name == exchange) ?? new ExchangeOptions();
+    }
+
+    private string GetKeysFilePath(ExchangeSchedule x)
+    {
+        return Path.Combine(this.runner.KeysPath, $"{x.Id}.{ExecutionConsts.KeysFileExtension}");
     }
 }
