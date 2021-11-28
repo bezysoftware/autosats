@@ -40,7 +40,11 @@
                             <span>Total accumulated</span>
                             <span>@Summary.TotalAccumulated.ToString("N8") BTC</span>
                         </div>
-                    </div>
+                        <div class="description-container">
+                            <span>On exchange</span>
+                            <span>@Summary.AvailableSpend?.ToString("N2") @spendCurrency / @Summary.AvailableBTC?.ToString("N8") BTC</span>
+                        </div>
+                    </div> 
                 </DescriptionTemplate>
             </ListItemMeta>
         </ListItem>
@@ -50,7 +54,7 @@
 @code {
     [Parameter] public ExchangeScheduleSummary? Summary { get; set; }
 
-    private void ScheduleClick()
+    private void ScheduleClick()    
     {
         navigationManager.NavigateTo($"/schedule/{Summary!.Id}");
     }

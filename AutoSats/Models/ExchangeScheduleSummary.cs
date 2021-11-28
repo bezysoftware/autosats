@@ -20,6 +20,11 @@ public record ExchangeScheduleSummary(
 
     public decimal TotalAccumulated { get; set; }
 
+    public decimal? AvailableSpend { get; set; }
+
+    public decimal? AvailableBTC { get; set; }
+
+
     public DateTime NextOccurrence => this.nextOccurrence ??= GetNextOccurrence();
 
     public string CronDescription => this.cronDescription ??= GetCronDescription();
