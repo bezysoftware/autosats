@@ -126,7 +126,7 @@ public class ExchangeScheduleRunner : IExchangeScheduleRunner
             return;
         }
 
-        var amount = balance - ExecutionConsts.FeeReserve;
+        var amount = balance - options.WithdrawalReserve;
         var address = schedule.WithdrawalType switch
         {
             ExchangeWithdrawalType.Fixed => schedule.WithdrawalAddress ?? throw new InvalidOperationException("WithdrawalType is Fixed, but address is null"),
@@ -140,6 +140,7 @@ public class ExchangeScheduleRunner : IExchangeScheduleRunner
         try
         {
             var id = await service.WithdrawAsync(withdrawCurrency, address, amount);
+            var (_, newBalance) = await GetCurrencyBalance(service, options.BitcoinSymbol);
 
             this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
             {

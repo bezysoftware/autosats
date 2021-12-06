@@ -100,13 +100,14 @@ public class ExchangeService : IExchangeService
 
     public async Task<string> WithdrawAsync(string cryptoCurrency, string? address, decimal amount)
     {
+        amount = Math.Floor(amount * 100_000_000) / 100_000_000; // round to satoshis
         var result = await Api.WithdrawAsync(new ExchangeWithdrawalRequest
         {
             Address = address,
             AddressTag = string.IsNullOrEmpty(address) ? "AutoSats" : null, // only set tag when adress is missing
             Amount = amount,
             Currency = cryptoCurrency,
-            TakeFeeFromAmount = false
+            TakeFeeFromAmount = true
         });
 
         if (!result.Success && string.IsNullOrEmpty(result.Id))

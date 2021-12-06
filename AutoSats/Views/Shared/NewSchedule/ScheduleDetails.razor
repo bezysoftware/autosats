@@ -147,7 +147,11 @@
                     @if (context.WithdrawalType != ExchangeWithdrawalType.None)
                     {
                         <FormItem Label="Limit" Required LabelColSpan="10" WrapperColSpan="14">
-                            <Tooltip Title="@($"Once you accumulate at least this much BTC your entire balance (minus a {ExecutionConsts.FeeReserve.ToString(CultureInfo.InvariantCulture)} fee reserve) will be withdrawn to your wallet")">
+                            @{
+                                var fee = exchange?.WithdrawalReserve ?? 0;
+                                var feeText = fee == 0 ? "withdrawal" : fee.ToString(CultureInfo.InvariantCulture);
+                            }
+                            <Tooltip Title="@($"Once you accumulate at least this much BTC your entire balance (minus a {feeText} fee) will be withdrawn to your wallet")">
                                 <NumberInput @bind-Value="context.WithdrawalLimit"
                                              Class="element-stretch"
                                              Type="number"

@@ -26,6 +26,8 @@ public class ExchangeOptions : IExchange
 
     public WithdrawalType WithdrawalType { get; set; }
 
+    public decimal WithdrawalReserve { get; set; }
+
     public char[] TickerPrefixes { get; set; } = Array.Empty<char>();
 
     public string[] Permissions { get; init; } = Array.Empty<string>();
