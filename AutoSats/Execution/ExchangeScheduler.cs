@@ -5,12 +5,14 @@ using AutoSats.Execution.Services;
 using AutoSats.Models;
 using ExchangeSharp;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Quartz;
 
 namespace AutoSats.Execution;
 
 public class ExchangeScheduler : IExchangeScheduler
 {
+    private static readonly TimeSpan PrerenderCacheTimeout = TimeSpan.FromSeconds(5);
     private readonly ILogger<ExchangeScheduler> logger;
     private readonly SatsContext db;
     private readonly IWalletService walletService;
@@ -19,6 +21,7 @@ public class ExchangeScheduler : IExchangeScheduler
     private readonly IExchangeServiceFactory exchangeFactory;
     private readonly IMapper mapper;
     private readonly IEnumerable<ExchangeOptions> exchangeOptions;
+    private readonly IMemoryCache cache;
 
     public ExchangeScheduler(
         ILogger<ExchangeScheduler> logger,
@@ -28,7 +31,8 @@ public class ExchangeScheduler : IExchangeScheduler
         IExchangeScheduleRunner runner,
         IExchangeServiceFactory exchangeFactory,
         IMapper mapper,
-        IEnumerable<ExchangeOptions> exchangeOptions)
+        IEnumerable<ExchangeOptions> exchangeOptions,
+        IMemoryCache memoryCache)
     {
         this.logger = logger;
         this.db = db;
@@ -38,6 +42,7 @@ public class ExchangeScheduler : IExchangeScheduler
         this.exchangeFactory = exchangeFactory;
         this.mapper = mapper;
         this.exchangeOptions = exchangeOptions;
+        this.cache = memoryCache;
     }
 
     public async Task<IEnumerable<SymbolBalance>> GetSymbolBalancesAsync(string exchange, string key1, string key2, string? key3)
@@ -56,60 +61,70 @@ public class ExchangeScheduler : IExchangeScheduler
 
     public async Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync()
     {
-        var schedules = await this.db.ExchangeSchedules
-            .Include(x => x.Events.Where(e => e.Type == ExchangeEventType.Buy))
-            .AsNoTracking()
-            .OrderByDescending(x => x.IsPaused)
-            .ToArrayAsync();
+        return await this.cache.GetOrCreateAsync("list", async e =>
+        {
+            e.AbsoluteExpirationRelativeToNow = PrerenderCacheTimeout;
 
-        var balancesTasks = schedules
-            .Select(x => (x.Id, x.Exchange, Keys: GetKeysFilePath(x)))
-            .Select(x => (x.Id, Balances: this.exchangeFactory.GetServiceAsync(x.Exchange, x.Keys).ContinueWith(e => e.Result.GetBalancesAsync()).Unwrap()))
-            .ToArray();
+            var schedules = await this.db.ExchangeSchedules
+                .Include(x => x.Events.Where(e => e.Type == ExchangeEventType.Buy))
+                .AsNoTracking()
+                .OrderByDescending(x => x.IsPaused)
+                .ToArrayAsync();
 
-        await Task.WhenAll(balancesTasks.Select(x => x.Balances));
+            var balancesTasks = schedules
+                .Select(x => (x.Id, x.Exchange, Keys: GetKeysFilePath(x)))
+                .Select(x => (x.Id, Balances: this.exchangeFactory.GetServiceAsync(x.Exchange, x.Keys).ContinueWith(e => e.Result.GetBalancesAsync()).Unwrap()))
+                .ToArray();
 
-        var balances = balancesTasks.ToDictionary(x => x.Id, x => x.Balances.Result);
+            await Task.WhenAll(balancesTasks.Select(x => x.Balances));
 
-        return schedules
-            .Select(x => this.mapper.Map<ExchangeScheduleSummary>(x) with
-            {
-                TotalAccumulated = x.Events.Cast<ExchangeEventBuy>().Sum(e => e.Received),
-                TotalSpent = x.Events.Count * x.Spend,
-                AvailableBTC = balances.GetValueOrDefault(x.Id)?.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
-                AvailableSpend = balances.GetValueOrDefault(x.Id)?.FirstOrDefault(a => a.Currency == x.SpendCurrency)?.Amount
-            })
-            .OrderBy(x => x.NextOccurrence)
-            .ToArray();
+            var balances = balancesTasks.ToDictionary(x => x.Id, x => x.Balances.Result);
+
+            return schedules
+                .Select(x => this.mapper.Map<ExchangeScheduleSummary>(x) with
+                {
+                    TotalAccumulated = x.Events.Cast<ExchangeEventBuy>().Sum(e => e.Received),
+                    TotalSpent = x.Events.Count * x.Spend,
+                    AvailableBTC = balances.GetValueOrDefault(x.Id)?.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
+                    AvailableSpend = balances.GetValueOrDefault(x.Id)?.FirstOrDefault(a => a.Currency == x.SpendCurrency)?.Amount
+                })
+                .OrderBy(x => x.NextOccurrence)
+                .ToArray();
+        });
     }
 
     public async Task<ExchangeScheduleDetails> GetScheduleDetailsAsync(int id)
     {
-        var schedule = await this.db.ExchangeSchedules
+        return await this.cache.GetOrCreateAsync(id, async e =>
+        {
+            e.AbsoluteExpirationRelativeToNow = PrerenderCacheTimeout;
+
+            var schedule = await this.db.ExchangeSchedules
             .Include(x => x.Events)
             .Where(x => x.Id == id)
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
-        if (schedule == null)
-        {
-            throw new ScheduleNotFoundException(id);
-        }
+            if (schedule == null)
+            {
+                throw new ScheduleNotFoundException(id);
+            }
 
-        var balances = await (await this.exchangeFactory
-            .GetServiceAsync(schedule.Exchange, GetKeysFilePath(schedule)))
-            .GetBalancesAsync();
-        
-        var buys = schedule.Events.Where(e => e.Type == ExchangeEventType.Buy).Cast<ExchangeEventBuy>().ToArray();
-        var summary = this.mapper.Map<ExchangeScheduleSummary>(schedule) with
-        {
-            TotalAccumulated = buys.Sum(e => e.Received),
-            TotalSpent = buys.Length * schedule.Spend,
-            AvailableBTC = balances.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
-            AvailableSpend = balances.FirstOrDefault(a => a.Currency == schedule.SpendCurrency)?.Amount
-        };
+            var balances = await (await this.exchangeFactory
+                .GetServiceAsync(schedule.Exchange, GetKeysFilePath(schedule)))
+                .GetBalancesAsync();
 
-        return new ExchangeScheduleDetails(summary, schedule.Events);
+            var buys = schedule.Events.Where(e => e.Type == ExchangeEventType.Buy).Cast<ExchangeEventBuy>().ToArray();
+            var summary = this.mapper.Map<ExchangeScheduleSummary>(schedule) with
+            {
+                TotalAccumulated = buys.Sum(e => e.Received),
+                TotalSpent = buys.Length * schedule.Spend,
+                AvailableBTC = balances.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
+                AvailableSpend = balances.FirstOrDefault(a => a.Currency == schedule.SpendCurrency)?.Amount
+            };
+
+            return new ExchangeScheduleDetails(summary, schedule.Events);
+        });
     }
 
     public async Task DeleteScheduleAsync(int id)
