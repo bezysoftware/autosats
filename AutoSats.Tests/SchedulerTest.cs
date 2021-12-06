@@ -8,6 +8,7 @@ using ExchangeSharp;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Quartz;
@@ -74,7 +75,8 @@ public class SchedulerTest : IDisposable
             this.runner.Object,
             this.serviceProvider.Object,
             this.mapper,
-            Array.Empty<ExchangeOptions>());
+            Array.Empty<ExchangeOptions>(),
+            new Microsoft.Extensions.Caching.Memory.MemoryCache(new MemoryCacheOptions()));
     }
 
     public void Dispose()

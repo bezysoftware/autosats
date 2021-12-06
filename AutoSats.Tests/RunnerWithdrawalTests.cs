@@ -59,15 +59,15 @@ public class RunnerWithdrawalTests : RunnerTestsBase
         var e = events[1] as ExchangeEventWithdrawal;
         e.Type.Should().Be(ExchangeEventType.Withdraw);
         e.Address.Should().Be("address");
-        e.Amount.Should().Be(1.5m - Execution.ExecutionConsts.FeeReserve);
+        e.Amount.Should().Be(1.5m);
 
         // withdraw called
         var request = new ExchangeWithdrawalRequest
         {
             Address = "address",
-            Amount = 1.5m - Execution.ExecutionConsts.FeeReserve,
+            Amount = 1.5m,
             Currency = "BTC",
-            TakeFeeFromAmount = false
+            TakeFeeFromAmount = true
         };
         this.api.Verify(x => x.WithdrawAsync(It.Is<ExchangeWithdrawalRequest>(x => Verify(request, x))), Times.Once());
     }
@@ -93,9 +93,9 @@ public class RunnerWithdrawalTests : RunnerTestsBase
         {
             Address = null,
             AddressTag = "AutoSats",
-            Amount = 1.5m - Execution.ExecutionConsts.FeeReserve,
+            Amount = 1.5m,
             Currency = "BTC",
-            TakeFeeFromAmount = false
+            TakeFeeFromAmount = true
         };
         this.api.Verify(x => x.WithdrawAsync(It.Is<ExchangeWithdrawalRequest>(x => Verify(request, x))), Times.Once());
     }
@@ -125,15 +125,15 @@ public class RunnerWithdrawalTests : RunnerTestsBase
         var e = events[1] as ExchangeEventWithdrawal;
         e.Type.Should().Be(ExchangeEventType.Withdraw);
         e.Address.Should().Be("dynamicaddress");
-        e.Amount.Should().Be(1.5m - Execution.ExecutionConsts.FeeReserve);
+        e.Amount.Should().Be(1.5m);
 
         // withdraw called
         var request = new ExchangeWithdrawalRequest
         {
             Address = "dynamicaddress",
-            Amount = 1.5m - Execution.ExecutionConsts.FeeReserve,
+            Amount = 1.5m,
             Currency = "BTC",
-            TakeFeeFromAmount = false
+            TakeFeeFromAmount = true
         };
         this.api.Verify(x => x.WithdrawAsync(It.Is<ExchangeWithdrawalRequest>(x => Verify(request, x))), Times.Once());
     }
