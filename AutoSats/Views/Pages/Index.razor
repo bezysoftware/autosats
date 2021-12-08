@@ -1,7 +1,15 @@
 ﻿@page "/"
 @inject IExchangeScheduler scheduler
 
-@if (!exchangeSchedules.Any())
+@if (exchangeSchedules == null)
+{
+    <PageHeader Title="Loading schedules" Ghost="true" />
+
+    <Card>
+        <Skeleton Active="true"></Skeleton>
+    </Card>
+}
+else if (!exchangeSchedules.Any())
 {
     <NoSchedules />
 }
@@ -16,7 +24,7 @@ else
 
 @code
 {
-    private ExchangeScheduleSummary[] exchangeSchedules { get; set; } = Array.Empty<ExchangeScheduleSummary>();
+    private ExchangeScheduleSummary[]? exchangeSchedules { get; set; }
 
     private Task SingleScheduleDeleted()
     {
