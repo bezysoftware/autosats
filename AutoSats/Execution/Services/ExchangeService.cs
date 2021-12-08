@@ -55,9 +55,12 @@ public class ExchangeService : IExchangeService
 
         var orderId = result.OrderId;
 
+        this.logger.LogInformation($"Placed buy order '{orderId}', result: {result.Result} | {result.ResultCode}");
+
         // if the order details are missing query them
         if (result.Result == ExchangeAPIOrderResult.Unknown && orderId != null)
         {
+            await Task.Delay(1000);
             result = await Api.GetOrderDetailsAsync(orderId);
         }
 

@@ -6,6 +6,6 @@ public class ExchangeAPIProvider : IExchangeAPIProvider
 {
     public Task<IExchangeAPI> GetApiAsync(string name)
     {
-        return ExchangeAPI.GetExchangeAPIAsync(name);
+        return ExchangeAPI.CreateExchangeAPIAsync(name);
     }
 }

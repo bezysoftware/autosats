@@ -13,9 +13,9 @@ namespace AutoSats.Execution;
 public class ExchangeScheduler : IExchangeScheduler
 {
     private static readonly TimeSpan PrerenderCacheTimeout = TimeSpan.FromSeconds(5);
+    private static readonly string PrerenderCacheListName = "list";
     private readonly ILogger<ExchangeScheduler> logger;
     private readonly SatsContext db;
-    private readonly IWalletService walletService;
     private readonly ISchedulerFactory schedulerFactory;
     private readonly IExchangeScheduleRunner runner;
     private readonly IExchangeServiceFactory exchangeFactory;
@@ -26,7 +26,6 @@ public class ExchangeScheduler : IExchangeScheduler
     public ExchangeScheduler(
         ILogger<ExchangeScheduler> logger,
         SatsContext db,
-        IWalletService walletService,
         ISchedulerFactory schedulerFactory,
         IExchangeScheduleRunner runner,
         IExchangeServiceFactory exchangeFactory,
@@ -36,7 +35,6 @@ public class ExchangeScheduler : IExchangeScheduler
     {
         this.logger = logger;
         this.db = db;
-        this.walletService = walletService;
         this.schedulerFactory = schedulerFactory;
         this.runner = runner;
         this.exchangeFactory = exchangeFactory;
@@ -61,7 +59,7 @@ public class ExchangeScheduler : IExchangeScheduler
 
     public async Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync()
     {
-        return await this.cache.GetOrCreateAsync("list", async e =>
+        return await this.cache.GetOrCreateAsync(PrerenderCacheListName, async e =>
         {
             e.AbsoluteExpirationRelativeToNow = PrerenderCacheTimeout;
 
@@ -73,7 +71,7 @@ public class ExchangeScheduler : IExchangeScheduler
 
             var balancesTasks = schedules
                 .Select(x => (x.Id, x.Exchange, Keys: GetKeysFilePath(x)))
-                .Select(x => (x.Id, Balances: this.exchangeFactory.GetServiceAsync(x.Exchange, x.Keys).ContinueWith(e => e.Result.GetBalancesAsync()).Unwrap()))
+                .Select(x => (x.Id, Balances: GetExchangeBalances(x.Exchange, x.Keys)))
                 .ToArray();
 
             await Task.WhenAll(balancesTasks.Select(x => x.Balances));
@@ -84,7 +82,7 @@ public class ExchangeScheduler : IExchangeScheduler
                 .Select(x => this.mapper.Map<ExchangeScheduleSummary>(x) with
                 {
                     TotalAccumulated = x.Events.Cast<ExchangeEventBuy>().Sum(e => e.Received),
-                    TotalSpent = x.Events.Count * x.Spend,
+                    TotalSpent = x.Events.Count(x => x.Error == null) * x.Spend,
                     AvailableBTC = balances.GetValueOrDefault(x.Id)?.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
                     AvailableSpend = balances.GetValueOrDefault(x.Id)?.FirstOrDefault(a => a.Currency == x.SpendCurrency)?.Amount
                 })
@@ -118,7 +116,7 @@ public class ExchangeScheduler : IExchangeScheduler
             var summary = this.mapper.Map<ExchangeScheduleSummary>(schedule) with
             {
                 TotalAccumulated = buys.Sum(e => e.Received),
-                TotalSpent = buys.Length * schedule.Spend,
+                TotalSpent = buys.Count(x => x.Error == null) * schedule.Spend,
                 AvailableBTC = balances.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
                 AvailableSpend = balances.FirstOrDefault(a => a.Currency == schedule.SpendCurrency)?.Amount
             };
@@ -135,6 +133,7 @@ public class ExchangeScheduler : IExchangeScheduler
         await scheduler.UnscheduleJob(GetTriggerKey(id));
         this.db.ExchangeSchedules.Remove(schedule);
         this.db.SaveChanges();
+        this.cache.Remove(PrerenderCacheListName);
     }
 
     public async Task PauseScheduleAsync(int id)
@@ -152,6 +151,8 @@ public class ExchangeScheduler : IExchangeScheduler
             Timestamp = DateTime.UtcNow
         });
         this.db.SaveChanges();
+        this.cache.Remove(id);
+        this.cache.Remove(PrerenderCacheListName);
     }
 
     public async Task ResumeScheduleAsync(int id)
@@ -169,6 +170,8 @@ public class ExchangeScheduler : IExchangeScheduler
             Timestamp = DateTime.UtcNow
         });
         this.db.SaveChanges();
+        this.cache.Remove(id);
+        this.cache.Remove(PrerenderCacheListName);
     }
 
     public async Task AddScheduleAsync(NewExchangeSchedule newSchedule, bool runToVerify)
@@ -214,6 +217,8 @@ public class ExchangeScheduler : IExchangeScheduler
             tx.Commit();
 
             await scheduler.ScheduleJob(trigger);
+
+            this.cache.Remove(PrerenderCacheListName);
         }
         catch (Exception ex)
         {
@@ -250,5 +255,11 @@ public class ExchangeScheduler : IExchangeScheduler
     private string GetKeysFilePath(ExchangeSchedule x)
     {
         return Path.Combine(this.runner.KeysPath, $"{x.Id}.{ExecutionConsts.KeysFileExtension}");
+    }
+
+    private async Task<IEnumerable<Balance>> GetExchangeBalances(string exchange, string keysPath)
+    {
+        var service = await this.exchangeFactory.GetServiceAsync(exchange, keysPath);
+        return await service.GetBalancesAsync();
     }
 }
