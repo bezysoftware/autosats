@@ -70,7 +70,6 @@ public class SchedulerTest : IDisposable
         this.escheduler = new ExchangeScheduler(
             this.logger,
             this.db,
-            this.wallet,
             this.schedulerFactory.Object,
             this.runner.Object,
             this.serviceProvider.Object,
