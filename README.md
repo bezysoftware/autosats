@@ -56,21 +56,22 @@ Let's go over the parameters:
 There is also an option to use a lightning wallet instead of Bitcoind wallet (this will be used in Umbrel):
 
 ```bash
+mkdir -p /home/umbrel/umbrel/app-data/autosats/data/home
 docker run \
     -e Wallet__Type=lightning \
     -e Wallet__Lightning__ConnectionType=lndREST \
-    -e Wallet__Lightning__BaseUri=<uri> \
-    -e Wallet__Lightning__MacaroonFilePath=<path> \
-    -e Wallet__Lightning__CertificatePath=<path> \
+    -e Wallet__Lightning__BaseUri="https://lnd:8080" \
+    -e Wallet__Lightning__MacaroonFilePath="/lnd/data/chain/bitcoin/mainnet/walletkit.macaroon" \
+    -e Wallet__Lightning__CertificatePath="/lnd/tls.cert" \
+    -e Application__Password="moneyprintergobrrr" \
     --network umbrel_main_network \
     -p 3311:80 \
-    -v autosats:/app_data \
-    -v </path/to/lnd>:/lnd:ro \
+    -v /home/umbrel/umbrel/app-data/autosats/data/:/app_data \
+    -v /home/umbrel/umbrel/app-data/autosats/data/home:/root \
+    -v /home/umbrel/umbrel/lnd:/lnd:ro \
     -d \
     bezysoftware/autosats:latest
 ```
-
-As you can see there are are 3 things for you to configure: `BaseUri` of the LND instance, `MacaroonFilePath` (to the `walletkit` macaroon file) and `CertificatePath` to the LND's `.tls file`. These paths should be relative to the mounted `lnd` volume (specified by the `-v` switch). Also notice the `--network` which configures which network AutoSats should join (same where LND is running).
 
 The long term goal is to make AutoSats available on [Umbrel](https://github.com/getumbrel/umbrel/pull/1039) and similar solutions with one-click install.
 
