@@ -26,6 +26,10 @@ h3 {
         margin-right: 0;
     }
 
+    &:first-child {
+        margin-right: auto;
+    }
+
     span:first-child {
     }
 
@@ -57,5 +61,16 @@ h3 {
 
     .ant-timeline-item-content {
         min-height: 0;
+    }
+}
+
+@media(max-width: 575px) {
+    .ant-col-offset-9 {
+        margin-left: 0;
+    }
+
+    .stretch-when-small {
+        max-width: 100%;
+        flex: 0 0 100%;
     }
 }
