@@ -2,7 +2,7 @@
 @inject NavigationManager navigation
 @inject IJSRuntime JSRunTime
 
-<div class="login-container">
+<div class="login-container stretch-when-small">
     <Form Model="Model" OnFinish="LoginAsync" Layout="@FormLayout.Vertical" ValidateMode="FormValidateMode.Complex">
 
         <FormItem WrapperColOffset="8" 
@@ -10,7 +10,7 @@
                   LabelColOffset="8"
                   Label="AutoSats Password" 
                   ValidateStatus="ValidateStatus">
-            <InputPassword @bind-Value="context.Password" />
+            <InputPassword @bind-Value="context.Password" OnInput="PasswordSet" />
             @if (ValidateStatus == FormValidateStatus.Error) 
             {
                 <span class="error">Incorrect password</span>
@@ -21,7 +21,7 @@
             }
         </FormItem>
 
-        <FormItem WrapperColOffset="8" WrapperColSpan="8">
+        <FormItem WrapperColOffset="8" WrapperColSpan="8" Class="stretch-when-small">
             <Button Block Type="primary" HtmlType="submit" Loading="LoginRunning">
                 Login
             </Button>
@@ -34,6 +34,12 @@
     public FormValidateStatus ValidateStatus { get; set; } = FormValidateStatus.Default;
     public string? Help { get; set; }
     public bool LoginRunning { get; set; }
+
+    private void PasswordSet(ChangeEventArgs change)
+    {
+        // required to set manually for firefox
+        Model.Password = change.Value?.ToString();
+    }
 
     private async Task LoginAsync(EditContext context)
     {

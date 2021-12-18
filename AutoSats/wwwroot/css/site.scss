@@ -65,7 +65,7 @@ h3 {
 }
 
 @media(max-width: 575px) {
-    .ant-col-offset-9 {
+    .ant-col-offset-9, .ant-col-offset-8 {
         margin-left: 0;
     }
 
