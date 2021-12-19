@@ -25,4 +25,11 @@ public class AuthController : ControllerBase
 
         return Unauthorized();
     }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        await this.loginService.LogoutAsync();
+        return LocalRedirect("/");
+    }
 }

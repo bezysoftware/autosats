@@ -39,4 +39,9 @@ public class LoginService : ILoginService
 
         return false;
     }
+
+    public Task LogoutAsync()
+    {
+        return this.http.HttpContext!.SignOutAsync();
+    }
 }
