@@ -12,7 +12,16 @@
                 <TitleTemplate>
                     <div class="schedule-title-container">
                         <span>
-                            Buy <strong>@(Summary.Spend.ToString("N2")) @spendCurrency</strong> worth of <strong>BTC</strong> on <strong>@Summary.Exchange</strong> and @GetWithdrawalDescription(Summary.WithdrawalType).
+                            Buy <strong>@(Summary.Spend.ToString("N2")) @spendCurrency</strong> worth of <strong>BTC</strong> 
+                            on <strong>@Summary.Exchange</strong> 
+                            and @GetWithdrawalDescription(Summary.WithdrawalType, Summary.WithdrawalLimit).
+
+                            @if (Summary.WithdrawalType == ExchangeWithdrawalType.Fixed)
+                            {
+                                <Tooltip Title="Summary.WithdrawalAddress">
+                                    <Button Type="@ButtonType.Link" Shape="@ButtonShape.Circle" Icon="@IconType.Outline.InfoCircle" />
+                                </Tooltip>
+                            }
                         </span>
 
                         <Tooltip Class="@GetScheduleIconClass(@Summary.IsPaused)"
@@ -69,13 +78,14 @@
         return schedule.IsPaused ? "<Paused>" : schedule.NextOccurrence.ToString();
     }
 
-    private string GetWithdrawalDescription(ExchangeWithdrawalType withdrawalType)
+    private string GetWithdrawalDescription(ExchangeWithdrawalType withdrawalType, decimal withdrawalLimit)
     {
+        var amountText = $" once you accumulate at least {withdrawalLimit} BTC";
         return withdrawalType switch
         {
-            ExchangeWithdrawalType.Fixed => "withdraw to a fixed address",
-            ExchangeWithdrawalType.Named => "withdraw to a named address",
-            ExchangeWithdrawalType.Dynamic => "withdraw to a new address each time",
+            ExchangeWithdrawalType.Fixed => "withdraw to a fixed address" + amountText,
+            ExchangeWithdrawalType.Named => "withdraw to a named address" + amountText,
+            ExchangeWithdrawalType.Dynamic => "withdraw to a new address each time" + amountText,
             _ => "do not withdraw"
         };
     }

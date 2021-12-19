@@ -10,6 +10,8 @@ public record ExchangeScheduleSummary(
     bool IsPaused,
     decimal Spend,
     string SpendCurrency,
+    decimal WithdrawalLimit,
+    string? WithdrawalAddress,
     DateTime Start,
     ExchangeWithdrawalType WithdrawalType) : IExchange
 {
