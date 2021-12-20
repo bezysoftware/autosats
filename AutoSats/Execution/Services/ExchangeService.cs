@@ -61,13 +61,15 @@ public class ExchangeService : IExchangeService
         if (result.Result == ExchangeAPIOrderResult.Unknown && orderId != null)
         {
             await Task.Delay(1000);
-            result = await Api.GetOrderDetailsAsync(orderId);
+            result = await TryGetOrderDetailsAsync(orderId);
         }
 
         // query order details until it is fully filled
-        while (result.Result == ExchangeAPIOrderResult.FilledPartially || result.Result == ExchangeAPIOrderResult.Open || result.Result == ExchangeAPIOrderResult.PendingOpen)
+        var counter = 0;
+        while (counter++ < 3 && (result.Result == ExchangeAPIOrderResult.FilledPartially || result.Result == ExchangeAPIOrderResult.Open || result.Result == ExchangeAPIOrderResult.PendingOpen))
         {
-            result = await Api.GetOrderDetailsAsync(result.OrderId);
+            await Task.Delay(1000);
+            result = await TryGetOrderDetailsAsync(result.OrderId);
         }
 
         if (result.Result != ExchangeAPIOrderResult.Filled && result.AveragePrice == null && result.Price == null)
@@ -135,6 +137,30 @@ public class ExchangeService : IExchangeService
     {
         this.api?.Dispose();
         this.api = null;
+    }
+
+    private async Task<ExchangeOrderResult> TryGetOrderDetailsAsync(string orderId)
+    {
+        var tries = 0;
+
+        while (true)
+        {
+            try
+            {
+                return await Api.GetOrderDetailsAsync(orderId);
+            }
+            catch (Exception ex)
+            {
+                if (++tries > 3)
+                {
+                    this.logger.LogError(ex, "Failed to get order details, giving up");
+                    throw;
+                }
+
+                this.logger.LogError(ex, "Failed to get order details, retrying");
+                await Task.Delay(1000);
+            }
+        }
     }
 
     private Task<ExchangeOrderResult> BuyMarketAsync(string symbol, decimal amount, bool invert)
