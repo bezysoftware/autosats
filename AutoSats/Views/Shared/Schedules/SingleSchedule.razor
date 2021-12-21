@@ -30,19 +30,19 @@
                         OnConfirm="RunScheduleAsync"
                         OkText="Run"
                         CancelText="Cancel">
-                <Button Icon="play-circle">
+                <Button Icon="play-circle" Loading="scheduleRunning">
                     Run now
                 </Button>
             </Popconfirm>
             @if (details.Summary.IsPaused)
             {
-                <Button Icon="caret-right" OnClick="ResumeScheduleAsync">
+                <Button Icon="caret-right" OnClick="ResumeScheduleAsync" Disabled="scheduleRunning">
                     Resume
                 </Button>
             }
             else
             {
-                <Button Icon="pause" OnClick="PauseScheduleAsync">
+                <Button Icon="pause" OnClick="PauseScheduleAsync" Disabled="scheduleRunning">
                     Pause
                 </Button>
             }
@@ -50,7 +50,7 @@
                         OnConfirm="DeleteScheduleAsync"
                         OkText="Delete"
                         CancelText="Cancel">
-                <Button Type="primary" Danger Icon="delete">
+                <Button Type="primary" Danger Icon="delete" Disabled="scheduleRunning">
                     Delete
                 </Button>
             </Popconfirm>
@@ -95,6 +95,7 @@
     [Parameter] public EventCallback ScheduleDeleted { get; set; }
 
     private ExchangeScheduleDetails? details;
+    private bool scheduleRunning;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -119,6 +120,7 @@
     {
         try
         {
+            scheduleRunning = true;
             await runner.RunScheduleAsync(ScheduleId);
         }
         catch (Exception ex)
@@ -127,6 +129,7 @@
         }
 
         await RefreshDetailsAsync();
+        scheduleRunning = false;
     }
 
     private async Task PauseScheduleAsync()
