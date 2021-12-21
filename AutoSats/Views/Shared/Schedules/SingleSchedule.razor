@@ -1,5 +1,7 @@
 ﻿@inject NavigationManager navigation
 @inject IExchangeScheduler scheduler
+@inject IExchangeScheduleRunner runner
+@inject MessageService message
 
 <div>
     @if (ShowBackIcon)
@@ -24,12 +26,12 @@
         </AntList>
         <Divider />
         <div class="summary-buttons">
-            <Popconfirm Title="Are you sure you want to delete this schedule?"
-                        OnConfirm="DeleteScheduleAsync"
-                        OkText="Delete"
+            <Popconfirm Title="Are you sure you want to run this schedule now?"
+                        OnConfirm="RunScheduleAsync"
+                        OkText="Run"
                         CancelText="Cancel">
-                <Button Type="primary" Danger Icon="delete">
-                    Delete
+                <Button Icon="play-circle">
+                    Run now
                 </Button>
             </Popconfirm>
             @if (details.Summary.IsPaused)
@@ -44,6 +46,14 @@
                     Pause
                 </Button>
             }
+            <Popconfirm Title="Are you sure you want to delete this schedule?"
+                        OnConfirm="DeleteScheduleAsync"
+                        OkText="Delete"
+                        CancelText="Cancel">
+                <Button Type="primary" Danger Icon="delete">
+                    Delete
+                </Button>
+            </Popconfirm>
         </div>
     }
     else
@@ -103,6 +113,20 @@
         {
             await ScheduleDeleted.InvokeAsync();
         }
+    }
+
+    private async Task RunScheduleAsync()
+    {
+        try
+        {
+            await runner.RunScheduleAsync(ScheduleId);
+        }
+        catch (Exception ex)
+        {
+            await message.Error($"Failed to run the schedule: {ex.Message}");
+        }
+
+        await RefreshDetailsAsync();
     }
 
     private async Task PauseScheduleAsync()
