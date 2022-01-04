@@ -26,7 +26,7 @@
 
     [Parameter] public ExchangeScheduleDetails Details { get; set; } = null!;
 
-    private const int EventsPerPage = 10;
+    private const int EventsPerPage = 4;
     private IReadOnlyCollection<ExchangeEvent> events = Array.Empty<ExchangeEvent>();
 
     protected override void OnParametersSet()
@@ -47,8 +47,6 @@
             .ElementAt(pageIndex)
             .Reverse()
             .ToArray();
-
-        StateHasChanged();
     }
 
     private string GetEventDescription(ExchangeEvent e)
