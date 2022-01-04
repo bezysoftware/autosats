@@ -16,71 +16,57 @@
             </PageHeaderExtra>
         </PageHeader>
     }
-<Card>
-    @if (details != null)
-    {
-        <AntList TItem="ExchangeScheduleSummary" DataSource="new[] { details.Summary }">
-            <ChildContent Context="item">
-                <ScheduleSummary Summary="item" />
-            </ChildContent>
-        </AntList>
-        <Divider />
-        <div class="summary-buttons">
-            <Popconfirm Title="Are you sure you want to run this schedule now?"
-                        OnConfirm="RunScheduleAsync"
-                        OkText="Run"
-                        CancelText="Cancel">
-                <Button Icon="play-circle" Loading="scheduleRunning">
-                    Run now
-                </Button>
-            </Popconfirm>
-            @if (details.Summary.IsPaused)
-            {
-                <Button Icon="caret-right" OnClick="ResumeScheduleAsync" Disabled="scheduleRunning">
-                    Resume
-                </Button>
-            }
-            else
-            {
-                <Button Icon="pause" OnClick="PauseScheduleAsync" Disabled="scheduleRunning">
-                    Pause
-                </Button>
-            }
-            <Popconfirm Title="Are you sure you want to delete this schedule?"
-                        OnConfirm="DeleteScheduleAsync"
-                        OkText="Delete"
-                        CancelText="Cancel">
-                <Button Type="primary" Danger Icon="delete" Disabled="scheduleRunning">
-                    Delete
-                </Button>
-            </Popconfirm>
-        </div>
-    }
-    else
-    {
-        <Skeleton Active="true"></Skeleton>
-    }
-</Card>
+    <Card>
+        @if (details != null)
+        {
+            <AntList TItem="ExchangeScheduleSummary" DataSource="new[] { details.Summary }">
+                <ChildContent Context="item">
+                    <ScheduleSummary Summary="item" />
+                </ChildContent>
+            </AntList>
+            <Divider />
+            <div class="summary-buttons">
+                <Popconfirm Title="Are you sure you want to run this schedule now?"
+                            OnConfirm="RunScheduleAsync"
+                            OkText="Run"
+                            CancelText="Cancel">
+                    <Button Icon="play-circle" Loading="scheduleRunning">
+                        Run now
+                    </Button>
+                </Popconfirm>
+                @if (details.Summary.IsPaused)
+                {
+                    <Button Icon="caret-right" OnClick="ResumeScheduleAsync" Disabled="scheduleRunning">
+                        Resume
+                    </Button>
+                }
+                else
+                {
+                    <Button Icon="pause" OnClick="PauseScheduleAsync" Disabled="scheduleRunning">
+                        Pause
+                    </Button>
+                }
+                <Popconfirm Title="Are you sure you want to delete this schedule?"
+                            OnConfirm="DeleteScheduleAsync"
+                            OkText="Delete"
+                            CancelText="Cancel">
+                    <Button Type="primary" Danger Icon="delete" Disabled="scheduleRunning">
+                        Delete
+                    </Button>
+                </Popconfirm>
+            </div>
+        }
+        else
+        {
+            <Skeleton Active="true"></Skeleton>
+        }
+    </Card>
 
     <PageHeader Title="Timeline" Ghost="true" />
     <Card>
         @if (details != null)
         {
-        <Timeline Reverse="true" Mode="@TimelineMode.Left">
-            <ChildContent>
-                @foreach (var e in details.Events.OrderBy(x => x.Timestamp))
-                {
-                    <TimelineItem Color="@(e.Error == null ? "blue" : "red")" Label="@e.Timestamp.ToLocalTime().ToString()">
-                        <ChildContent>@GetEventDescription(e)</ChildContent>
-                        <Dot>
-                            <Tooltip Title="e.Error">
-                                <Icon Type="@GetEventIcon(e)" Theme="outline" />
-                            </Tooltip>
-                        </Dot>
-                    </TimelineItem>
-                }
-            </ChildContent>
-        </Timeline>
+            <ScheduleTimeline Details="details" />
         }
         else
         {
@@ -147,36 +133,5 @@
     private async Task RefreshDetailsAsync()
     {
         this.details = await scheduler.GetScheduleDetailsAsync(ScheduleId);
-    }
-
-    private string GetEventDescription(ExchangeEvent e)
-    {
-        var spend = e.Schedule.SpendCurrency;
-        var accumulate = "BTC";
-
-        return e switch
-        {
-            ExchangeEventBuy buy when e.Error == null => $"Bought {buy.Received:N6} {accumulate} for {e.Schedule.Spend:N2} {spend}.",
-            ExchangeEventBuy buy => $"Failed to buy {accumulate}.",
-            ExchangeEventWithdrawal withdraw when e.Error == null => $"Withdrew {withdraw.Amount:N6} {accumulate} to {withdraw.Address}.",
-            ExchangeEventWithdrawal withdraw => $"Failed to withdraw {accumulate} to {withdraw.Address}.",
-            ExchangeEventCreate => "Schedule created.",
-            ExchangeEventPause => "Schedule paused.",
-            ExchangeEventResume => "Schedule resumed.",
-            _ => string.Empty
-        };
-    }
-
-    private string GetEventIcon(ExchangeEvent e)
-    {
-        return e.Type switch
-        {
-            ExchangeEventType.Pause => "pause",
-            ExchangeEventType.Resume => "caret-right",
-            ExchangeEventType.Buy => "bold",
-            ExchangeEventType.Withdraw => "export",
-            ExchangeEventType.Create => "plus",
-            _ => string.Empty
-        };
     }
 } 

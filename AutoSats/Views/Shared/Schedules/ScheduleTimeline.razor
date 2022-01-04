@@ -1,0 +1,82 @@
+﻿<Timeline Reverse="true" Mode="@TimelineMode.Left">
+    <ChildContent>
+        @foreach (var e in events)
+        {
+            <TimelineItem Color="@(e.Error == null ? "blue" : "red")" Label="@e.Timestamp.ToLocalTime().ToString()">
+                <ChildContent>@GetEventDescription(e)</ChildContent>
+                <Dot>
+                    <Tooltip Title="e.Error">
+                        <Icon Type="@GetEventIcon(e)" Theme="outline" />
+                    </Tooltip>
+                </Dot>
+            </TimelineItem>
+        }
+    </ChildContent>
+</Timeline>
+
+<Pagination 
+    Class="" 
+    HideOnSinglePage="true"
+    Total="Details.Events.Count()" 
+    PageSize="EventsPerPage" 
+    OnChange="ChangePage" />
+
+
+@code {
+
+    [Parameter] public ExchangeScheduleDetails Details { get; set; } = null!;
+
+    private const int EventsPerPage = 4;
+    private IReadOnlyCollection<ExchangeEvent> events = Array.Empty<ExchangeEvent>();
+
+    protected override void OnParametersSet()
+    {
+        LoadEventsPerPage(0);
+    }
+
+    private void ChangePage(PaginationEventArgs args)
+    {
+        LoadEventsPerPage(args.Page - 1);
+    }
+
+    private void LoadEventsPerPage(int pageIndex)
+    {
+        this.events = Details.Events
+            .OrderByDescending(x => x.Timestamp)
+            .Chunk(EventsPerPage)
+            .ElementAt(pageIndex)
+            .Reverse()
+            .ToArray();
+    }
+
+    private string GetEventDescription(ExchangeEvent e)
+    {
+        var spend = e.Schedule.SpendCurrency;
+        var accumulate = "BTC";
+
+        return e switch
+        {
+            ExchangeEventBuy buy when e.Error == null => $"Bought {buy.Received:N6} {accumulate} @ {buy.Price:N0} {spend}.",
+            ExchangeEventBuy buy => $"Failed to buy {accumulate}.",
+            ExchangeEventWithdrawal withdraw when e.Error == null => $"Withdrew {withdraw.Amount:N6} {accumulate} to {withdraw.Address}.",
+            ExchangeEventWithdrawal withdraw => $"Failed to withdraw {accumulate} to {withdraw.Address}.",
+            ExchangeEventCreate => "Schedule created.",
+            ExchangeEventPause => "Schedule paused.",
+            ExchangeEventResume => "Schedule resumed.",
+            _ => string.Empty
+        };
+    }
+
+    private string GetEventIcon(ExchangeEvent e)
+    {
+        return e.Type switch
+        {
+            ExchangeEventType.Pause => "pause",
+            ExchangeEventType.Resume => "caret-right",
+            ExchangeEventType.Buy => "bold",
+            ExchangeEventType.Withdraw => "export",
+            ExchangeEventType.Create => "plus",
+            _ => string.Empty
+        };
+    }
+}
