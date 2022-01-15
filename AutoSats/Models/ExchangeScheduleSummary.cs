@@ -25,7 +25,8 @@ public record ExchangeScheduleSummary(
     public decimal? AvailableSpend { get; set; }
 
     public decimal? AvailableBTC { get; set; }
-
+    
+    public decimal? CurrentPrice { get; set; }
 
     public DateTime NextOccurrence => this.nextOccurrence ??= GetNextOccurrence();
 

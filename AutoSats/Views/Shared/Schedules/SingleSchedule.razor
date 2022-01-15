@@ -62,6 +62,18 @@
         }
     </Card>
 
+    <PageHeader Title="Charts" Ghost="true" />
+    <Card>
+        @if (details != null)
+        {
+            <ScheduleCharts Details="details" />
+        }
+        else
+        {
+            <Skeleton Active="true"></Skeleton>
+        }
+    </Card>
+
     <PageHeader Title="Timeline" Ghost="true" />
     <Card>
         @if (details != null)

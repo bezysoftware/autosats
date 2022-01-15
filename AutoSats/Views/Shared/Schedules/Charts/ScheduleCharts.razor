@@ -1,0 +1,151 @@
+﻿<div id="area">
+    <span>Group by period</span>
+    <EnumSelect 
+        TEnum="TimePeriod" 
+        Value="selectedPeriod" 
+        Class="period-select"
+        PopupContainerSelector="#area"
+        OnSelectedItemChanged="PeriodChanged"
+        />
+     
+    @if (prices.Any())
+    {
+        <DualAxes 
+            @ref="chart"
+            Data="@(new object[] { prices, amounts })" 
+            Config="config" 
+            />
+    }
+</div>
+
+@code {
+
+    [Parameter] public ExchangeScheduleDetails? Details { get; set; }
+
+    private List<object> prices { get; set; } = new();
+    private List<object> amounts { get; set; } = new();
+
+    private IChartComponent? chart;
+    private IReadOnlyCollection<ExchangeEventBuy> buys = Array.Empty<ExchangeEventBuy>(); 
+    private TimePeriod selectedPeriod { get; set; }
+
+    private DualAxesConfigEx config = new() {
+        ForceFit = true,
+        XField = "timestamp",
+        YField = new string[] { "price", "received" },
+        Meta = new { 
+            price = new { alias = "Buy price" },
+            received = new { alias = "Bitcoin received" } 
+        },
+        GeometryOptions = new object[] {
+            new {
+                Geometry= "line",
+                SeriesField = "series"
+            },
+            new {
+                Geometry= "column",
+                IsGroup = true,
+                SeriesField = "series"
+            }
+        },
+        Annotations = new() {
+            ["price"] = new[] {
+                new AnnotationConfig {
+                    Type = "line",
+                    Start = new [] { "min", "0" },
+                    End = new [] { "max", "0" },
+                    Style = new LineStyle {
+                        Stroke = "red",
+                        LineDash = new[] { 4, 2 }
+                    },
+                    Text = new GuideLineConfigText {
+                        Position = "start",
+                        Content = "Current price",
+                        Style = new TextStyle {
+                            Fill = "red"
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (Details != null)
+        {
+            this.buys = Details.Events
+                .Where(x => x.Type == ExchangeEventType.Buy && x.Error == null)
+                .OrderBy(x => x.Timestamp)
+                .Cast<ExchangeEventBuy>()
+                .ToArray();
+
+            this.selectedPeriod = GetDefaultTimePeriod(this.buys);
+
+            SetChartData(this.buys, selectedPeriod);
+
+            var annotations = config.Annotations!["price"][0];
+            var price = (Details.Summary.CurrentPrice ?? 0m).ToString(CultureInfo.InvariantCulture);
+            annotations.Start![1] = price;
+            annotations.End![1] = price;
+        }
+    }
+
+    private TimePeriod GetDefaultTimePeriod(IReadOnlyCollection<ExchangeEventBuy> buys)
+    {
+        var days = buys.GroupBy(x => x.Timestamp.Date).Count();
+        return days switch
+        {
+            var x when x > 366 => TimePeriod.Yearly,
+            var x when x > 93 => TimePeriod.Monthly,
+            var x when x > 21 => TimePeriod.Weekly,
+            _ => TimePeriod.Daily,
+        };
+    }
+
+    private void PeriodChanged(TimePeriod period)
+    {
+        SetChartData(this.buys, period);
+        this.chart?.ChangeData(new[] { this.prices, this.amounts });
+    }
+
+    private void SetChartData(IEnumerable<ExchangeEventBuy> buys, TimePeriod period)
+    {
+        this.prices.Clear();
+        this.amounts.Clear();
+
+        var dateFormat = period switch
+        {
+            TimePeriod.Daily => "d",
+            TimePeriod.Weekly => "d",
+            TimePeriod.Monthly => "Y",
+            TimePeriod.Yearly => "yyyy",
+            _ => "d"
+        };
+
+        var grouped = period switch
+        {
+            TimePeriod.Weekly => buys.GroupBy(x => x.Timestamp.Date.AddDays(-(int)x.Timestamp.DayOfWeek).Ticks),
+            TimePeriod.Monthly => buys.GroupBy(x => (long)x.Timestamp.Date.Year * 12 + x.Timestamp.Date.Month),
+            TimePeriod.Yearly => buys.GroupBy(x => (long)x.Timestamp.Year),
+            _ => buys.GroupBy(x => x.Timestamp.Date.Ticks)
+        };
+
+        grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), price = (double)Math.Round(x.Average(y => y.Price)), series = "Daily buy price" })
+            .Aggregate((total: 0.0, count: 0), (acc, e) =>
+            {
+                var avg = Math.Round((acc.total + e.price) / (acc.count + 1));
+                prices.Add(e);
+                prices.Add(new { timestamp = $"{e.timestamp}", price = avg, series = "Average buy price" });
+                return (acc.total + e.price, acc.count + 1);
+            });
+
+        grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), received = (double)x.Sum(y => y.Received), series = "Bitcoin received daily" })
+            .Aggregate(0.0, (acc, e) =>
+            {
+                amounts.Add(e);
+                amounts.Add(new { timestamp = e.timestamp, received = acc + e.received, series = "Bitcoin received total" });
+                return acc + e.received;
+            });
+    }
+}
