@@ -98,19 +98,19 @@ public class ExchangeScheduler : IExchangeScheduler
             e.AbsoluteExpirationRelativeToNow = PrerenderCacheTimeout;
 
             var schedule = await this.db.ExchangeSchedules
-            .Include(x => x.Events)
-            .Where(x => x.Id == id)
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
+                .Include(x => x.Events)
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
 
             if (schedule == null)
             {
                 throw new ScheduleNotFoundException(id);
             }
 
-            var balances = await (await this.exchangeFactory
-                .GetServiceAsync(schedule.Exchange, GetKeysFilePath(schedule)))
-                .GetBalancesAsync();
+            var service = await this.exchangeFactory.GetServiceAsync(schedule.Exchange, GetKeysFilePath(schedule));
+            var balances = await service.GetBalancesAsync();
+            var price = await service.GetPriceAsync(schedule.Symbol);
 
             var buys = schedule.Events.Where(e => e.Type == ExchangeEventType.Buy).Cast<ExchangeEventBuy>().ToArray();
             var summary = this.mapper.Map<ExchangeScheduleSummary>(schedule) with
@@ -118,7 +118,8 @@ public class ExchangeScheduler : IExchangeScheduler
                 TotalAccumulated = buys.Sum(e => e.Received),
                 TotalSpent = buys.Count(x => x.Error == null) * schedule.Spend,
                 AvailableBTC = balances.FirstOrDefault(a => a.Currency == "BTC")?.Amount,
-                AvailableSpend = balances.FirstOrDefault(a => a.Currency == schedule.SpendCurrency)?.Amount
+                AvailableSpend = balances.FirstOrDefault(a => a.Currency == schedule.SpendCurrency)?.Amount,
+                CurrentPrice = price
             };
 
             return new ExchangeScheduleDetails(summary, schedule.Events);
