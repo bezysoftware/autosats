@@ -1,24 +1,26 @@
-﻿<Timeline Reverse="true" Mode="@TimelineMode.Left">
-    <ChildContent>
-        @foreach (var e in events)
-        {
-            <TimelineItem Color="@(e.Error == null ? "blue" : "red")" Label="@e.Timestamp.ToLocalTime().ToString()">
-                <ChildContent>@GetEventDescription(e)</ChildContent>
-                <Dot>
-                    <Tooltip Title="e.Error">
-                        <Icon Type="@GetEventIcon(e)" Theme="outline" />
-                    </Tooltip>
-                </Dot>
-            </TimelineItem>
-        }
-    </ChildContent>
-</Timeline>
+﻿<ul class="ant-timeline ant-timeline-label">
+    @foreach (var e in events)
+    {
+        <li id="@e.Id" class="ant-timeline-item ant-timeline-item-left">
+			<div class="ant-timeline-item-label">@e.Timestamp.ToLocalTime().ToString()</div>
+            <div class="ant-timeline-item-tail"></div>
+            <Dot class="ant-timeline-item-head ant-timeline-item-head-blue ant-timeline-item-head-custom">
+                <Tooltip Title="e.Error">
+                    <Icon Type="@GetEventIcon(e)" Theme="outline" />
+                </Tooltip>
+            </Dot>
+            <div class="ant-timeline-item-content">
+                @GetEventDescription(e)
+            </div>
+        </li>
+    }
+</ul>
 
 <Pagination 
     Class="" 
     HideOnSinglePage="true"
     Total="Details.Events.Count()" 
-    PageSize="EventsPerPage" 
+    PageSize="EventsPerPage"
     OnChange="ChangePage" />
 
 
@@ -26,8 +28,8 @@
 
     [Parameter] public ExchangeScheduleDetails Details { get; set; } = null!;
 
-    private const int EventsPerPage = 4;
-    private IReadOnlyCollection<ExchangeEvent> events = Array.Empty<ExchangeEvent>();
+    private const int EventsPerPage = 10;
+    private ExchangeEvent[] events = Array.Empty<ExchangeEvent>();
 
     protected override void OnParametersSet()
     {
@@ -37,6 +39,7 @@
     private void ChangePage(PaginationEventArgs args)
     {
         LoadEventsPerPage(args.Page - 1);
+        
     }
 
     private void LoadEventsPerPage(int pageIndex)
@@ -45,7 +48,6 @@
             .OrderByDescending(x => x.Timestamp)
             .Chunk(EventsPerPage)
             .ElementAt(pageIndex)
-            .Reverse()
             .ToArray();
     }
 
