@@ -33,10 +33,6 @@
         ForceFit = true,
         XField = "timestamp",
         YField = new string[] { "price", "received" },
-        Meta = new { 
-            price = new { alias = "Buy price" },
-            received = new { alias = "Bitcoin received" } 
-        },
         GeometryOptions = new object[] {
             new {
                 Geometry= "line",
@@ -83,11 +79,6 @@
             this.selectedPeriod = GetDefaultTimePeriod(this.buys);
 
             SetChartData(this.buys, selectedPeriod);
-
-            var annotations = config.Annotations!["price"][0];
-            var price = (Details.Summary.CurrentPrice ?? 0m).ToString(CultureInfo.InvariantCulture);
-            annotations.Start![1] = price;
-            annotations.End![1] = price;
         }
     }
 
@@ -106,7 +97,7 @@
     private void PeriodChanged(TimePeriod period)
     {
         SetChartData(this.buys, period);
-        this.chart?.ChangeData(new[] { this.prices, this.amounts });
+        this.chart?.UpdateChart(this.config, data: new[] { this.prices, this.amounts });
     }
 
     private void SetChartData(IEnumerable<ExchangeEventBuy> buys, TimePeriod period)
@@ -131,21 +122,52 @@
             _ => buys.GroupBy(x => x.Timestamp.Date.Ticks)
         };
 
-        grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), price = (double)Math.Round(x.Average(y => y.Price)), series = "Daily buy price" })
-            .Aggregate((total: 0.0, count: 0), (acc, e) =>
+        var minPrice = decimal.MaxValue;
+        var maxPrice = decimal.MinValue;
+
+        grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), price = Math.Round(x.Average(y => y.Price)), series = "Buy price" })
+            .Aggregate((total: 0m, count: 0), (acc, e) =>
             {
+                if (e.price > maxPrice)
+                {
+                    maxPrice = e.price;
+                }
+                if (e.price < minPrice)
+                {
+                    minPrice = e.price;
+                }
+
                 var avg = Math.Round((acc.total + e.price) / (acc.count + 1));
                 prices.Add(e);
                 prices.Add(new { timestamp = $"{e.timestamp}", price = avg, series = "Average buy price" });
                 return (acc.total + e.price, acc.count + 1);
             });
 
-        grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), received = (double)x.Sum(y => y.Received), series = "Bitcoin received daily" })
+        grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), received = (double)x.Sum(y => y.Received), series = "Bitcoin received" })
             .Aggregate(0.0, (acc, e) =>
             {
                 amounts.Add(e);
                 amounts.Add(new { timestamp = e.timestamp, received = acc + e.received, series = "Bitcoin received total" });
                 return acc + e.received;
             });
+
+
+        // set current price annotation
+        var annotations = config.Annotations!["price"][0];
+        var currentPrice = Details?.Summary.CurrentPrice ?? 0m;
+        var price = currentPrice.ToString(CultureInfo.InvariantCulture);
+        annotations.Start![1] = price;
+        annotations.End![1] = price;
+
+        // if current price out of range, add it as min/max
+        if (currentPrice > 0) 
+        {
+            config.YAxis = new {
+                price = new {
+                    min = minPrice > currentPrice ? Math.Round(currentPrice - 1000) : (decimal?)null,
+                    max = maxPrice < currentPrice ? Math.Round(currentPrice + 1000) : (decimal?)null,
+                }
+            };
+        }
     }
 }
