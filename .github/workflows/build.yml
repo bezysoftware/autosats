@@ -34,11 +34,11 @@ jobs:
 
       - name: Get docker tag
         run: |
-            echo "${GITHUB_REF##*/}"
-            if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            echo "${GITHUB_HEAD_REF##*/}"
+            if [[ "${GITHUB_HEAD_REF##*/}" == "main" ]]; then
                 echo "IMAGE_TAG=latest" >> $GITHUB_ENV
             else
-                echo "IMAGE_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
+                echo "IMAGE_TAG=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
             fi
       
       - name: Build and push
