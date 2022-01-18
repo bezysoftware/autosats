@@ -1,1 +1,1 @@
-.header-container{height:100%;display:flex;justify-content:center;align-items:center}.header-container .logo-container{object-fit:contain;margin:10px}::deep .app-title{color:white;margin-bottom:0;margin-left:12px;align-self:center;font-weight:800}
+.header-container{height:100%;display:flex;justify-content:center;align-items:center}.header-container .logo-container{object-fit:contain;margin:10px}::deep .app-title{margin-bottom:0;margin-left:12px;align-self:center;font-weight:800}::deep .app-title a{color:white}
