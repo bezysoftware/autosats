@@ -46,6 +46,12 @@
                         Pause
                     </Button>
                 }
+                
+                <a href="@GetExportPath()" target="_blank">
+                    <Button Icon="download" OnClick="ExportCsvAsync" Disabled="scheduleRunning">
+                        Export as csv
+                    </Button>
+                </a>
                 <Popconfirm Title="Are you sure you want to delete this schedule?"
                             OnConfirm="DeleteScheduleAsync"
                             OkText="Delete"
@@ -100,6 +106,11 @@
         await RefreshDetailsAsync();
     }
 
+    private string GetExportPath()
+    {
+        return $"/api/export/{ScheduleId}";
+    }
+
     private async Task DeleteScheduleAsync()
     {
         await scheduler.DeleteScheduleAsync(ScheduleId);
@@ -131,6 +142,12 @@
     }
 
     private async Task PauseScheduleAsync()
+    {
+        await scheduler.PauseScheduleAsync(ScheduleId);
+        await RefreshDetailsAsync();
+    }
+
+    private async Task ExportCsvAsync()
     {
         await scheduler.PauseScheduleAsync(ScheduleId);
         await RefreshDetailsAsync();

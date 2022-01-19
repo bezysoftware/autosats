@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="AntDesign.Charts" Version="0.2.2" />
+    <PackageReference Include="CsvHelper" Version="27.2.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.3.3" />
     <PackageReference Include="Quartz.Serialization.Json" Version="3.3.3" />
