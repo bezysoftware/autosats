@@ -44,7 +44,7 @@ jobs:
       - name: Get docker tag (PR)
         if: github.event_name == 'pull_request'
         run: |
-            echo "${GITHUB_REF##*/}"
+            echo "${GITHUB_HEAD_REF##*/}"
             echo "IMAGE_TAG=${GITHUB_HEAD_REF##*/}" >> $GITHUB_ENV
       - name: Build and push
         id: docker_build

@@ -126,6 +126,22 @@ public class ExchangeScheduler : IExchangeScheduler
         });
     }
 
+    public async Task<IEnumerable<ExchangeEvent>> GetScheduleEventsAsync(int id)
+    {
+        var schedule = await this.db.ExchangeSchedules
+                .Include(x => x.Events)
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+        if (schedule == null)
+        {
+            throw new ScheduleNotFoundException(id);
+        }
+
+        return schedule.Events;
+    }
+
     public async Task DeleteScheduleAsync(int id)
     {
         var schedule = await GetScheduleByIdAsync(id);

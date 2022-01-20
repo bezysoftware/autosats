@@ -46,6 +46,12 @@
                         Pause
                     </Button>
                 }
+                
+                <a href="@GetExportPath()" target="_blank">
+                    <Button Icon="download" Disabled="scheduleRunning">
+                        Export as csv
+                    </Button>
+                </a>
                 <Popconfirm Title="Are you sure you want to delete this schedule?"
                             OnConfirm="DeleteScheduleAsync"
                             OkText="Delete"
@@ -98,6 +104,11 @@
     protected override async Task OnParametersSetAsync()
     {
         await RefreshDetailsAsync();
+    }
+
+    private string GetExportPath()
+    {
+        return $"/api/export/{ScheduleId}";
     }
 
     private async Task DeleteScheduleAsync()

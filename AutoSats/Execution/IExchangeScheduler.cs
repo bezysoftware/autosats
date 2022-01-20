@@ -35,6 +35,11 @@ public interface IExchangeScheduler
     Task<ExchangeScheduleDetails> GetScheduleDetailsAsync(int id);
 
     /// <summary>
+    /// Get schedule events.
+    /// </summary>
+    Task<IEnumerable<ExchangeEvent>> GetScheduleEventsAsync(int id);
+
+    /// <summary>
     /// Get a list of available symbols with their balances.
     /// </summary>
     Task<IEnumerable<SymbolBalance>> GetSymbolBalancesAsync(string exchange, string key1, string key2, string? key3);
