@@ -48,7 +48,7 @@
                 }
                 
                 <a href="@GetExportPath()" target="_blank">
-                    <Button Icon="download" OnClick="ExportCsvAsync" Disabled="scheduleRunning">
+                    <Button Icon="download" Disabled="scheduleRunning">
                         Export as csv
                     </Button>
                 </a>
@@ -142,12 +142,6 @@
     }
 
     private async Task PauseScheduleAsync()
-    {
-        await scheduler.PauseScheduleAsync(ScheduleId);
-        await RefreshDetailsAsync();
-    }
-
-    private async Task ExportCsvAsync()
     {
         await scheduler.PauseScheduleAsync(ScheduleId);
         await RefreshDetailsAsync();
