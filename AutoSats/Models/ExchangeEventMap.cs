@@ -2,7 +2,7 @@
 
 namespace AutoSats.Models;
 
-public class ExchangeEventMap : ClassMap<BuyWithdrawal>
+public class ExchangeEventMap : ClassMap<ExchangeEventGrouped>
 {
     public ExchangeEventMap()
     {

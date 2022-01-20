@@ -28,7 +28,7 @@ public class ExportController : ControllerBase
         {
             csv.Context.RegisterClassMap<ExchangeEventMap>();
 
-            csv.WriteRecords(events.Select(x => new BuyWithdrawal(x)));
+            csv.WriteRecords(events.Select(x => new ExchangeEventGrouped(x)));
 
             var contentType = "text/csv";
             var fileName = "export.csv";

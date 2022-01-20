@@ -1,6 +1,6 @@
 ﻿namespace AutoSats.Models;
 
-public record BuyWithdrawal(ExchangeEvent Event)
+public record ExchangeEventGrouped(ExchangeEvent Event)
 {
     public DateTime Timestamp => Event.Timestamp;
 
