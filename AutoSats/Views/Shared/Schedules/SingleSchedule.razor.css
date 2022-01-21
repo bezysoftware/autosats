@@ -1,1 +1,1 @@
-.summary-buttons{display:flex;flex-direction:row;justify-content:center}.summary-buttons ::deep button{margin:0 6px}::deep .create-schedule-button{margin-right:-15px}
+::deep .summary-buttons{display:flex;flex-direction:row;justify-content:center;flex-wrap:wrap;margin:-3px 0}::deep .summary-buttons>*{margin:3px 6px}::deep .create-schedule-button{margin-right:-15px}

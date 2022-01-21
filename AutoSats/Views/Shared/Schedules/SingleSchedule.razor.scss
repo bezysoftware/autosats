@@ -1,13 +1,17 @@
-﻿.summary-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+﻿::deep {
+    .summary-buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: -3px 0;
 
-    ::deep button {
-        margin: 0 6px;
+        > * {
+            margin: 3px 6px;
+        }
     }
-}
 
-::deep .create-schedule-button {
-    margin-right: -15px;
+    .create-schedule-button {
+        margin-right: -15px;
+    }
 }
