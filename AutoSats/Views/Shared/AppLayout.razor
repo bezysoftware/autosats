@@ -1,18 +1,24 @@
 ﻿@inherits LayoutComponentBase
 
-<Layout Class="site-layout">
-    <Header>
-        <AppHeader />
-    </Header>
-    <Layout>
-        <div class="site-layout-content">@Body</div>
+<div class="site-root">
+    <Layout Class="site-layout">
+        <Header>
+            <AppHeader />
+        </Header>
+        <Layout>
+            <div class="site-layout-content">@Body</div>
+        </Layout>
+        <Footer Class="app-footer">
+            <AppFooter />
+        </Footer>
     </Layout>
-    <Footer Class="app-footer">
-        <AppFooter />
-    </Footer>
-</Layout>
-
+</div>
 <style>
+    .site-root {
+        overflow: auto;
+        height: 100vh;
+    }
+
     .site-layout {
         min-height: 100vh;
         display: flex;
