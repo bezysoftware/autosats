@@ -4,11 +4,15 @@
         <li id="@e.Id" class="ant-timeline-item ant-timeline-item-left">
 			<div class="ant-timeline-item-label">@e.Timestamp.ToLocalTime().ToString()</div>
             <div class="ant-timeline-item-tail"></div>
-            <Dot class="ant-timeline-item-head ant-timeline-item-head-blue ant-timeline-item-head-custom">
+            <div class="@($"ant-timeline-item-head ant-timeline-item-head-{(e.Error == null ? "blue" : "red")} ant-timeline-item-head-custom")">
                 <Tooltip Title="e.Error">
-                    <Icon Type="@GetEventIcon(e)" Theme="outline" />
+                    <Unbound>
+                        <span @ref="@context.Current">
+                            <Icon Type="@GetEventIcon(e)" Theme="outline" />
+                        </span>
+                    </Unbound>
                 </Tooltip>
-            </Dot>
+            </div>
             <div class="ant-timeline-item-content">
                 @GetEventDescription(e)
             </div>
