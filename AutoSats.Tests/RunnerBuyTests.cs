@@ -55,7 +55,7 @@ public class RunnerBuyTests : RunnerTestsBase
         // api request
         var request = new ExchangeOrderRequest
         {
-            Amount = 5 / 30000m,
+            Amount = 0.00016667m,
             IsBuy = true,
             MarketSymbol = "BTCEUR",
             OrderType = OrderType.Market
@@ -80,7 +80,7 @@ public class RunnerBuyTests : RunnerTestsBase
 
         var request = new ExchangeOrderRequest
         {
-            Amount = 100 / 30000m,
+            Amount = 0.00333333m,
             IsBuy = true,
             MarketSymbol = "BTCEUR",
             OrderType = OrderType.Limit,
