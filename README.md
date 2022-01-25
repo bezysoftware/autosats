@@ -14,12 +14,13 @@ AutoSats is the easiest non-custudial DCA solution you can run on your own node.
 
 ## Supported exchanges
 
-* Bitfinex
-* Bitstamp
-* Coinbase PRO
-* FTX
-* Kraken
-* Poloniex
+* [Bitfinex](https://bitfinex.com/)
+* [Bitstamp](https://bitstamp.net/)
+* [Coinbase PRO](https://pro.coinbase.com/)
+* [Coinmate](https://coinmate.io/)
+* [FTX](https://ftx.com/)
+* [Kraken](https://kraken.com/)
+* [Poloniex](https://poloniex.com/)
 * ...more coming in the future, see below how you can contribute
 
 ## Installation
@@ -53,7 +54,7 @@ Let's go over the parameters:
 
 ### Lightning
 
-There is also an option to use a lightning wallet instead of Bitcoind wallet (this will be used in Umbrel):
+There is also an option to use a lightning wallet (e.g. LND) instead of Bitcoind wallet (this will be used in Umbrel):
 
 ```bash
 mkdir -p /home/umbrel/umbrel/app-data/autosats/data/home
