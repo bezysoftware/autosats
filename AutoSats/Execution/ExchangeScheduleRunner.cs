@@ -72,7 +72,7 @@ public class ExchangeScheduleRunner : IExchangeScheduleRunner
             var price = await service.GetPriceAsync(schedule.Symbol);
             var currenciesReversed = GetExchangeOptions(schedule.Exchange).ReverseCurrencies;
             var invert = !schedule.Symbol.EndsWith(spendCurrency, StringComparison.OrdinalIgnoreCase) ^ currenciesReversed;
-            var amount = invert ? schedule.Spend : schedule.Spend / price;
+            var amount = invert ? schedule.Spend : Math.Round(schedule.Spend / price, 8);
 
             this.logger.LogInformation($"Going to buy '{amount}' of '{schedule.Symbol}'");
 
