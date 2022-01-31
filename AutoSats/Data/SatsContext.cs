@@ -19,6 +19,8 @@ public class SatsContext : DbContext
 
     public DbSet<ExchangeSchedule> ExchangeSchedules { get; set; }
 
+    public DbSet<ApplicationSettings> ApplicationSettings { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.SetEnumConverterForAll();
@@ -34,6 +36,5 @@ public class SatsContext : DbContext
             .HasValue<ExchangeEventResume>(ExchangeEventType.Resume)
             .HasValue<ExchangeEventBuy>(ExchangeEventType.Buy)
             .HasValue<ExchangeEventWithdrawal>(ExchangeEventType.Withdraw);
-
     }
 }

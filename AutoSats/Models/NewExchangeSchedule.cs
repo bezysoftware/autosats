@@ -8,5 +8,7 @@ public record NewExchangeSchedule(
     DateTime Start,
     ExchangeWithdrawalType WithdrawalType,
     string? WithdrawalAddress,
-    decimal? WithdrawalLimit)
+    decimal? WithdrawalLimit,
+    NotificationType NotificationType,
+    NotificationSubscription? Notification)
 { }

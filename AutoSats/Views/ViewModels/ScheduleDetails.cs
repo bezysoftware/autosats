@@ -33,4 +33,8 @@ public class ScheduleDetails
 
     [Required]
     public bool RunToVerify { get; set; } = true;
+
+    public NotificationSubscription? Notification { get; set; }
+
+    public NotificationType NotificationType { get; set; } = NotificationType.None;
 }

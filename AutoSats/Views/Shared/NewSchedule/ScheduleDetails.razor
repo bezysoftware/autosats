@@ -1,7 +1,9 @@
 ﻿@inject IExchangeServiceFactory factory
 @inject IExchangeScheduler scheduler
+@inject INotificationService notifications
 @inject MessageService message
 @inject IWalletService wallet 
+@inject IJSRuntime JSRuntime
 
 <div>
     <Form Model="details" LabelColSpan="12" WrapperColSpan="12" OnFinish="SaveScheduleAsync" Loading="isSaving">
@@ -96,7 +98,6 @@
                                     OnChange="@(x => UpdateCronExpression(this.selectedPeriod, x.Date))" />
                     </FormItem>
                 }
-
             </GridCol>
 
             <GridCol>
@@ -113,6 +114,10 @@
                 }
                 else
                 {
+                    <FormItem Label="Push notifications" Required LabelColSpan="10" WrapperColSpan="14">
+                        <EnumSelect TEnum="AutoSats.Data.NotificationType" @bind-Value="context.NotificationType" OnSelectedItemChanged="NotificationTypeChanged" />
+                    </FormItem>
+
                     <FormItem Label="Withdrawal" Required LabelColSpan="10" WrapperColSpan="14">
                         <Select TItem="ExchangeWithdrawalType"
                                 TItemValue="ExchangeWithdrawalType"
@@ -239,6 +244,27 @@
         UpdateCronExpression(period, this.details.Start);
     }
 
+    private async void NotificationTypeChanged(AutoSats.Data.NotificationType type)
+    {
+        if (type == Data.NotificationType.None)
+        {
+            this.details.Notification = null;
+            return;
+        }
+
+        var publicKey = this.notifications.GetServicePublicKey();
+        var notifications = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/notifications.js");
+
+        this.details.Notification = await notifications.InvokeAsync<NotificationSubscription>("requestSubscription", publicKey);
+
+        if (this.details.Notification == null)
+        {
+            this.details.NotificationType = Data.NotificationType.None;
+            StateHasChanged();
+            await this.message.Error("Couldn't get notification subscription details (is your browser blocking push notifications?)");
+        }
+    }
+
     private void UpdateCronExpression(SchedulePeriod period, DateTime start)
     {
         switch (this.selectedPeriod)
@@ -271,7 +297,12 @@
             this.details.Start,
             this.details.WithdrawalType,
             this.details.WithdrawalAddress,
-            this.details.WithdrawalLimit);
+            this.details.WithdrawalLimit,
+            this.details.Notification == null 
+                ? Data.NotificationType.None 
+                : this.details.NotificationType,
+            this.details.Notification
+        );
 
         try
         {

@@ -35,5 +35,7 @@ public class ExchangeSchedule
 
     public decimal WithdrawalLimit { get; set; }
 
+    public ExchangeScheduleNotification? Notification { get; set; } 
+
     public virtual ICollection<ExchangeEvent> Events { get; set; } = null!;
 }

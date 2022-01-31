@@ -25,11 +25,17 @@
     <PackageReference Include="AntDesign" Version="0.10.2" />
     <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />
 	<PackageReference Include="BTCPayServer.Lightning.All" Version="1.2.12" />
+	<PackageReference Include="WebPush" Version="1.0.12" />
 
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+
+	<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.5.3">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	</PackageReference>
 	
 	<PackageReference Include="LibSassBuilder" Version="1.6.4" Condition=" '$(Configuration)' == 'Debug' " />
   </ItemGroup>
@@ -37,6 +43,7 @@
   <ItemGroup>
     <Watch Include="wwwroot/**;**/*.scss" />
     <None Update="**/*.css" Watch="false" />
+    <None Update="**/*.ts" Watch="false" />
   </ItemGroup>
 
   <ItemGroup>

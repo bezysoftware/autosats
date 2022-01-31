@@ -87,14 +87,17 @@ public class Startup
         services.AddScoped<IExchangeScheduler, ExchangeScheduler>();
         services.AddScoped<IExchangeScheduleRunner, ExchangeScheduleRunner>();
         services.AddSingleton<ILoginService, LoginService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<ApplicationSettingsSeed>();
 
         services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/Views/Pages");
         services.Configure<ApplicationOptions>(Configuration.GetSection("Application"));
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SatsContext db)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SatsContext db, ApplicationSettingsSeed seed)
     {
         db.Database.Migrate();
+        seed.Seed();
 
         if (env.IsDevelopment())
         {
