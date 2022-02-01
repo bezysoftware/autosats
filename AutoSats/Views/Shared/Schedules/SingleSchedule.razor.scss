@@ -9,6 +9,23 @@
         > * {
             margin: 3px 6px;
         }
+
+        .notification-select {
+            width: 160px !important;
+
+            .ant-select-selector {
+                padding-top: 4px;
+            }
+
+            .ant-select-prefix {
+                margin-top: -4px;
+                margin-left: 4px;
+            }
+
+            .notification-label {
+                margin-left: 4px;
+            }
+        }
     }
 
     .create-schedule-button {

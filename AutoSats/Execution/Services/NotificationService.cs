@@ -37,19 +37,11 @@ public class NotificationService : INotificationService
             return;
         }
 
-        var settings = this.db.ApplicationSettings.First();
-        var pushSubscription = new PushSubscription(notification.Url, notification.P256dh, notification.Auth);
-        var vapidDetails = new VapidDetails(VapidSubject, settings.PublicKey, settings.PrivateKey);
-        var webPushClient = new WebPushClient();
-
+        var message = GetNotificationText(e);
+        
         try
         {
-            var payload = JsonConvert.SerializeObject(new
-            {
-                message = GetNotificationText(e)
-            });
-
-            await webPushClient.SendNotificationAsync(pushSubscription, payload, vapidDetails);
+            await SendPushNotificationAsync(notification, message);
         }
         catch (Exception ex)
         {
@@ -60,6 +52,26 @@ public class NotificationService : INotificationService
 
             this.log.LogError(ex, $"Error sending notification for event {JsonConvert.SerializeObject(e, json)}");
         }
+    }
+
+    public Task SendTestNotificationAsync(ExchangeScheduleNotification notification)
+    {
+        return SendPushNotificationAsync(notification, "Test notification from AutoSats");
+    }
+
+    private async Task SendPushNotificationAsync(ExchangeScheduleNotification notification, string message)
+    {
+        var settings = this.db.ApplicationSettings.First();
+        var pushSubscription = new PushSubscription(notification.Url, notification.P256dh, notification.Auth);
+        var vapidDetails = new VapidDetails(VapidSubject, settings.PublicKey, settings.PrivateKey);
+        var webPushClient = new WebPushClient();
+
+        var payload = JsonConvert.SerializeObject(new
+        {
+            message = message
+        });
+
+        await webPushClient.SendNotificationAsync(pushSubscription, payload, vapidDetails);
     }
 
     private string GetNotificationText(ExchangeEvent e)

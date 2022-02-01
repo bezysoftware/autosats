@@ -20,7 +20,8 @@ public class MappingProfile : Profile
                 }
             });
 
-        CreateMap<ExchangeSchedule, ExchangeScheduleSummary>();
+        CreateMap<ExchangeSchedule, ExchangeScheduleSummary>()
+            .ForMember(x => x.NotificationType, opts => opts.MapFrom(x => x.Notification != null ? x.Notification.Type : NotificationType.None));
         CreateMap<NotificationSubscription, ExchangeScheduleNotification>();
     }
 }

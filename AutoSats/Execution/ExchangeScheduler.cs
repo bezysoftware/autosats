@@ -21,6 +21,7 @@ public class ExchangeScheduler : IExchangeScheduler
     private readonly IExchangeServiceFactory exchangeFactory;
     private readonly IMapper mapper;
     private readonly IEnumerable<ExchangeOptions> exchangeOptions;
+    private readonly INotificationService notificationService;
     private readonly IMemoryCache cache;
 
     public ExchangeScheduler(
@@ -31,6 +32,7 @@ public class ExchangeScheduler : IExchangeScheduler
         IExchangeServiceFactory exchangeFactory,
         IMapper mapper,
         IEnumerable<ExchangeOptions> exchangeOptions,
+        INotificationService notificationService,
         IMemoryCache memoryCache)
     {
         this.logger = logger;
@@ -40,6 +42,7 @@ public class ExchangeScheduler : IExchangeScheduler
         this.exchangeFactory = exchangeFactory;
         this.mapper = mapper;
         this.exchangeOptions = exchangeOptions;
+        this.notificationService = notificationService;
         this.cache = memoryCache;
     }
 
@@ -189,6 +192,21 @@ public class ExchangeScheduler : IExchangeScheduler
         this.db.SaveChanges();
         this.cache.Remove(id);
         this.cache.Remove(PrerenderCacheListName);
+    }
+
+    public async Task UpdateScheduleNotificationsAsync(int id, NotificationType type, NotificationSubscription? subscription)
+    {
+        var schedule = await GetScheduleByIdAsync(id);
+        schedule.Notification = subscription == null 
+            ? null 
+            : this.mapper.Map(subscription, new ExchangeScheduleNotification { Type = type });
+        
+        this.db.SaveChanges();
+
+        if (subscription != null)
+        {
+            await this.notificationService.SendTestNotificationAsync(schedule.Notification!);
+        }
     }
 
     public async Task AddScheduleAsync(NewExchangeSchedule newSchedule, bool runToVerify)

@@ -2,6 +2,8 @@
 @inject IExchangeScheduler scheduler
 @inject IExchangeScheduleRunner runner
 @inject MessageService message
+@inject INotificationService notifications
+@inject IJSRuntime JSRuntime
 
 <div>
     @if (ShowBackIcon)
@@ -52,6 +54,20 @@
                         Export as csv
                     </Button>
                 </a>
+
+                <EnumSelect
+                    Class="notification-select"
+                    @bind-Value="NotificationType"
+                    TEnum="AutoSats.Data.NotificationType"
+                    OnSelectedItemChanged="NotificationTypeChanged">
+                    <PrefixIcon>
+                        <Icon Type="@GetNotificationTypeIcon(NotificationType)" Theme="outline"/>
+                    </PrefixIcon>
+                    <LabelTemplate Context="_">
+                        <span class="notification-label">Notifications @(NotificationType == Data.NotificationType.None ? "off" : "on")</span>
+                    </LabelTemplate>
+                </EnumSelect>
+
                 <Popconfirm Title="Are you sure you want to delete this schedule?"
                             OnConfirm="DeleteScheduleAsync"
                             OkText="Delete"
@@ -98,8 +114,11 @@
     [Parameter] public bool ShowBackIcon { get; set; }
     [Parameter] public EventCallback ScheduleDeleted { get; set; }
 
+    public Data.NotificationType NotificationType { get; set; }
+
     private ExchangeScheduleDetails? details;
     private bool scheduleRunning;
+    private bool firstRun = true;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -109,6 +128,16 @@
     private string GetExportPath()
     {
         return $"/api/export/{ScheduleId}";
+    }
+
+    private string GetNotificationTypeIcon(Data.NotificationType type)
+    {
+        return type switch
+        {
+            Data.NotificationType.All => "check",
+            Data.NotificationType.Errors => "exclamation",
+            _ => "close",
+        };
     }
 
     private async Task DeleteScheduleAsync()
@@ -123,6 +152,37 @@
         {
             await ScheduleDeleted.InvokeAsync();
         }
+    }
+
+    private async void NotificationTypeChanged(AutoSats.Data.NotificationType type)
+    {
+        Console.WriteLine($"{NotificationType} x {type}");
+        if (this.firstRun) 
+        {
+            this.firstRun = false;
+            return;
+        }
+
+        NotificationSubscription? subscription = null;
+
+        if (type != Data.NotificationType.None)
+        {
+
+            var publicKey = this.notifications.GetServicePublicKey();
+            var notifications = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/notifications.js");
+            subscription = await notifications.InvokeAsync<NotificationSubscription>("requestSubscription", publicKey);
+
+            if (subscription == null)
+            {
+                this.NotificationType = Data.NotificationType.None;
+                StateHasChanged();
+                await this.message.Error("Couldn't get notification subscription details (is your browser blocking push notifications?)");
+                return;
+            }
+        }
+
+        await this.scheduler.UpdateScheduleNotificationsAsync(ScheduleId, type, subscription);
+        await this.message.Info("Notification preferences updated");
     }
 
     private async Task RunScheduleAsync()
@@ -156,5 +216,6 @@
     private async Task RefreshDetailsAsync()
     {
         this.details = await scheduler.GetScheduleDetailsAsync(ScheduleId);
+        this.NotificationType = this.details?.Summary.NotificationType ?? Data.NotificationType.None;
     }
 } 
