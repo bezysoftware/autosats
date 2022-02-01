@@ -37,6 +37,15 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <script src="_framework/blazor.server.js"></script>
+    <script src="_framework/blazor.server.js" autostart="false"></script>
+    <script>
+        Blazor.start().then(() => {
+            Blazor.defaultReconnectionHandler._reconnectionDisplay = {
+                show: () => {},
+                update: (d) => {},
+                rejected: (d) => document.location.reload()
+            };
+        });
+    </script>
 </body>
 </html>
