@@ -68,7 +68,8 @@ public class NotificationService : INotificationService
 
         var payload = JsonConvert.SerializeObject(new
         {
-            message = message
+            message = message,
+            timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
         });
 
         await webPushClient.SendNotificationAsync(pushSubscription, payload, vapidDetails);
