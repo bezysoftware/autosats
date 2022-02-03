@@ -80,7 +80,7 @@ public class NotificationService : INotificationService
         return e switch
         {
             ExchangeEventBuy buy when !string.IsNullOrEmpty(buy.Error) => $"Failed to buy {buy.Schedule.Spend} {buy.Schedule.SpendCurrency} worth of BTC on {buy.Schedule.Exchange}: {buy.Error}.",
-            ExchangeEventBuy buy => $"Bought {buy.Received} BTC on {buy.Schedule.Exchange}.",
+            ExchangeEventBuy buy => $"Bought {buy.Received} BTC @ {buy.Price:N0} {buy.Schedule.SpendCurrency} on {buy.Schedule.Exchange}.",
             ExchangeEventWithdrawal withdrawal when !string.IsNullOrEmpty(withdrawal.Error) => $"Failed to withdraw {withdrawal.Amount} BTC from {withdrawal.Schedule.Exchange} to {withdrawal.Address}: {withdrawal.Error}.",
             ExchangeEventWithdrawal withdrawal => $"Withdrew {withdrawal.Amount} BTC from {withdrawal.Schedule.Exchange} to {withdrawal.Address}.",
             _ => $"{e.Schedule.Exchange} schedule changed."
