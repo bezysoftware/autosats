@@ -25,6 +25,9 @@ export function requestSubscription(key) {
         };
     });
 }
+export function checkServiceWorkerExists() {
+    return !!navigator.serviceWorker;
+}
 function subscribe(worker, key) {
     return __awaiter(this, void 0, void 0, function* () {
         try {

@@ -17,6 +17,10 @@
     };
 }
 
+export function checkServiceWorkerExists() {
+    return !!navigator.serviceWorker;
+}
+
 async function subscribe(worker, key) {
     try {
         return await worker.pushManager.subscribe({

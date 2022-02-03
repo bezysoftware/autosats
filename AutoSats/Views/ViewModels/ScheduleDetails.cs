@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Views.ViewModels;
 
-public class ScheduleDetails
+public record class ScheduleDetails
 {
     [Required]
     [Cron]

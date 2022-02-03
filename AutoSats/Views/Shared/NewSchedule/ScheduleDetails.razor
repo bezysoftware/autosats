@@ -217,6 +217,8 @@
     </Form>
 </div>
 
+<MissingServiceWorkerModal @ref="missingServiceWorker" />
+
 @code {
     [Parameter] public EventCallback<ViewModels.ScheduleDetails> DetailsChanged { get; set; }
     [Parameter] public KeysWithBalances? KeysWithBalances { get; set; }
@@ -229,6 +231,7 @@
     private bool isGeneratingAddress;
     private bool isSaving;
     private ExchangeOptions? exchange;
+    private MissingServiceWorkerModal? missingServiceWorker;
 
     protected override void OnInitialized()
     {
@@ -255,14 +258,31 @@
         var publicKey = this.notifications.GetServicePublicKey();
         var notifications = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/notifications.js");
 
-        this.details.Notification = await notifications.InvokeAsync<NotificationSubscription>("requestSubscription", publicKey);
-
-        if (this.details.Notification == null)
+        if (!await notifications.InvokeAsync<bool>("checkServiceWorkerExists"))
         {
-            this.details.NotificationType = Data.NotificationType.None;
-            StateHasChanged();
-            await this.message.Error("Couldn't get notification subscription details (is your browser blocking push notifications?)");
+            this.details = this.details with 
+            {
+                NotificationType = Data.NotificationType.None
+            };
+                
+            this.missingServiceWorker?.Open();
         }
+        else 
+        {
+            this.details.Notification = await notifications.InvokeAsync<NotificationSubscription>("requestSubscription", publicKey);
+
+            if (this.details.Notification == null)
+            {
+                this.details = this.details with 
+                {
+                    NotificationType = Data.NotificationType.None
+                };
+
+                await this.message.Error("Couldn't get notification subscription details (is your browser blocking push notifications?)");
+            }
+        }
+
+        StateHasChanged();
     }
 
     private void UpdateCronExpression(SchedulePeriod period, DateTime start)
@@ -352,7 +372,10 @@
     {
         if (type == ExchangeWithdrawalType.Dynamic && !(await GenerateWithdrawalAddressAsync()))
         {
-            this.details.WithdrawalType = ExchangeWithdrawalType.None;
+            this.details = this.details with 
+            {
+                WithdrawalType = ExchangeWithdrawalType.None
+            };
         }
 
         StateHasChanged();

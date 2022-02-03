@@ -109,6 +109,8 @@
     </Card>
 </div>
 
+<MissingServiceWorkerModal @ref="missingServiceWorker" />
+
 @code {
     [Parameter] public int ScheduleId { get; set; }
     [Parameter] public bool ShowBackIcon { get; set; }
@@ -116,6 +118,7 @@
 
     public Data.NotificationType NotificationType { get; set; }
 
+    private MissingServiceWorkerModal? missingServiceWorker;
     private ExchangeScheduleDetails? details;
     private bool scheduleRunning;
     private bool firstRun = true;
@@ -166,9 +169,18 @@
 
         if (type != Data.NotificationType.None)
         {
+            var notifications = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/notifications.js");
+            if (!await notifications.InvokeAsync<bool>("checkServiceWorkerExists"))
+            {
+                this.NotificationType = Data.NotificationType.None;
+                StateHasChanged();
+                
+                this.missingServiceWorker?.Open();
+
+                return;
+            }
 
             var publicKey = this.notifications.GetServicePublicKey();
-            var notifications = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "/js/notifications.js");
             subscription = await notifications.InvokeAsync<NotificationSubscription>("requestSubscription", publicKey);
 
             if (subscription == null)
