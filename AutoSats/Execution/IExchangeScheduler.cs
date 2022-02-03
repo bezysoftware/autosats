@@ -25,6 +25,11 @@ public interface IExchangeScheduler
     Task ResumeScheduleAsync(int id);
 
     /// <summary>
+    /// Update schedule notification settings.
+    /// </summary>
+    Task UpdateScheduleNotificationsAsync(int id, NotificationType type, NotificationSubscription? subscription);
+
+    /// <summary>
     /// Get an overview of all exchange schedules.
     /// </summary>
     Task<IEnumerable<ExchangeScheduleSummary>> ListSchedulesAsync();

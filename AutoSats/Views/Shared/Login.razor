@@ -1,6 +1,6 @@
 ﻿@inject IHttpClientFactory http
 @inject NavigationManager navigation
-@inject IJSRuntime JSRunTime
+@inject IJSRuntime JSRuntime
 
 <div class="login-container stretch-when-small">
     <Form Model="Model" OnFinish="LoginAsync" Layout="@FormLayout.Vertical" ValidateMode="FormValidateMode.Complex">
@@ -47,7 +47,7 @@
         LoginRunning = true;
 
         var model = (LoginRequest)context.Model;
-        var authModule = await JSRunTime.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
+        var authModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/auth.js");
         var result = await authModule.InvokeAsync<bool>("SignIn", model.Password, "/");
 
         if (result)

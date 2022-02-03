@@ -12,6 +12,7 @@ public class ExchangeScheduleRunner : IExchangeScheduleRunner
     private readonly ILogger<ExchangeScheduleRunner> logger;
     private readonly IExchangeServiceFactory exchangeServiceFactory;
     private readonly IWalletService walletService;
+    private readonly INotificationService notificationService;
     private readonly IEnumerable<ExchangeOptions> exchangeOptions;
     private readonly string dataFolder;
 
@@ -20,12 +21,14 @@ public class ExchangeScheduleRunner : IExchangeScheduleRunner
         ILogger<ExchangeScheduleRunner> logger,
         IExchangeServiceFactory exchangeServiceFactory,
         IWalletService walletService,
+        INotificationService notificationService,
         IEnumerable<ExchangeOptions> exchangeOptions)
     {
         this.db = db;
         this.logger = logger;
         this.exchangeServiceFactory = exchangeServiceFactory;
         this.walletService = walletService;
+        this.notificationService = notificationService;
         this.exchangeOptions = exchangeOptions;
 
         // set data folder to the same location where the db is saved
@@ -90,16 +93,22 @@ public class ExchangeScheduleRunner : IExchangeScheduleRunner
             this.db.ExchangeBuys.Add(buy);
 
             this.logger.LogInformation($"Received '{buy.Received}' of '{schedule.Symbol}' w/ avg price '{buy.Price}', order id: '{buy.OrderId}'");
+
+            await this.notificationService.SendNotificationAsync(buy);
         }
         catch (Exception ex)
         {
-            this.logger.LogError(ex, $"Buy failed for schedule {schedule.Id}");
-            this.db.ExchangeBuys.Add(new ExchangeEventBuy
+            var buy = new ExchangeEventBuy
             {
                 Schedule = schedule,
                 Timestamp = DateTime.UtcNow,
                 Error = ex.InnerException == null ? ex.Message : ex.ToString()
-            });
+            };
+
+            this.logger.LogError(ex, $"Buy failed for schedule {schedule.Id}");
+            this.db.ExchangeBuys.Add(buy);
+
+            await this.notificationService.SendNotificationAsync(buy);
 
             throw;
         }
@@ -142,26 +151,34 @@ public class ExchangeScheduleRunner : IExchangeScheduleRunner
             var id = await service.WithdrawAsync(withdrawCurrency, address, amount);
             var (_, newBalance) = await GetCurrencyBalance(service, options.BitcoinSymbol);
 
-            this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
+            var withdrawal = new ExchangeEventWithdrawal
             {
                 Schedule = schedule,
                 Address = address,
                 Amount = amount,
                 Timestamp = DateTime.UtcNow,
                 WithdrawalId = id
-            });
+            };
+
+            this.db.ExchangeWithdrawals.Add(withdrawal);
 
             this.logger.LogInformation($"Withdrawal succeeded with id '{id}'");
+
+            await this.notificationService.SendNotificationAsync(withdrawal);
         }
         catch (Exception ex)
         {
-            this.logger.LogError(ex, $"Withdrawal failed for schedule {schedule.Id}");
-            this.db.ExchangeWithdrawals.Add(new ExchangeEventWithdrawal
+            var withdrawal = new ExchangeEventWithdrawal
             {
                 Schedule = schedule,
                 Timestamp = DateTime.UtcNow,
                 Error = ex.InnerException == null ? ex.Message : ex.ToString()
-            });
+            };
+
+            this.logger.LogError(ex, $"Withdrawal failed for schedule {schedule.Id}");            
+            this.db.ExchangeWithdrawals.Add(withdrawal);
+            
+            await this.notificationService.SendNotificationAsync(withdrawal);
 
             throw;
         }

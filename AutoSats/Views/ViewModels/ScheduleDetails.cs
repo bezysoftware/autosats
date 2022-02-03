@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AutoSats.Views.ViewModels;
 
-public class ScheduleDetails
+public record class ScheduleDetails
 {
     [Required]
     [Cron]
@@ -33,4 +33,8 @@ public class ScheduleDetails
 
     [Required]
     public bool RunToVerify { get; set; } = true;
+
+    public NotificationSubscription? Notification { get; set; }
+
+    public NotificationType NotificationType { get; set; } = NotificationType.None;
 }

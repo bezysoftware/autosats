@@ -52,6 +52,7 @@ public abstract class RunnerTestsBase
             Mock.Of<ILogger<ExchangeScheduleRunner>>(),
             this.serviceProvider.Object,
             this.wallet.Object,
+            Mock.Of<INotificationService>(),
             this.options);
     }
 

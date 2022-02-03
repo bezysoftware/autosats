@@ -1,0 +1,37 @@
+﻿@inject IJSRuntime JSRuntime
+
+<Modal 
+    Title="Service worker not available"
+    Visible="@dialogVisible"
+    OkText="@("Open readme on Github")"
+    OnOk="OpenGithub"
+    OnCancel="() => dialogVisible = false">
+    <span>
+        Service worker is not available which prevents the use of push notifications.
+        This is typically caused by the application running on HTTP and not HTTP<strong>S</strong>, which is required by most modern browsers.
+        There are two ways to deal with this:
+    </span>
+    <ol type="a" style="margin-top: 10px">
+        <li>Setup nginx with SSL certificate to allow HTTPS</li>
+        <li>Enable use of Service workers even on non-HTTPS connection in your browser</li>
+    </ol>
+    <span>
+        Option b) is documented on Github, click the button below to see the details.
+    </span>
+</Modal>
+
+@code {
+    private bool dialogVisible { get; set; }
+
+    public void Open()
+    {
+        this.dialogVisible = true;
+        StateHasChanged();
+    }
+
+    private void OpenGithub()
+    {
+        this.dialogVisible = false;
+        JSRuntime.InvokeVoidAsync("open", "https://github.com/bezysoftware/autosats/blob/main/SERVICE-WORKER.md", "_blank");
+    }
+}

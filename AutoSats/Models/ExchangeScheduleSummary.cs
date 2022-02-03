@@ -13,7 +13,8 @@ public record ExchangeScheduleSummary(
     decimal WithdrawalLimit,
     string? WithdrawalAddress,
     DateTime Start,
-    ExchangeWithdrawalType WithdrawalType) : IExchange
+    ExchangeWithdrawalType WithdrawalType, 
+    NotificationType NotificationType) : IExchange
 {
     private DateTime? nextOccurrence;
     private string? cronDescription;

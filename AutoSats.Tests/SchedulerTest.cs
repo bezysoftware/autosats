@@ -75,6 +75,7 @@ public class SchedulerTest : IDisposable
             this.serviceProvider.Object,
             this.mapper,
             Array.Empty<ExchangeOptions>(),
+            Mock.Of<INotificationService>(),
             new Microsoft.Extensions.Caching.Memory.MemoryCache(new MemoryCacheOptions()));
     }
 
@@ -100,6 +101,8 @@ public class SchedulerTest : IDisposable
             DateTime.Now,
             ExchangeWithdrawalType.None,
             null,
+            null,
+            NotificationType.None,
             null);
 
         Func<Task> action = () => this.escheduler.AddScheduleAsync(request, runToVerify);
