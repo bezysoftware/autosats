@@ -3,6 +3,7 @@
 @if (Summary != null)
 {
     var spendCurrency = Summary.SpendCurrency;
+    var spendSymbol = CurrencyHelper.GetCurrencySymbol(Summary.SpendCurrency);
     <div class="ant-list-vertical">
         <ListItem Class="schedule-container" OnClick="ScheduleClick">
             <ListItemMeta>
@@ -43,15 +44,15 @@
                         </div>
                         <div class="description-container">
                             <span>Total spent</span>
-                            <span>@Summary.TotalSpent.ToString("N0") @spendCurrency</span>
+                            <span>@Summary.TotalSpent.ToString("N0") @spendSymbol</span>
                         </div>
                         <div class="description-container">
                             <span>Total accumulated</span>
-                            <span>@Summary.TotalAccumulated.ToString("N8") BTC</span>
+                            <span>@Summary.TotalAccumulated.ToString("N8") ₿</span>
                         </div>
                         <div class="description-container">
                             <span>On exchange</span>
-                            <span>@Summary.AvailableSpend?.ToString("N0") @spendCurrency / @Summary.AvailableBTC?.ToString("N8") BTC</span>
+                            <span>@Summary.AvailableSpend?.ToString("N0") @spendSymbol / @Summary.AvailableBTC?.ToString("N8") ₿</span>
                         </div>
                         @if (@Summary.GainLoss.HasValue)
                         {
@@ -59,11 +60,11 @@
                                 <span>Gain / loss</span>
                                 @if (Summary.GainLoss > 0)
                                 {
-                                    <span>+@Summary.GainLoss.Value.ToString("N0") @spendCurrency / +@(Summary.GainLossPercent!.Value.ToString("N0")) %</span>
+                                    <span>+@Summary.GainLoss.Value.ToString("N0") @spendSymbol / +@(Summary.GainLossPercent!.Value.ToString("N0")) %</span>
                                 }
                                 else 
                                 {
-                                    <span>@Summary.GainLoss.Value.ToString("N0") @spendCurrency / @(Summary.GainLossPercent!.Value.ToString("N0")) %</span>
+                                    <span>@Summary.GainLoss.Value.ToString("N0") @spendSymbol / @(Summary.GainLossPercent!.Value.ToString("N0")) %</span>
                                 }
                             </div>
                         }
@@ -89,7 +90,7 @@
 
     private string GetNextOccurrence(ExchangeScheduleSummary schedule)
     {
-        return schedule.IsPaused ? "<Paused>" : schedule.NextOccurrence.ToString();
+        return schedule.IsPaused ? "<Paused>" : schedule.NextOccurrence.ToString("g");
     }
 
     private string GetWithdrawalDescription(ExchangeWithdrawalType withdrawalType, decimal withdrawalLimit)
