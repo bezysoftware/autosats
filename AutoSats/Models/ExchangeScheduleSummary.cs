@@ -19,15 +19,19 @@ public record ExchangeScheduleSummary(
     private DateTime? nextOccurrence;
     private string? cronDescription;
 
-    public decimal TotalSpent { get; set; }
+    public decimal TotalSpent { get; init; }
 
-    public decimal TotalAccumulated { get; set; }
+    public decimal TotalAccumulated { get; init; }
 
-    public decimal? AvailableSpend { get; set; }
+    public decimal? AvailableSpend { get; init; }
 
-    public decimal? AvailableBTC { get; set; }
+    public decimal? AvailableBTC { get; init; }
     
-    public decimal? CurrentPrice { get; set; }
+    public decimal? CurrentPrice { get; init; }
+
+    public decimal? GainLoss => TotalAccumulated * CurrentPrice - TotalSpent;
+
+    public decimal? GainLossPercent => GainLoss / TotalSpent * 100;
 
     public DateTime NextOccurrence => this.nextOccurrence ??= GetNextOccurrence();
 

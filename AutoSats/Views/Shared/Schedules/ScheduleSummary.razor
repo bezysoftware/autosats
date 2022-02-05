@@ -43,7 +43,7 @@
                         </div>
                         <div class="description-container">
                             <span>Total spent</span>
-                            <span>@Summary.TotalSpent.ToString("N2") @spendCurrency</span>
+                            <span>@Summary.TotalSpent.ToString("N0") @spendCurrency</span>
                         </div>
                         <div class="description-container">
                             <span>Total accumulated</span>
@@ -51,8 +51,22 @@
                         </div>
                         <div class="description-container">
                             <span>On exchange</span>
-                            <span>@Summary.AvailableSpend?.ToString("N2") @spendCurrency / @Summary.AvailableBTC?.ToString("N8") BTC</span>
+                            <span>@Summary.AvailableSpend?.ToString("N0") @spendCurrency / @Summary.AvailableBTC?.ToString("N8") BTC</span>
                         </div>
+                        @if (@Summary.GainLoss.HasValue)
+                        {
+                            <div class="description-container">
+                                <span>Gain / loss</span>
+                                @if (Summary.GainLoss > 0)
+                                {
+                                    <span>+@Summary.GainLoss.Value.ToString("N0") @spendCurrency / +@(Summary.GainLossPercent!.Value.ToString("N0")) %</span>
+                                }
+                                else 
+                                {
+                                    <span>@Summary.GainLoss.Value.ToString("N0") @spendCurrency / @(Summary.GainLossPercent!.Value.ToString("N0")) %</span>
+                                }
+                            </div>
+                        }
                     </div> 
                 </DescriptionTemplate>
             </ListItemMeta>
