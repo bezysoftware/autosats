@@ -124,10 +124,10 @@
         var minPrice = decimal.MaxValue;
         var maxPrice = decimal.MinValue;
 
-        grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), price = Math.Round(x.Average(y => y.Price)), series = "Buy price" })
+        grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), price = x.Average(y => y.Price), series = "Buy price", events = x.Count() })
             .Aggregate((total: 0m, count: 0), (acc, e) =>
             {
-                if (e.price > maxPrice)
+            if (e.price > maxPrice)
                 {
                     maxPrice = e.price;
                 }
@@ -136,10 +136,12 @@
                     minPrice = e.price;
                 }
 
-                var avg = Math.Round((acc.total + e.price) / (acc.count + 1));
+                var newTotal = acc.total + (e.price * e.events);
+                var newCount = acc.count + e.events;
+                var avg = Math.Round(newTotal / newCount);
                 prices.Add(e);
                 prices.Add(new { timestamp = $"{e.timestamp}", price = avg, series = "Average buy price" });
-                return (acc.total + e.price, acc.count + 1);
+                return (newTotal, newCount);
             });
 
         grouped.Select(x => new { timestamp = x.First().Timestamp.ToString(dateFormat), received = (double)x.Sum(y => y.Received), series = "Bitcoin received" })
