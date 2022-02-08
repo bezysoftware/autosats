@@ -7,6 +7,7 @@ public class BitcoinAddressTest
 {
     [Theory]
     [InlineData("bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh")]
+    [InlineData("bc1p8p4epca2l4vw7qp5q9fr653yjq565ujej5add63tjrpljxj9mzjspmtz2k")]
     [InlineData("35ih8ZuVQhhgyYmLrXhHLrT6AcSfMNqX1q")]
     [InlineData("1MKmgsj5fKohBAJFRsnGymZ19o1rKXrX63")]
     [InlineData(" 1MKmgsj5fKohBAJFRsnGymZ19o1rKXrX63 ")]
